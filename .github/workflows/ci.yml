@@ -1,0 +1,74 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: ${{ matrix.kind }} ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      matrix:
+        os: [macOS-latest, windows-2019, ubuntu-16.04]
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v1
+
+      - name: Install rust
+        uses: hecrj/setup-rust-action@v1
+        with:
+          rust-version: "1.41.0"
+
+      - name: Environment (common)
+        run: |
+          echo ::set-env name=GH_ACTIONS::1
+          echo ::set-env name=DENO_BUILD_MODE::release
+          echo ::set-env name=RUST_BACKTRACE::full
+      - name: Log versions
+        run: |
+          node -v
+          rustc --version
+          cargo --version
+      - name: Cache cargo registry
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+      - name: Cache cargo index
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+      - name: Cache cargo build
+        uses: actions/cache@v1
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-target
+
+      - name: Remove Some Cache
+        if: matrix.os == 'windows-2019'
+        run: |
+          rm target/release/gn_root -Recurse -ErrorAction Ignore
+          rm target/debug/gn_root -Recurse -ErrorAction Ignore
+      - name: Install python
+        uses: actions/setup-python@v1
+        with:
+          python-version: "2.7.x"
+          architecture: x64
+
+      - name: Build
+        env:
+          RUST_BACKTRACE: 1
+        run: cargo build --release
+
+      - name: Release TestPlugin
+        uses: softprops/action-gh-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: "plugin_bins"
+          files: |
+            target/release/libtest_plugin.dylib
+            target/release/libtest_plugin.so
+            target/release/test_plugin.dll
