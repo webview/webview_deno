@@ -67,7 +67,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: "plugin_bins"
+          draft: true
           files: |
             target/release/libtest_plugin.dylib
             target/release/libtest_plugin.so
