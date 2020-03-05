@@ -62,13 +62,14 @@ jobs:
           RUST_BACKTRACE: 1
         run: cargo build --release
 
-      - name: Release TestPlugin
+      - name: Release Plugin
         uses: softprops/action-gh-release@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          tag_name: "deno_webview release"
           draft: true
           files: |
-            target/release/libtest_plugin.dylib
-            target/release/libtest_plugin.so
-            target/release/test_plugin.dll
+            target/release/libdeno_webview.dylib
+            target/release/libdeno_webview.so
+            target/release/deno_webview.dll
