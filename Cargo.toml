@@ -1,0 +1,12 @@
+[package]
+name = "deno_webview"
+version = "0.1.0"
+authors = ["Elias Sjögreen <eliassjogreen1@gmail.com>"]
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+futures = "0.3.1"
+deno_core = "0.35.0"
