@@ -57,6 +57,10 @@ jobs:
           python-version: "2.7.x"
           architecture: x64
 
+      - name: Install webkit2gtk
+        if: matrix.os == 'ubuntu-16.04'
+        run: sudo apt-get install libwebkit2gtk-4.0-dev
+
       - name: Build
         env:
           RUST_BACKTRACE: 1
