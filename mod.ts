@@ -1,69 +1,28 @@
-function open(): Deno.Plugin {
-    let filename = "bins/";
+import { prepare } from "https://deno.land/x/plugin_prepare/mod.ts";
 
-    switch (Deno.build.os) {
-        case "linux":
-            filename += "libdeno_webview.so";
-            break;
-        case "mac":
-            filename += "libdeno_webview.dylib";
-            break;
-        case "win":
-            filename += "deno_webview.dll";
-            break;
+const releaseUrl =
+    "https://github.com/eliassjogreen/deno_webview/releases/latest/download";
+
+const deno_webview = await prepare({
+    name: "deno_webview",
+    urls: {
+        mac: `${releaseUrl}/libdeno_webview.dylib`,
+        win: `${releaseUrl}/deno_webview.dll`,
+        linux: `${releaseUrl}/libdeno_webview.so`
     }
-
-    return Deno.openPlugin(filename);
-}
-
-const plugin = open();
-
-const { testSync, testAsync } = plugin.ops;
-
-const textDecoder = new TextDecoder();
-
-function runTestSync() {
-    const response = testSync.dispatch(
-        new Uint8Array([116, 101, 115, 116]),
-        new Uint8Array([116, 101, 115, 116])
-    );
-
-    console.log(`Plugin Sync Response: ${textDecoder.decode(response)}`);
-}
-
-testAsync.setAsyncHandler((response) => {
-    console.log(`Plugin Async Response: ${textDecoder.decode(response)}`);
 });
 
-function runTestAsync() {
-    const response = testAsync.dispatch(
-        new Uint8Array([116, 101, 115, 116]),
-        new Uint8Array([116, 101, 115, 116])
-    );
-
-    if (response != null || response != undefined) {
-        throw new Error("Expected null response!");
-    }
+export interface Options {
+    title: string;
+    width: number;
+    height: number;
+    resizable: boolean;
+    debug: boolean;
+    content: string;
 }
 
-function runTestOpCount() {
-    const start = Deno.metrics();
+export function run(options: Options) {
+    const { webview_run } = deno_webview.ops;
 
-    testSync.dispatch(new Uint8Array([116, 101, 115, 116]));
-
-    const end = Deno.metrics();
-
-    if (end.opsCompleted - start.opsCompleted !== 2) {
-        // one op for the plugin and one for Deno.metrics
-        throw new Error("The opsCompleted metric is not correct!");
-    }
-    if (end.opsDispatched - start.opsDispatched !== 2) {
-        // one op for the plugin and one for Deno.metrics
-        throw new Error("The opsDispatched metric is not correct!");
-    }
+    webview_run(new TextEncoder().encode(JSON.stringify(options)));
 }
-
-runTestSync();
-runTestAsync();
-
-runTestOpCount();
