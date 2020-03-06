@@ -1,2 +1,3 @@
-/target
-/bins
+target/
+bins/
+.deno_plugins/
