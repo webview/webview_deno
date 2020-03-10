@@ -12,5 +12,7 @@ the basics are really implemented yet (apart from opening a webview window).
 - [ ] Two-way deno bindings (to call deno from javascript)
 - [ ] Multiple windows?
 - [ ] Easier importing of scripts, images and css
+- [ ] Dialog
+- [ ] DialogBuilder and WebViewBuilder
 - [ ] Examples
 - [ ] Tests

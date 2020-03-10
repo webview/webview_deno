@@ -1,28 +1,49 @@
 import { prepare } from "https://deno.land/x/plugin_prepare/mod.ts";
 
-export interface Options {
+const releaseUrl =
+    "https://github.com/eliassjogreen/deno_webview/releases/download/0.0.1";
+
+const plugin = await prepare({
+    name: "deno_webview",
+    urls: {
+        mac: `${releaseUrl}/libdeno_webview.dylib`,
+        win: `${releaseUrl}/deno_webview.dll`,
+        linux: `${releaseUrl}/libdeno_webview.so`
+    }
+});
+
+interface NewArgs {
     title: string;
+    url: string;
     width: number;
     height: number;
     resizable: boolean;
     debug: boolean;
-    content: string;
 }
 
-export async function run(options: Options) {
-    const releaseUrl =
-        "https://github.com/eliassjogreen/deno_webview/releases/download/0.0.1";
+interface EvalArgs {
+    js: string;
+}
 
-    const deno_webview: Deno.Plugin = await prepare({
-        name: "deno_webview",
-        urls: {
-            mac: `${releaseUrl}/libdeno_webview.dylib`,
-            win: `${releaseUrl}/deno_webview.dll`,
-            linux: `${releaseUrl}/libdeno_webview.so`
-        }
-    });
+interface InjectCssArgs {
+    css: string;
+}
 
-    const { webview_run } = deno_webview.ops;
+interface SetColorArgs {
+    r: number;
+    g: number;
+    b: number;
+    a: number;
+}
 
-    webview_run.dispatch(new TextEncoder().encode(JSON.stringify(options)));
+interface SetTitleArgs {
+    title: String;
+}
+
+interface SetFullscreenArgs {
+    fullscreen: boolean;
+}
+
+interface LoopArgs {
+    blocking: number;
 }
