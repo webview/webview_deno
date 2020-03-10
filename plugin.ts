@@ -1,7 +1,7 @@
 import { prepare } from "https://deno.land/x/plugin_prepare/mod.ts";
 
 const releaseUrl =
-    "https://github.com/eliassjogreen/deno_webview/releases/download/0.1.0";
+    "https://github.com/eliassjogreen/deno_webview/releases/download/0.0.2";
 
 const plugin = await prepare({
     name: "deno_webview",
@@ -91,6 +91,6 @@ export function webviewLoop(args: LoopArgs): Uint8Array {
 }
 
 export function webviewDispose(): boolean {
-    let result = plugin.ops.webview_dispose.dispatch([]);
+    let result = plugin.ops.webview_dispose.dispatch(new Uint8Array());
     return result![0] !== 0;
 }
