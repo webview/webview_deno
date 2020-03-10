@@ -74,7 +74,7 @@ export class WebView {
         });
     }
 
-    // public dispose() {
-    //     TODO
-    // }
+    public dispose() {
+        return Plugin.webviewDispose();
+    }
 }

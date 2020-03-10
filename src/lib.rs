@@ -204,7 +204,6 @@ fn op_webview_dispose(_data: &[u8], _zero_copy: Option<ZeroCopyBuf>) -> CoreOp {
         if CWEBVIEW.is_none() {
             return Op::Sync(Box::new([false as u8]));
         }
-        
         webview_free(CWEBVIEW.unwrap());
         CWEBVIEW = None;
 
