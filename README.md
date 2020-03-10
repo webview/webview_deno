@@ -44,3 +44,4 @@ webview.run();
 - [ ] Wait for the [rust bindings](https://github.com/Boscop/web-view) to update to the latest [webview](https://github.com/zserge/webview) version.
     - [ ] Polyfill for new API?
 - [ ] Docs
+- [ ] Update ci so building with Edge works
