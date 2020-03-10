@@ -8,7 +8,7 @@ the basics are really implemented yet (apart from opening a webview window).
 ![Example image](images/deno_webview.png)
 
 ## Todo
-- [ ] Implement all webview [instance methods](https://docs.rs/web-view/0.6.0/web_view/struct.WebView.html)
+- [x] Implement ~~all~~ most webview [instance methods](https://docs.rs/web-view/0.6.0/web_view/struct.WebView.html)
 - [ ] Two-way deno bindings (to call deno from javascript)
 - [ ] Multiple windows?
 - [ ] Easier importing of scripts, images and css
@@ -16,3 +16,6 @@ the basics are really implemented yet (apart from opening a webview window).
 - [ ] DialogBuilder and WebViewBuilder
 - [ ] Examples
 - [ ] Tests
+- [ ] Wait for the [rust bindings](https://github.com/Boscop/web-view) to update to the latest [webview](https://github.com/zserge/webview) version.
+    - [ ] Polyfill for new API?
+    

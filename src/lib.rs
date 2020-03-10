@@ -66,6 +66,7 @@ fn init(context: &mut dyn PluginInitContext) {
         Box::new(op_webview_set_fullscreen),
     );
     context.register_op("webview_loop", Box::new(op_webview_loop));
+    context.register_op("webview_dispose", Box::new(op_webview_dispose));
 }
 init_fn!(init);
 
@@ -195,5 +196,18 @@ fn op_webview_loop(data: &[u8], _zero_copy: Option<ZeroCopyBuf>) -> CoreOp {
         let result = webview_loop(CWEBVIEW.unwrap(), args.blocking);
 
         Op::Sync(Box::new(result.to_be_bytes()))
+    }
+}
+
+fn op_webview_dispose(_data: &[u8], _zero_copy: Option<ZeroCopyBuf>) -> CoreOp {
+    unsafe {
+        if CWEBVIEW.is_none() {
+            return Op::Sync(Box::new([false as u8]));
+        }
+        
+        webview_free(CWEBVIEW.unwrap());
+        CWEBVIEW = None;
+
+        Op::Sync(Box::new([true as u8]))
     }
 }

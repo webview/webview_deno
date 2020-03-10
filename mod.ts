@@ -1,49 +1,80 @@
-import { prepare } from "https://deno.land/x/plugin_prepare/mod.ts";
+import * as Plugin from "./plugin.ts";
 
-const releaseUrl =
-    "https://github.com/eliassjogreen/deno_webview/releases/download/0.0.1";
+export class WebView {
+    constructor(args: {
+        title?: string;
+        url?: string;
+        width?: number;
+        height?: number;
+        resizable?: boolean;
+        debug?: boolean;
+    }) {
+        args = Object.assign({
+            title: "deno_webview",
+            url: "about:blank",
+            width: 800,
+            height: 600,
+            resizable: true,
+            debug: true
+        }, args);
 
-const plugin = await prepare({
-    name: "deno_webview",
-    urls: {
-        mac: `${releaseUrl}/libdeno_webview.dylib`,
-        win: `${releaseUrl}/deno_webview.dll`,
-        linux: `${releaseUrl}/libdeno_webview.so`
+        if (!Plugin.webviewNew(args as Plugin.NewArgs))
+            throw "Cannot create multiple WebView instances";
     }
-});
 
-interface NewArgs {
-    title: string;
-    url: string;
-    width: number;
-    height: number;
-    resizable: boolean;
-    debug: boolean;
-}
+    private Uint8ArrayToNumber(data: Uint8Array): number {
+        return (
+            (data[3] << 0) | (data[2] << 8) | (data[1] << 16) | (data[0] << 24)
+        );
+    }
 
-interface EvalArgs {
-    js: string;
-}
+    public run() {
+        while (this.step()) {}
+    }
 
-interface InjectCssArgs {
-    css: string;
-}
+    public step(): boolean {
+        return (
+            this.Uint8ArrayToNumber(
+                Plugin.webviewLoop({
+                    blocking: 1
+                })
+            ) === 0
+        );
+    }
 
-interface SetColorArgs {
-    r: number;
-    g: number;
-    b: number;
-    a: number;
-}
+    public exit(): boolean {
+        return Plugin.webviewExit();
+    }
 
-interface SetTitleArgs {
-    title: String;
-}
+    public eval(js: string): boolean {
+        return Plugin.webviewEval({
+            js: js
+        });
+    }
 
-interface SetFullscreenArgs {
-    fullscreen: boolean;
-}
+    public injectCss(css: string): boolean {
+        return Plugin.webviewInjectCss({
+            css: css
+        });
+    }
 
-interface LoopArgs {
-    blocking: number;
+    public setColor(color: Plugin.SetColorArgs): boolean {
+        return Plugin.webviewSetColor(color);
+    }
+
+    public setTitle(title: string): boolean {
+        return Plugin.webviewSetTitle({
+            title: title
+        });
+    }
+
+    public setFullscreen(fullscreen: boolean): boolean {
+        return Plugin.webviewSetFullscreen({
+            fullscreen: fullscreen
+        });
+    }
+
+    // public dispose() {
+    //     TODO
+    // }
 }
