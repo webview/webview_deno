@@ -4,17 +4,14 @@
 [![ci](https://github.com/eliassjogreen/deno_webview/workflows/ci/badge.svg)](https://github.com/eliassjogreen/deno_webview/actions)
 [![GitHub Releases](https://img.shields.io/github/downloads/eliassjogreen/deno_webview/latest/total)](https://github.com/eliassjogreen/deno_webview/releases/latest/)
 
-Still in a *very* early stage of development. Lots of stuff to do and not even
-the basics are really implemented yet (apart from opening a webview window).
-`deno_webview` uses the [rust bindings](https://github.com/Boscop/web-view) for
-[zserge's webview](https://github.com/zserge/webview).
+Still in a early stage of development. `deno_webview` uses the [rust bindings](https://github.com/Boscop/web-view) for [zserge's webview](https://github.com/zserge/webview).
 
 ![Example image](images/deno_webview.png)
 
 ## Example
 Run the following with the `-A` flag enabled to get the example shown above:
 ```ts
-import { WebView } from "./mod.ts";
+import { WebView } from "https://deno.land/x/webview/mod.ts";
 
 const webview = new WebView({
     title: "Hello world",

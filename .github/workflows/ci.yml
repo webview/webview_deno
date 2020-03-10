@@ -1,6 +1,13 @@
 name: ci
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - '**/Cargo.toml'
+      - '.github/workflows/**'
 
 jobs:
   build:
@@ -25,21 +32,25 @@ jobs:
           echo ::set-env name=GH_ACTIONS::1
           echo ::set-env name=DENO_BUILD_MODE::release
           echo ::set-env name=RUST_BACKTRACE::full
+
       - name: Log versions
         run: |
           node -v
           rustc --version
           cargo --version
+
       - name: Cache cargo registry
         uses: actions/cache@v1
         with:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
       - name: Cache cargo index
         uses: actions/cache@v1
         with:
           path: ~/.cargo/git
           key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+
       - name: Cache cargo build
         uses: actions/cache@v1
         with:
@@ -51,11 +62,15 @@ jobs:
         run: |
           rm target/release/gn_root -Recurse -ErrorAction Ignore
           rm target/debug/gn_root -Recurse -ErrorAction Ignore
+
       - name: Install python
         uses: actions/setup-python@v1
         with:
           python-version: "2.7.x"
           architecture: x64
+
+      - name: Install windows sdk
+        uses: ilammy/msvc-dev-cmd@v1
 
       - name: Install webkit2gtk
         if: matrix.os == 'ubuntu-16.04'
