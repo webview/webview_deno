@@ -1,7 +1,7 @@
 import { prepare } from "https://deno.land/x/plugin_prepare/mod.ts";
 
 const releaseUrl =
-    "https://github.com/eliassjogreen/deno_webview/releases/download/0.1.1";
+    "https://github.com/eliassjogreen/deno_webview/releases/download/0.1.2";
 
 const plugin = await prepare({
     name: "deno_webview",

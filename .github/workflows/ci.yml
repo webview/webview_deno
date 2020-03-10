@@ -70,6 +70,7 @@ jobs:
           architecture: x64
 
       - name: Install windows sdk
+        if: matrix.os == 'windows-2019'
         uses: ilammy/msvc-dev-cmd@v1
 
       - name: Install webkit2gtk
