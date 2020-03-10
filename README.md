@@ -43,4 +43,4 @@ webview.run();
 - [ ] Tests
 - [ ] Wait for the [rust bindings](https://github.com/Boscop/web-view) to update to the latest [webview](https://github.com/zserge/webview) version.
     - [ ] Polyfill for new API?
-    
+- [ ] Docs
