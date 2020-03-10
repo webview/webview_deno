@@ -14,13 +14,11 @@ the basics are really implemented yet (apart from opening a webview window).
 ## Example
 Run the following with the `-A` flag enabled to get the example shown above:
 ```ts
-import { WebView } from "https://raw.githubusercontent.com/eliassjogreen/deno_webview/master/mod.ts";
+import { WebView } from "./mod.ts";
 
 const webview = new WebView({
     title: "Hello world",
-    url:
-        "data:text/html," +
-        `
+    url: `data:text/html,
     <html>
     <body>
       <h1>Hello from deno</h1>
