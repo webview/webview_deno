@@ -29,6 +29,7 @@ webview.run();
 
 ## Todo
 - [x] Implement ~~all~~ most webview [instance methods](https://docs.rs/web-view/0.6.0/web_view/struct.WebView.html)
+- [x] Update ci so building with Edge works
 - [ ] Two-way deno bindings (to call deno from javascript)
 - [ ] Multiple windows/instances? (Help, need to create a static HashMap of `*mut CWebView`)
 - [ ] Easier importing of scripts, images and css
@@ -39,4 +40,3 @@ webview.run();
 - [ ] Wait for the [rust bindings](https://github.com/Boscop/web-view) to update to the latest [webview](https://github.com/zserge/webview) version.
     - [ ] Polyfill for new API?
 - [ ] Docs
-- [ ] Update ci so building with Edge works

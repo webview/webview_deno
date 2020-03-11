@@ -1,95 +1,98 @@
 name: ci
 
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - 'Cargo.toml'
-      - 'src/**'
-      - '.github/workflows/**'
+    push:
+        branches:
+            - master
+        paths:
+            - "Cargo.toml"
+            - "src/**"
+            - ".github/workflows/**"
 
 jobs:
-  build:
-    name: ${{ matrix.kind }} ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
-    strategy:
-      matrix:
-        os: [macOS-latest, windows-2019, ubuntu-16.04]
+    build:
+        name: ${{ matrix.kind }} ${{ matrix.os }}
+        runs-on: ${{ matrix.os }}
+        timeout-minutes: 60
+        strategy:
+            matrix:
+                config:
+                    - os: macOS-latest
+                      target: x86_64-apple-darwin
+                    - os: ubuntu-16.04
+                      target: "x86_64-unknown-linux-gnu"
+                    - os: windows-2019
+                      target: x86_64-pc-windows-msvc
 
-    steps:
-      - name: Clone repository
-        uses: actions/checkout@v1
+        steps:
+            - name: Clone repository
+              uses: actions/checkout@v1
 
-      - name: Install rust
-        uses: hecrj/setup-rust-action@v1
-        with:
-          rust-version: "1.41.0"
+            - name: Install rust
+              uses: hecrj/setup-rust-action@v1
+              with:
+                  rust-version: "1.41.0"
 
-      - name: Environment (common)
-        run: |
-          echo ::set-env name=GH_ACTIONS::1
-          echo ::set-env name=DENO_BUILD_MODE::release
-          echo ::set-env name=RUST_BACKTRACE::full
+            - name: Environment (common)
+              run: |
+                  echo ::set-env name=GH_ACTIONS::1
+                  echo ::set-env name=DENO_BUILD_MODE::release
+                  echo ::set-env name=RUST_BACKTRACE::full
 
-      - name: Log versions
-        run: |
-          node -v
-          rustc --version
-          cargo --version
+            - name: Log versions
+              run: |
+                  node -v
+                  rustc --version
+                  cargo --version
 
-      - name: Cache cargo registry
-        uses: actions/cache@v1
-        with:
-          path: ~/.cargo/registry
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+            - name: Cache cargo registry
+              uses: actions/cache@v1
+              with:
+                  path: ~/.cargo/registry
+                  key:
+                      ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+            - name: Cache cargo index
+              uses: actions/cache@v1
+              with:
+                  path: ~/.cargo/git
+                  key:
+                      ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+            - name: Cache cargo build
+              uses: actions/cache@v1
+              with:
+                  path: target
+                  key:
+                      ${{ matrix.kind }}-${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Cache cargo index
-        uses: actions/cache@v1
-        with:
-          path: ~/.cargo/git
-          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+            - name: Remove Some Cache
+              if: matrix.os == 'windows-2019'
+              run: |
+                  rm target/release/gn_root -Recurse -ErrorAction Ignore
+                  rm target/debug/gn_root -Recurse -ErrorAction Ignore
 
-      - name: Cache cargo build
-        uses: actions/cache@v1
-        with:
-          path: target
-          key: ${{ runner.os }}-cargo-build-target
+            - name: Install python
+              uses: actions/setup-python@v1
+              with:
+                  python-version: "2.7.x"
+                  architecture: x64
 
-      - name: Remove Some Cache
-        if: matrix.os == 'windows-2019'
-        run: |
-          rm target/release/gn_root -Recurse -ErrorAction Ignore
-          rm target/debug/gn_root -Recurse -ErrorAction Ignore
+            - name: Install webkit2gtk
+              if: matrix.os == 'ubuntu-16.04'
+              run: sudo apt-get install libwebkit2gtk-4.0-dev
 
-      - name: Install python
-        uses: actions/setup-python@v1
-        with:
-          python-version: "2.7.x"
-          architecture: x64
+            - name: Build
+              env:
+                  RUST_BACKTRACE: 1
+              run: cargo build --release
 
-      - name: Install windows sdk
-        if: matrix.os == 'windows-2019'
-        uses: ilammy/msvc-dev-cmd@v1
-
-      - name: Install webkit2gtk
-        if: matrix.os == 'ubuntu-16.04'
-        run: sudo apt-get install libwebkit2gtk-4.0-dev
-
-      - name: Build
-        env:
-          RUST_BACKTRACE: 1
-        run: cargo build --release
-
-      - name: Release Plugin
-        uses: softprops/action-gh-release@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: "deno_webview release"
-          draft: true
-          files: |
-            target/release/libdeno_webview.dylib
-            target/release/libdeno_webview.so
-            target/release/deno_webview.dll
+            - name: Release Plugin
+              uses: softprops/action-gh-release@master
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  tag_name: "deno_webview release"
+                  draft: true
+                  files: |
+                      target/release/libdeno_webview.dylib
+                      target/release/libdeno_webview.so
+                      target/release/deno_webview.dll

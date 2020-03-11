@@ -64,7 +64,7 @@ dependencies = [
 
 [[package]]
 name = "deno_webview"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "deno_core",
  "serde",
