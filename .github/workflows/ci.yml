@@ -11,18 +11,12 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.kind }} ${{ matrix.config.os }} ${{ matrix.config.target }}
-    runs-on: ${{ matrix.config.os }}
+    name: ${{ matrix.kind }} ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:
       matrix:
-        config:
-          - os: macOS-latest
-            target: x86_64-apple-darwin
-          - os: ubuntu-16.04
-            target: "x86_64-unknown-linux-gnu"
-          - os: windows-2019
-            target: x86_64-pc-windows-msvc
+        os: [macOS-latest, windows-2019, ubuntu-16.04]
 
     steps:
       - name: Clone repository
@@ -62,7 +56,7 @@ jobs:
           key: ${{ matrix.kind }}-${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Remove Some Cache
-        if: matrix.config.os == 'windows-2019'
+        if: matrix.os == 'windows-2019'
         run: |
           rm target/release/gn_root -Recurse -ErrorAction Ignore
           rm target/debug/gn_root -Recurse -ErrorAction Ignore
@@ -74,13 +68,13 @@ jobs:
           architecture: x64
 
       - name: Install webkit2gtk
-        if: matrix.config.os == 'ubuntu-16.04'
+        if: matrix.os == 'ubuntu-16.04'
         run: sudo apt-get install libwebkit2gtk-4.0-dev
 
       - name: Build
         env:
           RUST_BACKTRACE: 1
-        run: cargo build --release --target ${{ matrix.config.target }}
+        run: cargo build --release
 
       - name: Release Plugin
         uses: softprops/action-gh-release@master
