@@ -56,7 +56,7 @@ export function webviewNew(args: NewArgs): boolean {
 }
 
 export function webviewExit(): boolean {
-    let result = plugin.ops.webview_exit.dispatch(new Uint8Array());
+    let result = plugin.ops.webview_exit.dispatch(new Uint8Array(0));
     return result![0] !== 0;
 }
 
@@ -91,6 +91,6 @@ export function webviewLoop(args: LoopArgs): Uint8Array {
 }
 
 export function webviewDispose(): boolean {
-    let result = plugin.ops.webview_dispose.dispatch(new Uint8Array());
+    let result = plugin.ops.webview_dispose.dispatch(new Uint8Array(0));
     return result![0] !== 0;
 }
