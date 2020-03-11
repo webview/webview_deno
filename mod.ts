@@ -25,7 +25,7 @@ export class WebView {
         );
 
         if (!Plugin.webviewNew(args as Plugin.NewArgs))
-            throw "Cannot create multiple WebView instances";
+            throw "Cannot create multiple WebView instances, dispose the previous instance first";
     }
 
     private Uint8ArrayToNumber(data: Uint8Array): number {
