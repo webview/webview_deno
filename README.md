@@ -3,7 +3,7 @@
 [![stars](https://img.shields.io/github/stars/eliassjogreen/deno_webview)](https://github.com/eliassjogreen/deno_webview/stargazers)
 [![ci](https://github.com/eliassjogreen/deno_webview/workflows/ci/badge.svg)](https://github.com/eliassjogreen/deno_webview/actions)
 [![GitHub Releases](https://img.shields.io/github/downloads/eliassjogreen/deno_webview/latest/total)](https://github.com/eliassjogreen/deno_webview/releases/latest/)
-[![Deno version](https://img.shields.io/badge/deno-0.35.0-success)](https://github.com/denoland/deno)
+[![Deno version](https://img.shields.io/badge/deno-0.36.0-success)](https://github.com/denoland/deno)
 
 Still in a early stage of development. `deno_webview` uses the [rust bindings](https://github.com/Boscop/web-view) for [zserge's webview](https://github.com/zserge/webview).
 
