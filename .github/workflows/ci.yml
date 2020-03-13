@@ -53,7 +53,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: target
-          key: ${{ runner.os }}-cargo-build-target
+          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Remove Some Cache
         if: matrix.os == 'windows-2019'

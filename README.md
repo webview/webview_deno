@@ -38,13 +38,11 @@ Docs can be found [here](https://deno.land/x/webview/mod.ts?doc).
 ## Todo
 - [x] Implement ~~all~~ most webview [instance methods](https://docs.rs/web-view/0.6.0/web_view/struct.WebView.html)
 - [x] Docs
+- [x] Multiple windows/instances? ~~(Help, need to create a static HashMap of `*mut CWebView`)~~ Used solution found [here](https://github.com/crabmusket/deno_sqlite_plugin/blob/2df9e495f34d246881de0b48c9c79cc9e271abeb/src/lib.rs#L18)
+- [ ] Better errors and responses from rust land
 - [ ] Update ci so building with Edge works #3
 - [ ] Two-way deno bindings (to call deno from javascript)
-- [ ] Multiple windows/instances? (Help, need to create a static HashMap of `*mut CWebView`)
-- [ ] Easier importing of scripts, images and css
-- [ ] Dialog
-- [ ] DialogBuilder and WebViewBuilder
-- [ ] Examples
+- [ ] More examples
 - [ ] Tests
-- [ ] Wait for the [rust bindings](https://github.com/Boscop/web-view) to update to the latest [webview](https://github.com/zserge/webview) version.
+- [ ] Wait for the [rust bindings](https://github.com/Boscop/web-view) to update to the latest [webview](https://github.com/zserge/webview) api.
     - [ ] Polyfill for new API?

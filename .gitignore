@@ -1,3 +1,7 @@
 target/
 bins/
 .deno_plugins/
+.vscode/
+
+# Temporarily until i get local development sorted out with plugin_prepare
+scripts/
