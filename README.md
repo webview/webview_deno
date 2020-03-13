@@ -12,9 +12,9 @@ Still in a early stage of development. `deno_webview` uses the [rust bindings](h
 ## Example
 Run the following with the `-A` flag enabled to get the example shown above:
 ```ts
-import { WebView } from "https://deno.land/x/webview/mod.ts";
+import { WebView } from "./mod.ts";
 
-const webview = new WebView({
+const webview1 = new WebView({
     title: "Hello world",
     url: `data:text/html,
     <html>
@@ -22,10 +22,27 @@ const webview = new WebView({
       <h1>Hello from deno</h1>
     </body>
     </html>
-    `
+    `,
+    width: 300,
+    height: 300,
+    frameless: true
 });
 
-webview.run();
+const webview2 = new WebView({
+    title: "Hello world 2",
+    url: `data:text/html,
+  <html>
+  <body>
+    <h1>Hello from deno 2</h1>
+  </body>
+  </html>
+  `,
+  width: 300,
+  height: 300
+});
+
+while (webview1.step() && webview2.step()) {}
+
 ```
 or just run the following in the terminal:
 ```
