@@ -12,7 +12,7 @@ Still in a early stage of development. `deno_webview` uses the [rust bindings](h
 ## Example
 Run the following with the `-A` flag enabled to get the example shown above:
 ```ts
-import { WebView } from "./mod.ts";
+import { WebView } from "https://deno.land/x/webview/mod.ts";
 
 const webview1 = new WebView({
     title: "Hello world",
