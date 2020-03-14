@@ -61,7 +61,7 @@ while (webview1.step() && webview2.step()) {}
 or just run the following in the terminal:
 
 ```
-deno -A https://deno.land/x/webview/example.ts
+deno -A https://deno.land/x/webview/examples/multiple.ts
 ```
 
 ## Docs
