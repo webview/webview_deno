@@ -184,7 +184,7 @@ are located. This is usually `file://./target/release`. The process of running a
 using local binaries can be easier to do using the
 [dev script](https://github.com/eliassjogreen/deno_webview/tree/master/scripts/dev.ts):
 
-```console
+```
 deno -A scripts/dev.ts example.ts
 ```
 
