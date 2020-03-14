@@ -1,4 +1,4 @@
-import { WebView } from "./mod.ts";
+import { WebView } from "../mod.ts";
 
 const webview1 = new WebView({
     title: "Multiple deno_webview example",
