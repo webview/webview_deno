@@ -1,14 +1,18 @@
-import { prepare } from "https://deno.land/x/plugin_prepare/mod.ts";
+import { prepare } from "https://deno.land/x/plugin_prepare@v0.3.0/mod.ts";
 
-const releaseUrl =
-    "https://github.com/eliassjogreen/deno_webview/releases/download/0.1.2";
+const DEV = Deno.env("DEV");
+
+const pluginPath = DEV !== undefined
+    ? DEV
+    : "https://github.com/eliassjogreen/deno_webview/releases/download/0.1.2";
 
 const plugin = await prepare({
     name: "deno_webview",
+    checkCache: DEV !== undefined,
     urls: {
-        mac: `${releaseUrl}/libdeno_webview.dylib`,
-        win: `${releaseUrl}/deno_webview.dll`,
-        linux: `${releaseUrl}/libdeno_webview.so`
+        mac: `${pluginPath}/libdeno_webview.dylib`,
+        win: `${pluginPath}/deno_webview.dll`,
+        linux: `${pluginPath}/libdeno_webview.so`
     }
 });
 
@@ -28,49 +32,6 @@ export interface NewArgs {
     frameless: boolean;
 }
 
-export interface ExitAndDisposeArgs {
-    id: number;
-}
-
-export interface EvalArgs {
-    id: number;
-
-    js: string;
-}
-
-export interface InjectCssArgs {
-    id: number;
-
-    css: string;
-}
-
-export interface SetColorArgs {
-    id: number;
-
-    r: number;
-    g: number;
-    b: number;
-    a: number;
-}
-
-export interface SetTitleArgs {
-    id: number;
-
-    title: String;
-}
-
-export interface SetFullscreenArgs {
-    id: number;
-
-    fullscreen: boolean;
-}
-
-export interface LoopArgs {
-    id: number;
-
-    blocking: number;
-}
-
 export function webviewNew(args: NewArgs): number {
     let result = plugin.ops.webview_new.dispatch(
         encoder.encode(JSON.stringify(args))
@@ -78,11 +39,20 @@ export function webviewNew(args: NewArgs): number {
     return Uint8ArrayToNumber(result);
 }
 
-export function webviewExit(args: ExitAndDisposeArgs): boolean {
+export interface ExitArgs {
+    id: number;
+}
+
+export function webviewExit(args: ExitArgs): boolean {
     let result = plugin.ops.webview_exit.dispatch(
         encoder.encode(JSON.stringify(args))
     );
     return result![0] !== 0;
+}
+
+export interface EvalArgs {
+    id: number;
+    js: string;
 }
 
 export function webviewEval(args: EvalArgs): boolean {
@@ -92,11 +62,25 @@ export function webviewEval(args: EvalArgs): boolean {
     return result![0] !== 0;
 }
 
+export interface InjectCssArgs {
+    id: number;
+
+    css: string;
+}
+
 export function webviewInjectCss(args: InjectCssArgs): boolean {
     let result = plugin.ops.webview_inject_css.dispatch(
         encoder.encode(JSON.stringify(args))
     );
     return result![0] !== 0;
+}
+
+export interface SetColorArgs {
+    id: number;
+    r: number;
+    g: number;
+    b: number;
+    a: number;
 }
 
 export function webviewSetColor(args: SetColorArgs): boolean {
@@ -106,11 +90,21 @@ export function webviewSetColor(args: SetColorArgs): boolean {
     return result![0] !== 0;
 }
 
+export interface SetTitleArgs {
+    id: number;
+    title: String;
+}
+
 export function webviewSetTitle(args: SetTitleArgs): boolean {
     let result = plugin.ops.webview_set_title.dispatch(
         encoder.encode(JSON.stringify(args))
     );
     return result![0] !== 0;
+}
+
+export interface SetFullscreenArgs {
+    id: number;
+    fullscreen: boolean;
 }
 
 export function webviewSetFullscreen(args: SetFullscreenArgs): boolean {
@@ -120,16 +114,14 @@ export function webviewSetFullscreen(args: SetFullscreenArgs): boolean {
     return result![0] !== 0;
 }
 
+export interface LoopArgs {
+    id: number;
+    blocking: number;
+}
+
 export function webviewLoop(args: LoopArgs): number {
     let result = plugin.ops.webview_loop.dispatch(
         encoder.encode(JSON.stringify(args))
     )!;
     return Uint8ArrayToNumber(result);
-}
-
-export function webviewDispose(args: ExitAndDisposeArgs): boolean {
-    let result = plugin.ops.webview_dispose.dispatch(
-        encoder.encode(JSON.stringify(args))
-    );
-    return result![0] !== 0;
 }

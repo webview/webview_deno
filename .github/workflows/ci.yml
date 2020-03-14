@@ -87,4 +87,3 @@ jobs:
             target/release/libdeno_webview.dylib
             target/release/libdeno_webview.so
             target/release/deno_webview.dll
- 
