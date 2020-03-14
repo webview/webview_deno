@@ -112,7 +112,7 @@ deno is required (mostly).
 
 To clone the repo simply run the following:
 
-````
+```
 
 git clone https://github.com/eliassjogreen/deno_webview.git
 
@@ -129,7 +129,8 @@ cd deno_webview
 ### Building
 
 Building deno_webview takes about 20-50 minutes the first time (then like a
-minute) depending on your operating system and is easiest done by running:
+minute) depending on your operating system. When building on Windows admin is
+required. Building is easiest done by running:
 
 ```
 
@@ -160,7 +161,7 @@ or
 
 cargo build --release --locked --features edge
 
-````
+```
 
 ### Running
 
