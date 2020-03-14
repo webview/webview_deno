@@ -95,19 +95,6 @@ A `WebView` instance
 -   WebView.setFullscreen(fullscreen: boolean): boolean
     -   Enables or disables fullscreen
 
-## Dependencies
-
-### Deno
-
--   [plugin_prepare](https://deno.land/x/plugin_prepare)
-
-### Rust
-
--   [deno_core](https://crates.io/crates/deno_core)
--   [webview-sys](https://crates.io/crates/webview-sys)
--   [serde](https://crates.io/crates/serde)
--   [serde_json](https://crates.io/crates/serde_json)
-
 ## Development
 
 ### Prerequisites
@@ -187,6 +174,19 @@ using local binaries can be easier to do using the
 ```
 deno -A scripts/dev.ts example.ts
 ```
+
+## Dependencies
+
+### Deno
+
+-   [plugin_prepare](https://deno.land/x/plugin_prepare)
+
+### Rust
+
+-   [deno_core](https://crates.io/crates/deno_core)
+-   [webview-sys](https://crates.io/crates/webview-sys)
+-   [serde](https://crates.io/crates/serde)
+-   [serde_json](https://crates.io/crates/serde_json)
 
 ## Todo
 
