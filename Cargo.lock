@@ -316,9 +316,9 @@ checksum = "4c691c0e608126e00913e33f0ccf3727d5fc84573623b8d65b2df340b5201783"
 
 [[package]]
 name = "rusty_v8"
-version = "0.3.4"
+version = "0.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "db0e3daf22c046be395b87f47063cf6a78254b839500d87b7c62897d6eb92d6f"
+checksum = "057a99614b5d0dd7140084beb1281c3d2fa89e195cf2ecb98d39bb525f2dc492"
 dependencies = [
  "bitflags",
  "cargo_gn",
@@ -424,11 +424,10 @@ dependencies = [
 
 [[package]]
 name = "webview-sys"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4db7bc5b01d1717ad842957733a4db019289ca141b79c71683da68874f099546"
+checksum = "52a44d42bcacace6b95f866aa5bbefa4e322a2ad70a4a93e048eb7802dcf0221"
 dependencies = [
- "bitflags",
  "cc",
  "pkg-config",
 ]
