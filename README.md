@@ -81,18 +81,16 @@ A `WebView` instance
 -   WebView.step(): boolean
     -   Iterates the event loop and returns `false` if the the `WebView` has
         been closed
--   WebView.exit(): boolean
+-   WebView.exit(): Void
     -   Exits the `WebView`
--   WebView.eval(js: string): boolean
+-   WebView.eval(js: string): Void
     -   Evaluates the provided js code in the `WebView`
--   WebView.injectCss(css: string): boolean
-    -   Injects the provided css into the WebView
 -   WebView.setColor(color: { r: number; g: number; b: number; a: number; }):
-    boolean
+    Void
     -   Sets the color of the title bar to the provided RGBA value
--   WebView.setTitle(title: string): boolean
+-   WebView.setTitle(title: string): Void
     -   Sets the window title
--   WebView.setFullscreen(fullscreen: boolean): boolean
+-   WebView.setFullscreen(fullscreen: boolean): Void
     -   Enables or disables fullscreen
 
 ## Development
@@ -176,6 +174,11 @@ using local binaries can be easier to do using the
 deno -A scripts/dev.ts example.ts
 ```
 
+## Contributing
+
+Contributions either in the form of pull requests or issues are always welcome.
+Just remember to format using `deno fmt` and `cargo fmt`. Thx <3
+
 ## Dependencies
 
 ### Deno
@@ -197,7 +200,7 @@ deno -A scripts/dev.ts example.ts
 -   [x] Multiple windows/instances? ~~(Help, need to create a static HashMap of
         `*mut CWebView`)~~ Used solution found
         [here](https://github.com/crabmusket/deno_sqlite_plugin/blob/2df9e495f34d246881de0b48c9c79cc9e271abeb/src/lib.rs#L18)
--   [ ] Better errors and responses from rust land
+-   [x] Better errors and responses from rust land
 -   [ ] Update ci so building with Edge works
         [#3](https://github.com/eliassjogreen/deno_webview/issues/3)
 -   [ ] Two-way deno bindings (to call deno from javascript)

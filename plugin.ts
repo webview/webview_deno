@@ -3,125 +3,142 @@ import { prepare } from "https://deno.land/x/plugin_prepare@v0.3.0/mod.ts";
 const DEV = Deno.env("DEV");
 
 const pluginPath = DEV !== undefined
-    ? DEV
-    : "https://github.com/eliassjogreen/deno_webview/releases/download/0.1.2";
+  ? DEV
+  : "https://github.com/eliassjogreen/deno_webview/releases/download/0.1.3";
 
 const plugin = await prepare({
-    name: "deno_webview",
-    checkCache: DEV !== undefined,
-    urls: {
-        mac: `${pluginPath}/libdeno_webview.dylib`,
-        win: `${pluginPath}/deno_webview.dll`,
-        linux: `${pluginPath}/libdeno_webview.so`
-    }
+  name: "deno_webview",
+  checkCache: DEV !== undefined,
+  urls: {
+    mac: `${pluginPath}/libdeno_webview.dylib`,
+    win: `${pluginPath}/deno_webview.dll`,
+    linux: `${pluginPath}/libdeno_webview.so`
+  }
 });
 
 const encoder = new TextEncoder();
+const decoder = new TextDecoder();
 
-function Uint8ArrayToNumber(data: Uint8Array): number {
-    return (data[3] << 0) | (data[2] << 8) | (data[1] << 16) | (data[0] << 24);
+function jsonOpSync<P extends Object, R extends WebViewResponse<any>>(
+  op: Deno.PluginOp,
+  params: P
+): R {
+  let raw = op.dispatch(encoder.encode(JSON.stringify(params)));
+
+  if (!raw) {
+    throw `Plugin op ${op} returned null`;
+  }
+
+  return JSON.parse(decoder.decode(raw)) as R;
 }
 
-export interface NewArgs {
-    title: string;
-    url: string;
-    width: number;
-    height: number;
-    resizable: boolean;
-    debug: boolean;
-    frameless: boolean;
+function unwrapResponse<T, R extends WebViewResponse<T>>(response: R): T {
+  if (response.err) {
+    throw response.err;
+  }
+
+  if (response.ok) {
+    return response.ok;
+  }
+
+  throw "Invalid response";
 }
 
-export function webviewNew(args: NewArgs): number {
-    let result = plugin.ops.webview_new.dispatch(
-        encoder.encode(JSON.stringify(args))
-    )!;
-    return Uint8ArrayToNumber(result);
+export interface WebViewResponse<T> {
+  err?: string;
+  ok?: T;
 }
 
-export interface ExitArgs {
-    id: number;
+export interface WebViewNewParams {
+  title: string;
+  url: string;
+  width: number;
+  height: number;
+  resizable: boolean;
+  debug: boolean;
+  frameless: boolean;
 }
 
-export function webviewExit(args: ExitArgs): boolean {
-    let result = plugin.ops.webview_exit.dispatch(
-        encoder.encode(JSON.stringify(args))
-    );
-    return result![0] !== 0;
+export interface WebViewNewResult {
+  id: number;
 }
 
-export interface EvalArgs {
-    id: number;
-    js: string;
+export interface WebViewExitParams {
+  id: number;
 }
 
-export function webviewEval(args: EvalArgs): boolean {
-    let result = plugin.ops.webview_eval.dispatch(
-        encoder.encode(JSON.stringify(args))
-    );
-    return result![0] !== 0;
+export interface WebViewExitResult {}
+
+export interface WebViewEvalParams {
+  id: number;
+  js: string;
 }
 
-export interface InjectCssArgs {
-    id: number;
+export interface WebViewEvalResult {}
 
-    css: string;
+export interface WebViewSetColorParams {
+  id: number;
+  r: number;
+  g: number;
+  b: number;
+  a: number;
 }
 
-export function webviewInjectCss(args: InjectCssArgs): boolean {
-    let result = plugin.ops.webview_inject_css.dispatch(
-        encoder.encode(JSON.stringify(args))
-    );
-    return result![0] !== 0;
+export interface WebViewSetColorResult {}
+
+export interface WebViewSetTitleParams {
+  id: number;
+  title: String;
 }
 
-export interface SetColorArgs {
-    id: number;
-    r: number;
-    g: number;
-    b: number;
-    a: number;
+export interface WebViewSetTitleResult {}
+
+export interface WebViewSetFullscreenParams {
+  id: number;
+  fullscreen: boolean;
 }
 
-export function webviewSetColor(args: SetColorArgs): boolean {
-    let result = plugin.ops.webview_set_color.dispatch(
-        encoder.encode(JSON.stringify(args))
-    );
-    return result![0] !== 0;
+export interface WebViewSetFullscreenResult {}
+
+export interface WebViewLoopParams {
+  id: number;
+  blocking: number;
 }
 
-export interface SetTitleArgs {
-    id: number;
-    title: String;
+export interface WebViewLoopResult {
+  code: number;
 }
 
-export function webviewSetTitle(args: SetTitleArgs): boolean {
-    let result = plugin.ops.webview_set_title.dispatch(
-        encoder.encode(JSON.stringify(args))
-    );
-    return result![0] !== 0;
+export function WebViewNew(params: WebViewNewParams): WebViewNewResult {
+  return unwrapResponse(jsonOpSync(plugin.ops.webview_new, params));
 }
 
-export interface SetFullscreenArgs {
-    id: number;
-    fullscreen: boolean;
+export function WebViewExit(params: WebViewExitParams): WebViewExitResult {
+  return unwrapResponse(jsonOpSync(plugin.ops.webview_exit, params));
 }
 
-export function webviewSetFullscreen(args: SetFullscreenArgs): boolean {
-    let result = plugin.ops.webview_set_fullscreen.dispatch(
-        encoder.encode(JSON.stringify(args))
-    );
-    return result![0] !== 0;
+export function WebViewEval(params: WebViewEvalParams): WebViewEvalResult {
+  return unwrapResponse(jsonOpSync(plugin.ops.webview_eval, params));
 }
 
-export interface LoopArgs {
-    id: number;
-    blocking: number;
+export function WebViewSetColor(
+  params: WebViewSetColorParams
+): WebViewSetColorResult {
+  return unwrapResponse(jsonOpSync(plugin.ops.webview_set_color, params));
 }
 
-export function webviewLoop(args: LoopArgs): number {
-    let result = plugin.ops.webview_loop.dispatch(
-        encoder.encode(JSON.stringify(args))
-    )!;
-    return Uint8ArrayToNumber(result);
+export function WebViewSetTitle(
+  params: WebViewSetTitleParams
+): WebViewSetTitleResult {
+  return unwrapResponse(jsonOpSync(plugin.ops.webview_set_title, params));
+}
+
+export function WebViewSetFullscreen(
+  params: WebViewSetFullscreenParams
+): WebViewSetFullscreenResult {
+  return unwrapResponse(jsonOpSync(plugin.ops.webview_set_fullscreen, params));
+}
+
+export function WebViewLoop(params: WebViewLoopParams): WebViewLoopResult {
+  return unwrapResponse(jsonOpSync(plugin.ops.webview_loop, params));
 }
