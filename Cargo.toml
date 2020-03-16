@@ -1,6 +1,6 @@
 [package]
 name = "deno_webview"
-version = "0.1.3"
+version = "0.2.0"
 authors = ["Elias Sjögreen <eliassjogreen1@gmail.com>"]
 edition = "2018"
 

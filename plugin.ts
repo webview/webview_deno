@@ -4,7 +4,7 @@ const DEV = Deno.env("DEV");
 
 const pluginPath = DEV !== undefined
   ? DEV
-  : "https://github.com/eliassjogreen/deno_webview/releases/download/0.1.3";
+  : "https://github.com/eliassjogreen/deno_webview/releases/download/0.2.0";
 
 const plugin = await prepare({
   name: "deno_webview",
