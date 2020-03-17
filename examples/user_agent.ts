@@ -1,8 +1,8 @@
 import { WebView } from "../mod.ts";
 
 new WebView({
-    title: "User agent deno_webview example",
-    url: `data:text/html,
+  title: "User agent deno_webview example",
+  url: `data:text/html,
       <html>
       <body>
         <h1 id="h1">2 Nav</h1>
@@ -10,9 +10,9 @@ new WebView({
       </body>
       </html>
       `,
-    width: 800,
-    height: 600,
-    resizable: true,
-    debug: false,
-    frameless: false
+  width: 800,
+  height: 600,
+  resizable: true,
+  debug: false,
+  frameless: false
 }).run();
