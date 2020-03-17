@@ -144,12 +144,11 @@ cargo build --release --locked
 
 ```
 
-optionally with edge (does not work yet
-[#3](https://github.com/eliassjogreen/deno_webview/issues/3))
+optionally with mshtml
 
 ```
 
-deno -A scripts/build.ts edge
+deno -A scripts/build.ts mshtml
 
 ```
 
@@ -157,7 +156,7 @@ or
 
 ```
 
-cargo build --release --locked --features edge
+cargo build --release --locked --no-default-features
 
 ```
 
@@ -173,6 +172,15 @@ using local binaries can be easier to do using the
 ```
 deno -A scripts/dev.ts example.ts
 ```
+
+## Environment variables
+
+-   `DEV` - When developing locally `DEV` should be set to the local release
+    path, usually `file://./target/release`
+-   `MSHTML` - Due to MSHTML (ie) no longer being enabled by default the only
+    way to enable it is to set the `MSHTML` variable to the path of a binary
+    build built with the `--no-default-features` flag or using
+    `deno -A scripts/build.ts mshtml`
 
 ## Contributing
 
@@ -201,7 +209,7 @@ Just remember to format using `deno fmt` and `cargo fmt`. Thx <3
         `*mut CWebView`)~~ Used solution found
         [here](https://github.com/crabmusket/deno_sqlite_plugin/blob/2df9e495f34d246881de0b48c9c79cc9e271abeb/src/lib.rs#L18)
 -   [x] Better errors and responses from rust land
--   [ ] Update ci so building with Edge works
+-   [x] Update ci so building with Edge works
         [#3](https://github.com/eliassjogreen/deno_webview/issues/3)
 -   [ ] Two-way deno bindings (to call deno from javascript)
 -   [ ] More examples

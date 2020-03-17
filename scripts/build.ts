@@ -1,9 +1,8 @@
-export async function build(edge: boolean = Deno.args[0] === "edge") {
+export async function build(mshtml: boolean = Deno.args.includes("mshtml")) {
   const command = ["cargo", "build", "--release", "--locked"];
 
-  // TODO (#3) fix
-  if (edge) {
-    command.push("--features", "edge");
+  if (mshtml) {
+    command.push("--no-default-features");
   }
 
   const cargo = Deno.run({
