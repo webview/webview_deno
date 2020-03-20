@@ -6,7 +6,10 @@ export async function build(mshtml: boolean = Deno.args.includes("mshtml")) {
   }
 
   const cargo = Deno.run({
-    args: command
+    args: command,
+    env: {
+      "V8_BINARY": "1"
+    }
   });
   await cargo.status();
 }

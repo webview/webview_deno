@@ -185,7 +185,7 @@ deno -A scripts/dev.ts example.ts
 ## Contributing
 
 Contributions either in the form of pull requests or issues are always welcome.
-Just remember to format using `deno fmt` and `cargo fmt`. Thx <3
+Just remember to format using `deno -A scripts/fmt.ts` (`deno fmt` and `cargo fmt`). Thx <3
 
 ## Dependencies
 

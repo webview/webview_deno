@@ -17,6 +17,12 @@ jobs:
     strategy:
       matrix:
         os: [macOS-latest, windows-2019, ubuntu-16.04]
+    
+    env:
+      GH_ACTIONS: true
+      RUST_BACKTRACE: full
+      DENO_BUILD_MODE: release
+      V8_BINARY: true
 
     steps:
       - name: Clone repository
@@ -26,12 +32,6 @@ jobs:
         uses: hecrj/setup-rust-action@v1
         with:
           rust-version: "1.41.0"
-
-      - name: Environment (common)
-        run: |
-          echo ::set-env name=GH_ACTIONS::1
-          echo ::set-env name=DENO_BUILD_MODE::release
-          echo ::set-env name=RUST_BACKTRACE::full
 
       - name: Log versions
         run: |
