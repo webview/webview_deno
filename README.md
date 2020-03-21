@@ -29,33 +29,39 @@ Run the following with the `-A` flag enabled to get the example shown above:
 import { WebView } from "https://deno.land/x/webview/mod.ts";
 
 const webview1 = new WebView({
-    title: "Hello world",
-    url: `data:text/html,
+  title: "Multiple deno_webview example",
+  url: `data:text/html,
     <html>
     <body>
-      <h1>Hello from deno</h1>
+      <h1>1</h1>
     </body>
     </html>
     `,
-    width: 300,
-    height: 300,
-    frameless: true
+  width: 800,
+  height: 600,
+  resizable: true,
+  debug: true,
+  frameless: false
 });
 
 const webview2 = new WebView({
-    title: "Hello world 2",
-    url: `data:text/html,
-  <html>
-  <body>
-    <h1>Hello from deno 2</h1>
-  </body>
-  </html>
-  `,
-    width: 300,
-    height: 300
+  title: "Multiple deno_webview example",
+  url: `data:text/html,
+    <html>
+    <body>
+      <h1>2</h1>
+    </body>
+    </html>
+    `,
+  width: 800,
+  height: 600,
+  resizable: true,
+  debug: true,
+  frameless: false
 });
 
-while (webview1.step() && webview2.step()) {}
+await Promise.all([webview1.run(), webview2.run()]);
+
 ```
 
 or just run the following in the terminal:
@@ -76,7 +82,7 @@ A `WebView` instance
     height?: number; resizable?: boolean; debug?: boolean; frameless?: boolean;
     }): WebView
     -   Creates a new `WebView` instance
--   WebView.run(): Void
+-   WebView.run(): Promise<Void>
     -   Runs the event loop to completion
 -   WebView.step(): boolean
     -   Iterates the event loop and returns `false` if the the `WebView` has

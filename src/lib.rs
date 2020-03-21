@@ -1,10 +1,12 @@
 #[macro_use]
 extern crate deno_core;
+extern crate futures;
 extern crate serde;
 extern crate serde_json;
 extern crate webview_sys;
 
 use deno_core::{CoreOp, Op, PluginInitContext, ZeroCopyBuf};
+use futures::future::FutureExt;
 use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, collections::HashMap, ffi::CString, ptr::null_mut};
 use webview_sys::*;
@@ -25,6 +27,7 @@ fn init(context: &mut dyn PluginInitContext) {
         Box::new(op_webview_set_fullscreen),
     );
     context.register_op("webview_loop", Box::new(op_webview_loop));
+    context.register_op("webview_run", Box::new(op_webview_run));
 }
 init_fn!(init);
 
@@ -307,5 +310,49 @@ fn op_webview_loop(data: &[u8], _zero_copy: Option<ZeroCopyBuf>) -> CoreOp {
         });
 
         Op::Sync(serde_json::to_vec(&response).unwrap().into_boxed_slice())
+    }
+}
+
+#[derive(Deserialize)]
+struct WebViewRunParams {
+    id: u32,
+}
+
+#[derive(Serialize)]
+struct WebViewRunResult {}
+
+fn op_webview_run(data: &[u8], _zero_copy: Option<ZeroCopyBuf>) -> CoreOp {
+    unsafe {
+        let mut response: WebViewResponse<WebViewRunResult> = WebViewResponse {
+            err: None,
+            ok: None,
+        };
+
+        let params: WebViewRunParams = serde_json::from_slice(data).unwrap();
+
+        let fut = async move {
+            INSTANCE_MAP.with(|cell| {
+                let instance_map = cell.borrow_mut();
+
+                if !instance_map.contains_key(&params.id) {
+                    response.err = Some(format!("Could not find instance of id {}", &params.id))
+                } else {
+                    let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
+
+                    loop {
+                        match webview_loop(instance, 1) {
+                            0 => (),
+                            _ => {
+                                response.ok = Some(WebViewRunResult {});
+                            }
+                        }
+                    }
+                }
+            });
+
+            Ok(serde_json::to_vec(&response).unwrap().into_boxed_slice())
+        };
+
+        Op::Async(fut.boxed())
     }
 }

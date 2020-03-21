@@ -1,6 +1,6 @@
 [package]
 name = "deno_webview"
-version = "0.2.2"
+version = "0.3.0"
 authors = ["Elias Sjögreen <eliassjogreen1@gmail.com>"]
 edition = "2018"
 
@@ -12,6 +12,7 @@ deno_core = "0.36.0"
 webview-sys = "0.5.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+futures = "0.3.4"
 
 [features]
 default = ["webview-sys/edge"]

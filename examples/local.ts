@@ -1,6 +1,6 @@
 import { WebView } from "../mod.ts";
 
-new WebView({
+await new WebView({
   title: "Local deno_webview example",
   url: `data:text/html,
     <html>

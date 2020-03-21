@@ -32,29 +32,29 @@ export class WebView {
   }
 
   /**
-   * Runs the event loop to completion
-   */
-  public run() {
-    while (this.step()) {}
+     * Runs the event loop to completion
+     */
+  public async run() {
+    await Plugin.WebViewRun({ id: this.id });
   }
 
   /**
-   * Iterates the event loop and returns `false` if the the `WebView` has been closed
-   */
+     * Iterates the event loop and returns `false` if the the `WebView` has been closed
+     */
   public step(): boolean {
     return Plugin.WebViewLoop({ id: this.id, blocking: 1 }).code === 0;
   }
 
   /**
-   * Exits the `WebView`
-   */
+     * Exits the `WebView`
+     */
   public exit() {
     Plugin.WebViewExit({ id: this.id });
   }
 
   /**
-   * Evaluates the provided js code in the `WebView`
-   */
+     * Evaluates the provided js code in the `WebView`
+     */
   public eval(js: string) {
     Plugin.WebViewEval({
       id: this.id,
@@ -63,8 +63,8 @@ export class WebView {
   }
 
   /**
-   * Sets the color of the title bar
-   */
+     * Sets the color of the title bar
+     */
   public setColor(color: { r: number; g: number; b: number; a: number }) {
     Plugin.WebViewSetColor({
       id: this.id,
@@ -73,8 +73,8 @@ export class WebView {
   }
 
   /**
-   * Sets the window title
-   */
+     * Sets the window title
+     */
   public setTitle(title: string) {
     Plugin.WebViewSetTitle({
       id: this.id,
@@ -83,8 +83,8 @@ export class WebView {
   }
 
   /**
-   * Enables or disables fullscreen
-   */
+     * Enables or disables fullscreen
+     */
   public setFullscreen(fullscreen: boolean) {
     Plugin.WebViewSetFullscreen({
       id: this.id,

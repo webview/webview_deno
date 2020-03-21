@@ -5,7 +5,7 @@ const MSHTML = Deno.env("MSHTML");
 
 const pluginPath = DEV !== undefined
   ? DEV
-  : "https://github.com/eliassjogreen/deno_webview/releases/download/0.2.2";
+  : "https://github.com/eliassjogreen/deno_webview/releases/download/0.3.0";
 
 const plugin = await prepare({
   name: "deno_webview",
@@ -31,6 +31,23 @@ function jsonOpSync<P extends Object, R extends WebViewResponse<any>>(
   }
 
   return JSON.parse(decoder.decode(raw)) as R;
+}
+
+async function jsonOpAsync<P extends Object, R extends WebViewResponse<any>>(
+  op: Deno.PluginOp,
+  params: P
+): Promise<R> {
+  return new Promise((resolve, reject) => {
+    op.setAsyncHandler((raw) => {
+      if (!raw) {
+        throw `Plugin op ${op} returned null`;
+      }
+
+      resolve(unwrapResponse(JSON.parse(decoder.decode(raw))));
+    });
+
+    op.dispatch(encoder.encode(JSON.stringify(params)));
+  });
 }
 
 function unwrapResponse<T, R extends WebViewResponse<T>>(response: R): T {
@@ -110,6 +127,12 @@ export interface WebViewLoopResult {
   code: number;
 }
 
+export interface WebViewRunParams {
+  id: number;
+}
+
+export interface WebViewRunResult {}
+
 export function WebViewNew(params: WebViewNewParams): WebViewNewResult {
   return unwrapResponse(jsonOpSync(plugin.ops.webview_new, params));
 }
@@ -137,9 +160,17 @@ export function WebViewSetTitle(
 export function WebViewSetFullscreen(
   params: WebViewSetFullscreenParams
 ): WebViewSetFullscreenResult {
-  return unwrapResponse(jsonOpSync(plugin.ops.webview_set_fullscreen, params));
+  return unwrapResponse(
+    jsonOpSync(plugin.ops.webview_set_fullscreen, params)
+  );
 }
 
 export function WebViewLoop(params: WebViewLoopParams): WebViewLoopResult {
   return unwrapResponse(jsonOpSync(plugin.ops.webview_loop, params));
+}
+
+export function WebViewRun(params: WebViewRunParams): Promise<
+  WebViewRunResult
+> {
+  return jsonOpAsync(plugin.ops.webview_run, params);
 }

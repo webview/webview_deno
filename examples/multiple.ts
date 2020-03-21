@@ -32,4 +32,4 @@ const webview2 = new WebView({
   frameless: false
 });
 
-while (webview1.step() && webview2.step()) {}
+await Promise.all([webview1.run(), webview2.run()]);
