@@ -90,6 +90,7 @@ version = "0.3.0"
 dependencies = [
  "deno_core",
  "futures 0.3.4",
+ "lazy_static",
  "serde",
  "serde_json",
  "webview-sys",
