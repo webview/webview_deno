@@ -17,7 +17,7 @@ export async function dev(
   }
 
   Deno.run({
-    args: ["deno", "run", "-A", "-r", file],
+    cmd: ["deno", "run", "-A", "-r", file],
     env
   });
 }

@@ -1,10 +1,10 @@
 export async function fmt(mshtml: boolean = Deno.args.includes("mshtml")) {
   const cargo = Deno.run({
-    args: ["cargo", "fmt"]
+    cmd: ["cargo", "fmt"]
   });
 
   const deno = Deno.run({
-    args: ["deno", "fmt"]
+    cmd: ["deno", "fmt"]
   });
 
   await Promise.all([cargo.status(), deno.status()]);
