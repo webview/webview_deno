@@ -4,7 +4,7 @@
 [![stars](https://img.shields.io/github/stars/eliassjogreen/deno_webview)](https://github.com/eliassjogreen/deno_webview/stargazers)
 [![ci](https://github.com/eliassjogreen/deno_webview/workflows/ci/badge.svg)](https://github.com/eliassjogreen/deno_webview/actions)
 [![GitHub Releases](https://img.shields.io/github/downloads/eliassjogreen/deno_webview/latest/total)](https://github.com/eliassjogreen/deno_webview/releases/latest/)
-[![Deno version](https://img.shields.io/badge/deno-0.36.0-success)](https://github.com/denoland/deno)
+[![Deno version](https://img.shields.io/badge/deno-0.37.1-success)](https://github.com/denoland/deno)
 
 This project provides [deno](https://github.com/denoland/deno) bindings for
 [webview](https://github.com/zserge/webview) using the
@@ -12,12 +12,10 @@ This project provides [deno](https://github.com/denoland/deno) bindings for
 cross-platform library to render web-based GUIs for desktop applications. This
 project is still in an early stage of development and stability is sometimes
 questionable. The plugin should be compatible with MacOS, Linux and Windows. It
-has been tested on Windows and Xubuntu where it worked as expected using deno
-[v0.35.0](https://github.com/denoland/deno/releases/tag/v0.35.0) and
-[v0.36.0](https://github.com/denoland/deno/releases/tag/v0.36.0) (the only
-versions i bothered testing). The current goal of deno_webview is to provide
-high quality bindings to webview for creating light cross-platform applications
-using web technologies.
+has been tested on Windows and Xubuntu where it worked as expected using the
+latest versions of deno. The current goal of deno_webview is to provide high
+quality bindings to webview for creating light cross-platform applications using
+web technologies.
 
 ![Example image](images/deno_webview.png)
 
@@ -29,39 +27,38 @@ Run the following with the `-A` flag enabled to get the example shown above:
 import { WebView } from "https://deno.land/x/webview/mod.ts";
 
 const webview1 = new WebView({
-  title: "Multiple deno_webview example",
-  url: `data:text/html,
+    title: "Multiple deno_webview example",
+    url: `data:text/html,
     <html>
     <body>
       <h1>1</h1>
     </body>
     </html>
     `,
-  width: 800,
-  height: 600,
-  resizable: true,
-  debug: true,
-  frameless: false
+    width: 800,
+    height: 600,
+    resizable: true,
+    debug: true,
+    frameless: false
 });
 
 const webview2 = new WebView({
-  title: "Multiple deno_webview example",
-  url: `data:text/html,
+    title: "Multiple deno_webview example",
+    url: `data:text/html,
     <html>
     <body>
       <h1>2</h1>
     </body>
     </html>
     `,
-  width: 800,
-  height: 600,
-  resizable: true,
-  debug: true,
-  frameless: false
+    width: 800,
+    height: 600,
+    resizable: true,
+    debug: true,
+    frameless: false
 });
 
 await Promise.all([webview1.run(), webview2.run()]);
-
 ```
 
 or just run the following in the terminal:
@@ -191,7 +188,8 @@ deno -A scripts/dev.ts example.ts
 ## Contributing
 
 Contributions either in the form of pull requests or issues are always welcome.
-Just remember to format using `deno -A scripts/fmt.ts` (`deno fmt` and `cargo fmt`). Thx <3
+Just remember to format using `deno -A scripts/fmt.ts` (`deno fmt` and
+`cargo fmt`). Thx <3
 
 ## Dependencies
 
