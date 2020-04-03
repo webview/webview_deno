@@ -1,11 +1,11 @@
-import { prepare } from "https://deno.land/x/plugin_prepare@v0.3.0/mod.ts";
+import { prepare } from "https://deno.land/x/plugin_prepare@v0.3.1/mod.ts";
 
 const DEV = Deno.env("DEV");
 const MSHTML = Deno.env("MSHTML");
 
 const pluginPath = DEV !== undefined
   ? DEV
-  : "https://github.com/eliassjogreen/deno_webview/releases/download/0.3.0";
+  : "https://github.com/eliassjogreen/deno_webview/releases/download/0.3.1";
 
 const plugin = await prepare({
   name: "deno_webview",
@@ -13,8 +13,8 @@ const plugin = await prepare({
   urls: {
     mac: `${pluginPath}/libdeno_webview.dylib`,
     win: MSHTML === undefined ? `${pluginPath}/deno_webview.dll` : MSHTML,
-    linux: `${pluginPath}/libdeno_webview.so`
-  }
+    linux: `${pluginPath}/libdeno_webview.so`,
+  },
 });
 
 const encoder = new TextEncoder();
@@ -22,7 +22,7 @@ const decoder = new TextDecoder();
 
 function jsonOpSync<P extends Object, R extends WebViewResponse<any>>(
   op: Deno.PluginOp,
-  params: P
+  params: P,
 ): R {
   let raw = op.dispatch(encoder.encode(JSON.stringify(params)));
 
@@ -35,7 +35,7 @@ function jsonOpSync<P extends Object, R extends WebViewResponse<any>>(
 
 async function jsonOpAsync<P extends Object, R extends WebViewResponse<any>>(
   op: Deno.PluginOp,
-  params: P
+  params: P,
 ): Promise<R> {
   return new Promise((resolve, reject) => {
     op.setAsyncHandler((raw) => {
@@ -146,22 +146,22 @@ export function WebViewEval(params: WebViewEvalParams): WebViewEvalResult {
 }
 
 export function WebViewSetColor(
-  params: WebViewSetColorParams
+  params: WebViewSetColorParams,
 ): WebViewSetColorResult {
   return unwrapResponse(jsonOpSync(plugin.ops.webview_set_color, params));
 }
 
 export function WebViewSetTitle(
-  params: WebViewSetTitleParams
+  params: WebViewSetTitleParams,
 ): WebViewSetTitleResult {
   return unwrapResponse(jsonOpSync(plugin.ops.webview_set_title, params));
 }
 
 export function WebViewSetFullscreen(
-  params: WebViewSetFullscreenParams
+  params: WebViewSetFullscreenParams,
 ): WebViewSetFullscreenResult {
   return unwrapResponse(
-    jsonOpSync(plugin.ops.webview_set_fullscreen, params)
+    jsonOpSync(plugin.ops.webview_set_fullscreen, params),
   );
 }
 

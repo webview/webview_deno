@@ -1,14 +1,14 @@
 export async function fmt(mshtml: boolean = Deno.args.includes("mshtml")) {
   const clippy = Deno.run({
-    cmd: ["cargo", "clippy", "--release", "--locked"]
+    cmd: ["cargo", "clippy", "--release", "--locked"],
   });
 
   const rustfmt = Deno.run({
-    cmd: ["cargo", "fmt"]
+    cmd: ["cargo", "fmt"],
   });
 
   const denofmt = Deno.run({
-    cmd: ["deno", "fmt"]
+    cmd: ["deno", "fmt"],
   });
 
   await Promise.all([clippy.status(), rustfmt.status(), denofmt.status()]);

@@ -13,7 +13,7 @@ const webview1 = new WebView({
   height: 600,
   resizable: true,
   debug: true,
-  frameless: false
+  frameless: false,
 });
 
 const webview2 = new WebView({
@@ -29,7 +29,7 @@ const webview2 = new WebView({
   height: 600,
   resizable: true,
   debug: true,
-  frameless: false
+  frameless: false,
 });
 
 await Promise.all([webview1.run(), webview2.run()]);

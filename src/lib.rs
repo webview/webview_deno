@@ -68,11 +68,14 @@ fn op_webview_new(data: &[u8], _zero_copy: Option<ZeroCopyBuf>) -> CoreOp {
         });
 
         INSTANCE_MAP.with(|cell| {
+            let title = CString::new(params.title).unwrap();
+            let url = CString::new(params.url).unwrap();
+
             cell.borrow_mut().insert(
                 instance_id,
                 webview_new(
-                    CString::new(params.title).unwrap().as_ptr(),
-                    CString::new(params.url).unwrap().as_ptr(),
+                    title.as_ptr(),
+                    url.as_ptr(),
                     params.width,
                     params.height,
                     params.resizable as i32,
@@ -150,8 +153,9 @@ fn op_webview_eval(data: &[u8], _zero_copy: Option<ZeroCopyBuf>) -> CoreOp {
                 response.err = Some(format!("Could not find instance of id {}", &params.id))
             } else {
                 let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
+                let js = CString::new(params.js).unwrap();
 
-                match webview_eval(instance, CString::new(params.js).unwrap().as_ptr()) {
+                match webview_eval(instance, js.as_ptr()) {
                     0 => {
                         response.ok = Some(WebViewEvalResult {});
                     }
@@ -228,8 +232,9 @@ fn op_webview_set_title(data: &[u8], _zero_copy: Option<ZeroCopyBuf>) -> CoreOp 
                 response.err = Some(format!("Could not find instance of id {}", &params.id))
             } else {
                 let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
+                let title = CString::new(params.title).unwrap();
 
-                webview_set_title(instance, CString::new(params.title).unwrap().as_ptr());
+                webview_set_title(instance, title.as_ptr());
 
                 response.ok = Some(WebViewSetTitleResult {});
             }
@@ -344,6 +349,7 @@ fn op_webview_run(data: &[u8], _zero_copy: Option<ZeroCopyBuf>) -> CoreOp {
                             0 => (),
                             _ => {
                                 response.ok = Some(WebViewRunResult {});
+                                break;
                             }
                         }
                     }

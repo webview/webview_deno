@@ -7,5 +7,5 @@ await new WebView({
   height: 600,
   resizable: true,
   debug: true,
-  frameless: false
+  frameless: false,
 }).run();

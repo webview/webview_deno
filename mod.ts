@@ -23,9 +23,9 @@ export class WebView {
         height: 600,
         resizable: true,
         debug: true,
-        frameless: false
+        frameless: false,
       },
-      args
+      args,
     );
 
     this.id = Plugin.WebViewNew(args as Plugin.WebViewNewParams).id;
@@ -58,7 +58,7 @@ export class WebView {
   public eval(js: string) {
     Plugin.WebViewEval({
       id: this.id,
-      js: js
+      js: js,
     });
   }
 
@@ -68,7 +68,7 @@ export class WebView {
   public setColor(color: { r: number; g: number; b: number; a: number }) {
     Plugin.WebViewSetColor({
       id: this.id,
-      ...color
+      ...color,
     });
   }
 
@@ -78,7 +78,7 @@ export class WebView {
   public setTitle(title: string) {
     Plugin.WebViewSetTitle({
       id: this.id,
-      title: title
+      title: title,
     });
   }
 
@@ -88,7 +88,7 @@ export class WebView {
   public setFullscreen(fullscreen: boolean) {
     Plugin.WebViewSetFullscreen({
       id: this.id,
-      fullscreen: fullscreen
+      fullscreen: fullscreen,
     });
   }
 }

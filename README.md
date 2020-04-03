@@ -4,7 +4,7 @@
 [![stars](https://img.shields.io/github/stars/eliassjogreen/deno_webview)](https://github.com/eliassjogreen/deno_webview/stargazers)
 [![ci](https://github.com/eliassjogreen/deno_webview/workflows/ci/badge.svg)](https://github.com/eliassjogreen/deno_webview/actions)
 [![GitHub Releases](https://img.shields.io/github/downloads/eliassjogreen/deno_webview/latest/total)](https://github.com/eliassjogreen/deno_webview/releases/latest/)
-[![Deno version](https://img.shields.io/badge/deno-0.37.1-success)](https://github.com/denoland/deno)
+[![Deno version](https://img.shields.io/badge/deno-0.38.0-success)](https://github.com/denoland/deno)
 
 This project provides [deno](https://github.com/denoland/deno) bindings for
 [webview](https://github.com/zserge/webview) using the
