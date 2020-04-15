@@ -4,8 +4,7 @@ const DEV = Deno.env("DEV");
 const IS_DEV = DEV !== undefined;
 const MSHTML = Deno.env("MSHTML");
 const IS_MSHTML = MSHTML !== undefined;
-
-const pluginPath = IS_DEV
+const PLUGIN_PATH = IS_DEV
   ? DEV
   : "https://github.com/eliassjogreen/deno_webview/releases/download/0.3.2";
 
@@ -13,9 +12,9 @@ const plugin = await prepare({
   name: "deno_webview",
   checkCache: IS_DEV,
   urls: {
-    mac: `${pluginPath}/libdeno_webview.dylib`,
-    win: IS_MSHTML ? MSHTML : `${pluginPath}/deno_webview.dll`,
-    linux: `${pluginPath}/libdeno_webview.so`,
+    mac: `${PLUGIN_PATH}/libdeno_webview.dylib`,
+    win: IS_MSHTML ? MSHTML : `${PLUGIN_PATH}/deno_webview.dll`,
+    linux: `${PLUGIN_PATH}/libdeno_webview.so`,
   },
 });
 
