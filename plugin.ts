@@ -1,18 +1,20 @@
 import { prepare } from "https://deno.land/x/plugin_prepare@v0.3.1/mod.ts";
 
 const DEV = Deno.env("DEV");
+const IS_DEV = DEV !== undefined;
 const MSHTML = Deno.env("MSHTML");
+const IS_MSHTML = MSHTML !== undefined;
 
-const pluginPath = DEV !== undefined
+const pluginPath = IS_DEV
   ? DEV
-  : "https://github.com/eliassjogreen/deno_webview/releases/download/0.3.1";
+  : "https://github.com/eliassjogreen/deno_webview/releases/download/0.3.2";
 
 const plugin = await prepare({
   name: "deno_webview",
-  checkCache: DEV === undefined,
+  checkCache: IS_DEV,
   urls: {
     mac: `${pluginPath}/libdeno_webview.dylib`,
-    win: MSHTML === undefined ? `${pluginPath}/deno_webview.dll` : MSHTML,
+    win: IS_MSHTML ? MSHTML : `${pluginPath}/deno_webview.dll`,
     linux: `${pluginPath}/libdeno_webview.so`,
   },
 });

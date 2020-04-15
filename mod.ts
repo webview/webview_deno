@@ -1,34 +1,30 @@
 import * as Plugin from "./plugin.ts";
 
+const DEFAULT_PARAMS: Plugin.WebViewNewParams = {
+  title: "deno_webview",
+  url: "about:blank",
+  width: 800,
+  height: 600,
+  resizable: true,
+  debug: true,
+  frameless: false,
+};
+
+/**
+ * The constructor parameters
+ */
+export type WebViewParams = Partial<Plugin.WebViewNewParams>;
+
 /**
  * A WebView instance
  */
 export class WebView {
   private id: number = 0;
 
-  constructor(args: {
-    title?: string;
-    url?: string;
-    width?: number;
-    height?: number;
-    resizable?: boolean;
-    debug?: boolean;
-    frameless?: boolean;
-  }) {
-    args = Object.assign(
-      {
-        title: "deno_webview",
-        url: "about:blank",
-        width: 800,
-        height: 600,
-        resizable: true,
-        debug: true,
-        frameless: false,
-      },
-      args,
-    );
+  constructor(params: WebViewParams) {
+    params = Object.assign(DEFAULT_PARAMS, params);
 
-    this.id = Plugin.WebViewNew(args as Plugin.WebViewNewParams).id;
+    this.id = Plugin.WebViewNew(params as Plugin.WebViewNewParams).id;
   }
 
   /**
