@@ -2,9 +2,10 @@
 
 [![license](https://img.shields.io/github/license/eliassjogreen/deno_webview)](https://github.com/eliassjogreen/deno_webview/blob/master/LICENSE)
 [![stars](https://img.shields.io/github/stars/eliassjogreen/deno_webview)](https://github.com/eliassjogreen/deno_webview/stargazers)
+[![issues](https://img.shields.io/github/issues/eliassjogreen/deno_webview)](https://github.com/eliassjogreen/deno_webview/issues)
 [![ci](https://github.com/eliassjogreen/deno_webview/workflows/ci/badge.svg)](https://github.com/eliassjogreen/deno_webview/actions)
-[![GitHub Releases](https://img.shields.io/github/downloads/eliassjogreen/deno_webview/latest/total)](https://github.com/eliassjogreen/deno_webview/releases/latest/)
-[![Deno version](https://img.shields.io/badge/deno-0.38.0-success)](https://github.com/denoland/deno)
+[![releases](https://img.shields.io/github/downloads/eliassjogreen/deno_webview/total)](https://github.com/eliassjogreen/deno_webview/releases/latest/)
+[![deno version](https://img.shields.io/badge/deno-0.40.0-success)](https://github.com/denoland/deno)
 
 This project provides [deno](https://github.com/denoland/deno) bindings for
 [webview](https://github.com/zserge/webview) using the
@@ -69,32 +70,7 @@ deno -A https://deno.land/x/webview/examples/multiple.ts
 
 ## Docs
 
-Docs can also be found [here](https://deno.land/x/webview/mod.ts?doc).
-
-### WebView
-
-A `WebView` instance
-
--   WebView.constructor(args: { title?: string; url?: string; width?: number;
-    height?: number; resizable?: boolean; debug?: boolean; frameless?: boolean;
-    }): WebView
-    -   Creates a new `WebView` instance
--   WebView.run(): Promise<Void>
-    -   Runs the event loop to completion
--   WebView.step(): boolean
-    -   Iterates the event loop and returns `false` if the the `WebView` has
-        been closed
--   WebView.exit(): Void
-    -   Exits the `WebView`
--   WebView.eval(js: string): Void
-    -   Evaluates the provided js code in the `WebView`
--   WebView.setColor(color: { r: number; g: number; b: number; a: number; }):
-    Void
-    -   Sets the color of the title bar to the provided RGBA value
--   WebView.setTitle(title: string): Void
-    -   Sets the window title
--   WebView.setFullscreen(fullscreen: boolean): Void
-    -   Enables or disables fullscreen
+Docs can be found [here](https://doc.deno.land/https/deno.land/x/webview/mod.ts).
 
 ## Development
 
