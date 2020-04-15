@@ -70,9 +70,9 @@ checksum = "4785bdd1c96b2a846b2bd7cc02e86b6b3dbf14e7e53446c4f54c92a361040822"
 
 [[package]]
 name = "deno_core"
-version = "0.38.0"
+version = "0.40.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "40385b8a20c2092edcf63befe8c3e8f1b79bbe2c68616a156a7488c2644baecb"
+checksum = "1f145f67012b01ff650e0e990c4a68c78c25fa5a5e4d5f0dfd0bb71d98da0b47"
 dependencies = [
  "downcast-rs",
  "futures 0.3.4",
@@ -86,7 +86,7 @@ dependencies = [
 
 [[package]]
 name = "deno_webview"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "deno_core",
  "futures 0.3.4",
@@ -474,9 +474,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.50"
+version = "1.0.51"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "78a7a12c167809363ec3bd7329fc0a3369056996de43c4b37ef3cd54a6ce4867"
+checksum = "da07b57ee2623368351e9a0488bb0b261322a15a6e0ae53e243cbdc0f4208da9"
 dependencies = [
  "itoa",
  "ryu",
