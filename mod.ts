@@ -16,6 +16,16 @@ const DEFAULT_PARAMS: Plugin.WebViewNewParams = {
 export type WebViewParams = Partial<Plugin.WebViewNewParams>;
 
 /**
+ * A rgb(a) color
+ */
+export interface WebViewColor {
+  r: number;
+  g: number;
+  b: number;
+  a?: number;
+}
+
+/**
  * A WebView instance
  */
 export class WebView {
@@ -61,10 +71,13 @@ export class WebView {
   /**
      * Sets the color of the title bar
      */
-  public setColor(color: { r: number; g: number; b: number; a: number }) {
+  public setColor(color: WebViewColor) {
     Plugin.WebViewSetColor({
       id: this.id,
-      ...color,
+      r: color.r,
+      g: color.g,
+      b: color.b,
+      a: color.a ?? 1,
     });
   }
 
