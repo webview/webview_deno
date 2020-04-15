@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        os: [macOS-latest, windows-2019, ubuntu-16.04]
+        os: [macOS-latest, windows-latest, ubuntu-latest]
     
     env:
       GH_ACTIONS: true
@@ -56,7 +56,7 @@ jobs:
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Remove Some Cache
-        if: matrix.os == 'windows-2019'
+        if: matrix.os == 'windows-latest'
         run: |
           rm target/release/gn_root -Recurse -ErrorAction Ignore
           rm target/debug/gn_root -Recurse -ErrorAction Ignore
@@ -68,7 +68,7 @@ jobs:
           architecture: x64
 
       - name: Install webkit2gtk
-        if: matrix.os == 'ubuntu-16.04'
+        if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get install libwebkit2gtk-4.0-dev
 
       - name: Build
