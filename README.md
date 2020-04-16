@@ -5,18 +5,19 @@
 [![issues](https://img.shields.io/github/issues/eliassjogreen/deno_webview)](https://github.com/eliassjogreen/deno_webview/issues)
 [![ci](https://github.com/eliassjogreen/deno_webview/workflows/ci/badge.svg)](https://github.com/eliassjogreen/deno_webview/actions)
 [![releases](https://img.shields.io/github/downloads/eliassjogreen/deno_webview/total)](https://github.com/eliassjogreen/deno_webview/releases/latest/)
-[![deno version](https://img.shields.io/badge/deno-0.40.0-success)](https://github.com/denoland/deno)
+[![deno version](https://img.shields.io/badge/deno-0.41.0-success)](https://github.com/denoland/deno)
 
 This project provides [deno](https://github.com/denoland/deno) bindings for
 [webview](https://github.com/zserge/webview) using the
 [webview rust bindings](https://github.com/Boscop/web-view). Webview is a tiny
 cross-platform library to render web-based GUIs for desktop applications. This
 project is still in an early stage of development and stability is sometimes
-questionable. The plugin should be compatible with MacOS, Linux and Windows. It
-has been tested on Windows and Xubuntu where it worked as expected using the
-latest versions of deno. The current goal of deno_webview is to provide high
-quality bindings to webview for creating light cross-platform applications using
-web technologies.
+questionable. The plugin should be compatible with MacOS (recently ran into some
+problems, but cannot solve the problem myself as i do not have acces to a mac),
+Linux and Windows. It has been tested on Windows and Xubuntu where it worked as
+expected using the latest versions of deno. The current goal of deno_webview is
+to provide high quality bindings to webview for creating light cross-platform
+applications using web technologies.
 
 ![Example image](images/deno_webview.png)
 
@@ -40,7 +41,7 @@ const webview1 = new WebView({
     height: 600,
     resizable: true,
     debug: true,
-    frameless: false
+    frameless: false,
 });
 
 const webview2 = new WebView({
@@ -56,7 +57,7 @@ const webview2 = new WebView({
     height: 600,
     resizable: true,
     debug: true,
-    frameless: false
+    frameless: false,
 });
 
 await Promise.all([webview1.run(), webview2.run()]);
@@ -70,7 +71,8 @@ deno -A https://deno.land/x/webview/examples/multiple.ts
 
 ## Docs
 
-Docs can be found [here](https://doc.deno.land/https/deno.land/x/webview/mod.ts).
+Docs can be found
+[here](https://doc.deno.land/https/deno.land/x/webview/mod.ts).
 
 ## Development
 
