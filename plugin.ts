@@ -6,7 +6,7 @@ const MSHTML = Deno.env("MSHTML");
 const IS_MSHTML = MSHTML !== undefined;
 const PLUGIN_PATH = IS_DEV
   ? DEV
-  : "https://github.com/eliassjogreen/deno_webview/releases/download/0.3.2";
+  : "https://github.com/eliassjogreen/deno_webview/releases/download/0.3.3";
 
 const plugin = await prepare({
   name: "deno_webview",
