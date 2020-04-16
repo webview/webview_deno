@@ -195,7 +195,7 @@ Just remember to format using `deno -A scripts/fmt.ts` (`deno fmt` and
         [#3](https://github.com/eliassjogreen/deno_webview/issues/3)
 -   [ ] Two-way deno bindings (to call deno from javascript)
 -   [ ] More examples
--   [ ] Tests (unsure of how though)
+-   [ ] Tests (unsure of how though also [#4670](https://github.com/denoland/deno/issues/4670))
 -   [ ] Wait for the [rust bindings](https://github.com/Boscop/web-view) to
         update to the latest [webview](https://github.com/zserge/webview) api.
     -   [ ] Polyfill for new API?
