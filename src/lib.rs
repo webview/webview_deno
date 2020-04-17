@@ -5,10 +5,23 @@ extern crate serde;
 extern crate serde_json;
 extern crate webview_sys;
 
-use deno_core::{CoreOp, Op, PluginInitContext, ZeroCopyBuf};
+use deno_core::CoreOp;
+use deno_core::Op;
+use deno_core::PluginInitContext;
+use deno_core::ZeroCopyBuf;
+
 use futures::future::FutureExt;
-use serde::{Deserialize, Serialize};
-use std::{cell::RefCell, collections::HashMap, ffi::CString, ptr::null_mut};
+
+use serde::Deserialize;
+use serde::Serialize;
+
+use std::cell::RefCell;
+use std::collections::HashMap;
+// use std::ffi::CStr;
+use std::ffi::CString;
+// use std::os::raw::*;
+use std::ptr::null_mut;
+
 use webview_sys::*;
 
 thread_local! {
@@ -81,7 +94,7 @@ fn op_webview_new(data: &[u8], _zero_copy: Option<ZeroCopyBuf>) -> CoreOp {
                     params.resizable as i32,
                     params.debug as i32,
                     params.frameless as i32,
-                    None,
+                    None, // Some(ffi_invoke_handler),
                     null_mut(),
                 ),
             );
@@ -92,6 +105,12 @@ fn op_webview_new(data: &[u8], _zero_copy: Option<ZeroCopyBuf>) -> CoreOp {
         Op::Sync(serde_json::to_vec(&response).unwrap().into_boxed_slice())
     }
 }
+
+// extern "C" fn ffi_invoke_handler(webview: *mut CWebView, arg: *const c_char) {
+//     unsafe {
+//         let arg = CStr::from_ptr(arg).to_string_lossy().to_string();
+//     }
+// }
 
 #[derive(Deserialize)]
 struct WebViewExitParams {
