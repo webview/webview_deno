@@ -6,6 +6,7 @@
 [![ci](https://github.com/eliassjogreen/deno_webview/workflows/ci/badge.svg)](https://github.com/eliassjogreen/deno_webview/actions)
 [![releases](https://img.shields.io/github/downloads/eliassjogreen/deno_webview/total)](https://github.com/eliassjogreen/deno_webview/releases/latest/)
 [![deno version](https://img.shields.io/badge/deno-0.41.0-success)](https://github.com/denoland/deno)
+[deno doc](https://doc.deno.land/badge.svg)](https://doc.deno.land/https/deno.land/std/webview/mod.ts)
 
 This project provides [deno](https://github.com/denoland/deno) bindings for
 [webview](https://github.com/zserge/webview) using the
