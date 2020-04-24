@@ -1,4 +1,3 @@
-#[macro_use]
 extern crate deno_core;
 extern crate futures;
 extern crate serde;
@@ -6,6 +5,7 @@ extern crate serde_json;
 extern crate webview_sys;
 
 use deno_core::CoreOp;
+use deno_core::init_fn;
 use deno_core::Op;
 use deno_core::PluginInitContext;
 use deno_core::ZeroCopyBuf;
