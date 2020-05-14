@@ -67,7 +67,7 @@ await Promise.all([webview1.run(), webview2.run()]);
 or just run the following in the terminal:
 
 ```
-deno -A https://deno.land/x/webview/examples/multiple.ts
+deno run -A https://deno.land/x/webview/examples/multiple.ts
 ```
 
 ## Docs
