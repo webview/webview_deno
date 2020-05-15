@@ -24,6 +24,8 @@ applications using web technologies.
 
 ## Example
 
+**Latest supported version of Deno is ```v0.41.0``` due to recent changes to the deno plugin system.**
+
 Run the following with the `-A` flag enabled to get the example shown above:
 
 ```ts
