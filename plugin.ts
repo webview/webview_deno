@@ -1,4 +1,4 @@
-import { prepare,deferred } from "./deps.ts";
+import { prepare, deferred } from "./deps.ts";
 
 const DEV = Deno.env.get("DEV");
 const IS_DEV = DEV !== undefined;

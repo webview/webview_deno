@@ -7,7 +7,7 @@ import {
   WebViewEval,
   WebViewSetColor,
   WebViewSetTitle,
-  WebViewSetFullscreen
+  WebViewSetFullscreen,
 } from "./plugin.ts";
 
 const DEFAULT_PARAMS: WebViewNewParams = {
