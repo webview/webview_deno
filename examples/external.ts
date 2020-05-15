@@ -1,6 +1,6 @@
 import { WebView } from "../mod.ts";
 
-// ffi_invoke_handler crashed the program when `external.invoke("hello from window");` is called
+// DOES NOT WORK YET
 
 await new WebView({
   title: "External deno_webview example",

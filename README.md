@@ -5,7 +5,7 @@
 [![issues](https://img.shields.io/github/issues/eliassjogreen/deno_webview)](https://github.com/eliassjogreen/deno_webview/issues)
 [![ci](https://github.com/eliassjogreen/deno_webview/workflows/ci/badge.svg)](https://github.com/eliassjogreen/deno_webview/actions)
 [![releases](https://img.shields.io/github/downloads/eliassjogreen/deno_webview/total)](https://github.com/eliassjogreen/deno_webview/releases/latest/)
-[![deno version](https://img.shields.io/badge/deno-0.41.0-success)](https://github.com/denoland/deno)
+[![deno version](https://img.shields.io/badge/deno-1.0.0-success)](https://github.com/denoland/deno)
 [![deno doc](https://doc.deno.land/badge.svg)](https://doc.deno.land/https/deno.land/x/webview/mod.ts)
 
 This project provides [deno](https://github.com/denoland/deno) bindings for
@@ -24,43 +24,41 @@ applications using web technologies.
 
 ## Example
 
-**Latest supported version of Deno is ```v0.41.0``` due to recent changes to the deno plugin system.**
-
-Run the following with the `-A` flag enabled to get the example shown above:
+Run the following with the `-A` and `--unstable` flags enabled to get the example shown above:
 
 ```ts
 import { WebView } from "https://deno.land/x/webview/mod.ts";
 
 const webview1 = new WebView({
-    title: "Multiple deno_webview example",
-    url: `data:text/html,
+  title: "Multiple deno_webview example",
+  url: `data:text/html,
     <html>
     <body>
       <h1>1</h1>
     </body>
     </html>
     `,
-    width: 800,
-    height: 600,
-    resizable: true,
-    debug: true,
-    frameless: false,
+  width: 800,
+  height: 600,
+  resizable: true,
+  debug: true,
+  frameless: false,
 });
 
 const webview2 = new WebView({
-    title: "Multiple deno_webview example",
-    url: `data:text/html,
+  title: "Multiple deno_webview example",
+  url: `data:text/html,
     <html>
     <body>
       <h1>2</h1>
     </body>
     </html>
     `,
-    width: 800,
-    height: 600,
-    resizable: true,
-    debug: true,
-    frameless: false,
+  width: 800,
+  height: 600,
+  resizable: true,
+  debug: true,
+  frameless: false,
 });
 
 await Promise.all([webview1.run(), webview2.run()]);
@@ -69,7 +67,7 @@ await Promise.all([webview1.run(), webview2.run()]);
 or just run the following in the terminal:
 
 ```
-deno run -A https://deno.land/x/webview/examples/multiple.ts
+deno run -A --unstable https://deno.land/x/webview/examples/multiple.ts
 ```
 
 ## Docs

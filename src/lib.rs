@@ -4,11 +4,10 @@ extern crate serde;
 extern crate serde_json;
 extern crate webview_sys;
 
-use deno_core::CoreOp;
-use deno_core::init_fn;
-use deno_core::Op;
-use deno_core::PluginInitContext;
-use deno_core::ZeroCopyBuf;
+use deno_core::plugin_api::Buf;
+use deno_core::plugin_api::Interface;
+use deno_core::plugin_api::Op;
+use deno_core::plugin_api::ZeroCopyBuf;
 
 use futures::future::FutureExt;
 
@@ -29,20 +28,17 @@ thread_local! {
     static INSTANCE_MAP: RefCell<HashMap<u32, *mut CWebView>> = RefCell::new(HashMap::new());
 }
 
-fn init(context: &mut dyn PluginInitContext) {
-    context.register_op("webview_new", Box::new(op_webview_new));
-    context.register_op("webview_exit", Box::new(op_webview_exit));
-    context.register_op("webview_eval", Box::new(op_webview_eval));
-    context.register_op("webview_set_color", Box::new(op_webview_set_color));
-    context.register_op("webview_set_title", Box::new(op_webview_set_title));
-    context.register_op(
-        "webview_set_fullscreen",
-        Box::new(op_webview_set_fullscreen),
-    );
-    context.register_op("webview_loop", Box::new(op_webview_loop));
-    context.register_op("webview_run", Box::new(op_webview_run));
+#[no_mangle]
+pub fn deno_plugin_init(interface: &mut dyn Interface) {
+    interface.register_op("webview_new", op_webview_new);
+    interface.register_op("webview_exit", op_webview_exit);
+    interface.register_op("webview_eval", op_webview_eval);
+    interface.register_op("webview_set_color", op_webview_set_color);
+    interface.register_op("webview_set_title", op_webview_set_title);
+    interface.register_op("webview_set_fullscreen", op_webview_set_fullscreen);
+    interface.register_op("webview_loop", op_webview_loop);
+    interface.register_op("webview_run", op_webview_run);
 }
-init_fn!(init);
 
 #[derive(Serialize)]
 struct WebViewResponse<T> {
@@ -66,20 +62,24 @@ struct WebViewNewResult {
     id: u32,
 }
 
-fn op_webview_new(data: &[u8], _zero_copy: Option<ZeroCopyBuf>) -> CoreOp {
+fn op_webview_new(
+    _interface: &mut dyn Interface,
+    data: &[u8],
+    _zero_copy: Option<ZeroCopyBuf>,
+) -> Op {
+    let mut response: WebViewResponse<WebViewNewResult> = WebViewResponse {
+        err: None,
+        ok: None,
+    };
+
+    let params: WebViewNewParams = serde_json::from_slice(data).unwrap();
+
+    let mut instance_id: u32 = 0;
+    INSTANCE_INDEX.with(|cell| {
+        instance_id = cell.replace_with(|&mut i| i + 1);
+    });
+
     unsafe {
-        let mut response: WebViewResponse<WebViewNewResult> = WebViewResponse {
-            err: None,
-            ok: None,
-        };
-
-        let params: WebViewNewParams = serde_json::from_slice(data).unwrap();
-
-        let mut instance_id: u32 = 0;
-        INSTANCE_INDEX.with(|cell| {
-            instance_id = cell.replace_with(|&mut i| i + 1);
-        });
-
         INSTANCE_MAP.with(|cell| {
             let title = CString::new(params.title).unwrap();
             let url = CString::new(params.url).unwrap();
@@ -99,11 +99,13 @@ fn op_webview_new(data: &[u8], _zero_copy: Option<ZeroCopyBuf>) -> CoreOp {
                 ),
             );
         });
-
-        response.ok = Some(WebViewNewResult { id: instance_id });
-
-        Op::Sync(serde_json::to_vec(&response).unwrap().into_boxed_slice())
     }
+
+    response.ok = Some(WebViewNewResult { id: instance_id });
+
+    let result: Buf = serde_json::to_vec(&response).unwrap().into_boxed_slice();
+
+    Op::Sync(result)
 }
 
 // extern "C" fn ffi_invoke_handler(webview: *mut CWebView, arg: *const c_char) {
@@ -120,7 +122,11 @@ struct WebViewExitParams {
 #[derive(Serialize)]
 struct WebViewExitResult {}
 
-fn op_webview_exit(data: &[u8], _zero_copy: Option<ZeroCopyBuf>) -> CoreOp {
+fn op_webview_exit(
+    _interface: &mut dyn Interface,
+    data: &[u8],
+    _zero_copy: Option<ZeroCopyBuf>,
+) -> Op {
     unsafe {
         let mut response: WebViewResponse<WebViewExitResult> = WebViewResponse {
             err: None,
@@ -156,7 +162,11 @@ struct WebViewEvalParams {
 #[derive(Serialize)]
 struct WebViewEvalResult {}
 
-fn op_webview_eval(data: &[u8], _zero_copy: Option<ZeroCopyBuf>) -> CoreOp {
+fn op_webview_eval(
+    _interface: &mut dyn Interface,
+    data: &[u8],
+    _zero_copy: Option<ZeroCopyBuf>,
+) -> Op {
     unsafe {
         let mut response: WebViewResponse<WebViewEvalResult> = WebViewResponse {
             err: None,
@@ -199,7 +209,11 @@ struct WebViewSetColorParams {
 #[derive(Serialize)]
 struct WebViewSetColorResult {}
 
-fn op_webview_set_color(data: &[u8], _zero_copy: Option<ZeroCopyBuf>) -> CoreOp {
+fn op_webview_set_color(
+    _interface: &mut dyn Interface,
+    data: &[u8],
+    _zero_copy: Option<ZeroCopyBuf>,
+) -> Op {
     unsafe {
         let mut response: WebViewResponse<WebViewSetColorResult> = WebViewResponse {
             err: None,
@@ -235,7 +249,11 @@ struct WebViewSetTitleParams {
 #[derive(Serialize)]
 struct WebViewSetTitleResult {}
 
-fn op_webview_set_title(data: &[u8], _zero_copy: Option<ZeroCopyBuf>) -> CoreOp {
+fn op_webview_set_title(
+    _interface: &mut dyn Interface,
+    data: &[u8],
+    _zero_copy: Option<ZeroCopyBuf>,
+) -> Op {
     unsafe {
         let mut response: WebViewResponse<WebViewSetTitleResult> = WebViewResponse {
             err: None,
@@ -272,7 +290,11 @@ struct WebViewSetFullscreenParams {
 #[derive(Serialize)]
 struct WebViewSetFullscreenResult {}
 
-fn op_webview_set_fullscreen(data: &[u8], _zero_copy: Option<ZeroCopyBuf>) -> CoreOp {
+fn op_webview_set_fullscreen(
+    _interface: &mut dyn Interface,
+    data: &[u8],
+    _zero_copy: Option<ZeroCopyBuf>,
+) -> Op {
     unsafe {
         let mut response: WebViewResponse<WebViewSetFullscreenResult> = WebViewResponse {
             err: None,
@@ -310,7 +332,11 @@ struct WebViewLoopResult {
     code: i32,
 }
 
-fn op_webview_loop(data: &[u8], _zero_copy: Option<ZeroCopyBuf>) -> CoreOp {
+fn op_webview_loop(
+    _interface: &mut dyn Interface,
+    data: &[u8],
+    _zero_copy: Option<ZeroCopyBuf>,
+) -> Op {
     unsafe {
         let mut response: WebViewResponse<WebViewLoopResult> = WebViewResponse {
             err: None,
@@ -345,7 +371,11 @@ struct WebViewRunParams {
 #[derive(Serialize)]
 struct WebViewRunResult {}
 
-fn op_webview_run(data: &[u8], _zero_copy: Option<ZeroCopyBuf>) -> CoreOp {
+fn op_webview_run(
+    _interface: &mut dyn Interface,
+    data: &[u8],
+    _zero_copy: Option<ZeroCopyBuf>,
+) -> Op {
     unsafe {
         let mut response: WebViewResponse<WebViewRunResult> = WebViewResponse {
             err: None,
@@ -375,7 +405,7 @@ fn op_webview_run(data: &[u8], _zero_copy: Option<ZeroCopyBuf>) -> CoreOp {
                 }
             });
 
-            Ok(serde_json::to_vec(&response).unwrap().into_boxed_slice())
+            serde_json::to_vec(&response).unwrap().into_boxed_slice()
         };
 
         Op::Async(fut.boxed())

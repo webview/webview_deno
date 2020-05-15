@@ -1,4 +1,2 @@
 target/
-bins/
 .deno_plugins/
-.vscode/

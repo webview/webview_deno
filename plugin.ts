@@ -1,54 +1,81 @@
-import { prepare } from "https://deno.land/x/plugin_prepare@v0.3.1/mod.ts";
+import { prepare,deferred } from "./deps.ts";
 
-const DEV = Deno.env("DEV");
+const DEV = Deno.env.get("DEV");
 const IS_DEV = DEV !== undefined;
-const MSHTML = Deno.env("MSHTML");
+const MSHTML = Deno.env.get("MSHTML");
 const IS_MSHTML = MSHTML !== undefined;
 const PLUGIN_PATH = IS_DEV
   ? DEV
-  : "https://github.com/eliassjogreen/deno_webview/releases/download/0.3.3";
+  : "https://github.com/eliassjogreen/deno_webview/releases/download/0.4.0";
 
-const plugin = await prepare({
-  name: "deno_webview",
-  checkCache: IS_DEV,
-  urls: {
-    mac: `${PLUGIN_PATH}/libdeno_webview.dylib`,
-    win: IS_MSHTML ? MSHTML : `${PLUGIN_PATH}/deno_webview.dll`,
-    linux: `${PLUGIN_PATH}/libdeno_webview.so`,
-  },
-});
+// @ts-ignore
+const core = Deno.core as {
+  ops: () => { [key: string]: number };
+  setAsyncHandler(rid: number, handler: (response: Uint8Array) => void): void;
+  dispatch(
+    rid: number,
+    msg: any,
+    buf?: ArrayBufferView,
+  ): Uint8Array | undefined;
+};
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
-function jsonOpSync<P extends Object, R extends WebViewResponse<any>>(
-  op: Deno.PluginOp,
-  params: P,
-): R {
-  let raw = op.dispatch(encoder.encode(JSON.stringify(params)));
-
-  if (!raw) {
-    throw `Plugin op ${op} returned null`;
-  }
-
-  return JSON.parse(decoder.decode(raw)) as R;
+function decode(data: Uint8Array): object {
+  const text = decoder.decode(data);
+  return JSON.parse(text);
 }
 
-async function jsonOpAsync<P extends Object, R extends WebViewResponse<any>>(
-  op: Deno.PluginOp,
-  params: P,
+function encode(data: object): Uint8Array {
+  const text = JSON.stringify(data);
+  return encoder.encode(text);
+}
+
+function getOpId(op: string): number {
+  const id = core.ops()[op];
+
+  if (!(id > 0)) {
+    throw `Bad op id for ${op}`;
+  }
+
+  return id;
+}
+
+function opSync<R extends WebViewResponse<any>>(op: string, data: object): R {
+  if (!pluginId) {
+    throw "The plugin must be initialized before use";
+  }
+
+  const opId = getOpId(op);
+  const response = core.dispatch(opId, encode(data))!;
+
+  return decode(response) as R;
+}
+
+async function opAsync<R extends WebViewResponse<any>>(
+  op: string,
+  data: object,
 ): Promise<R> {
-  return new Promise((resolve, reject) => {
-    op.setAsyncHandler((raw) => {
-      if (!raw) {
-        throw `Plugin op ${op} returned null`;
-      }
+  if (!pluginId) {
+    throw "The plugin must be initialized before use";
+  }
 
-      resolve(unwrapResponse(JSON.parse(decoder.decode(raw))));
-    });
+  const opId = getOpId(op);
+  const promise = deferred<R>();
 
-    op.dispatch(encoder.encode(JSON.stringify(params)));
-  });
+  core.setAsyncHandler(
+    opId,
+    (response) => promise.resolve(decode(response) as R),
+  );
+
+  const response = core.dispatch(opId, encode(data));
+
+  if (response != null || response != undefined) {
+    throw "Expected null response!";
+  }
+
+  return promise;
 }
 
 function unwrapResponse<T, R extends WebViewResponse<T>>(response: R): T {
@@ -61,6 +88,24 @@ function unwrapResponse<T, R extends WebViewResponse<T>>(response: R): T {
   }
 
   throw "Invalid response";
+}
+
+const pluginId = await prepare({
+  name: "deno_webview",
+  checkCache: IS_DEV,
+  printLog: IS_DEV,
+  urls: {
+    darwin: `${PLUGIN_PATH}/libdeno_webview.dylib`,
+    windows: IS_MSHTML ? MSHTML : `${PLUGIN_PATH}/deno_webview.dll`,
+    linux: `${PLUGIN_PATH}/libdeno_webview.so`,
+  },
+});
+
+/**
+ * Closes the plugin resource
+ */
+export function close(): void {
+  Deno.close(pluginId);
 }
 
 export interface WebViewResponse<T> {
@@ -135,43 +180,43 @@ export interface WebViewRunParams {
 export interface WebViewRunResult {}
 
 export function WebViewNew(params: WebViewNewParams): WebViewNewResult {
-  return unwrapResponse(jsonOpSync(plugin.ops.webview_new, params));
+  return unwrapResponse(opSync("webview_new", params));
 }
 
 export function WebViewExit(params: WebViewExitParams): WebViewExitResult {
-  return unwrapResponse(jsonOpSync(plugin.ops.webview_exit, params));
+  return unwrapResponse(opSync("webview_exit", params));
 }
 
 export function WebViewEval(params: WebViewEvalParams): WebViewEvalResult {
-  return unwrapResponse(jsonOpSync(plugin.ops.webview_eval, params));
+  return unwrapResponse(opSync("webview_eval", params));
 }
 
 export function WebViewSetColor(
   params: WebViewSetColorParams,
 ): WebViewSetColorResult {
-  return unwrapResponse(jsonOpSync(plugin.ops.webview_set_color, params));
+  return unwrapResponse(opSync("webview_set_color", params));
 }
 
 export function WebViewSetTitle(
   params: WebViewSetTitleParams,
 ): WebViewSetTitleResult {
-  return unwrapResponse(jsonOpSync(plugin.ops.webview_set_title, params));
+  return unwrapResponse(opSync("webview_set_title", params));
 }
 
 export function WebViewSetFullscreen(
   params: WebViewSetFullscreenParams,
 ): WebViewSetFullscreenResult {
   return unwrapResponse(
-    jsonOpSync(plugin.ops.webview_set_fullscreen, params),
+    opSync("webview_set_fullscreen", params),
   );
 }
 
 export function WebViewLoop(params: WebViewLoopParams): WebViewLoopResult {
-  return unwrapResponse(jsonOpSync(plugin.ops.webview_loop, params));
+  return unwrapResponse(opSync("webview_loop", params));
 }
 
-export function WebViewRun(params: WebViewRunParams): Promise<
+export async function WebViewRun(params: WebViewRunParams): Promise<
   WebViewRunResult
 > {
-  return jsonOpAsync(plugin.ops.webview_run, params);
+  return unwrapResponse(await opAsync("webview_run", params));
 }

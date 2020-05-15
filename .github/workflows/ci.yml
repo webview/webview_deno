@@ -22,7 +22,6 @@ jobs:
       GH_ACTIONS: true
       RUST_BACKTRACE: full
       DENO_BUILD_MODE: release
-      V8_BINARY: true
 
     steps:
       - name: Clone repository
@@ -31,7 +30,7 @@ jobs:
       - name: Install rust
         uses: hecrj/setup-rust-action@v1
         with:
-          rust-version: "1.42.0"
+          rust-version: "1.43.1"
 
       - name: Log versions
         run: |

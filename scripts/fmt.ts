@@ -11,7 +11,13 @@ export async function fmt(mshtml: boolean = Deno.args.includes("mshtml")) {
     cmd: ["deno", "fmt"],
   });
 
-  await Promise.all([clippy.status(), rustfmt.status(), denofmt.status()]);
+  const status = await Promise.all(
+    [clippy.status(), rustfmt.status(), denofmt.status()],
+  );
+
+  if (status.some((value) => !value.success)) {
+    Deno.exit(1);
+  }
 }
 
 if (import.meta.main) {

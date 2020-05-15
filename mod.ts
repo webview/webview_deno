@@ -1,6 +1,16 @@
-import * as Plugin from "./plugin.ts";
+import {
+  WebViewNew,
+  WebViewNewParams,
+  WebViewRun,
+  WebViewLoop,
+  WebViewExit,
+  WebViewEval,
+  WebViewSetColor,
+  WebViewSetTitle,
+  WebViewSetFullscreen
+} from "./plugin.ts";
 
-const DEFAULT_PARAMS: Plugin.WebViewNewParams = {
+const DEFAULT_PARAMS: WebViewNewParams = {
   title: "deno_webview",
   url: "about:blank",
   width: 800,
@@ -13,7 +23,7 @@ const DEFAULT_PARAMS: Plugin.WebViewNewParams = {
 /**
  * The constructor parameters
  */
-export type WebViewParams = Partial<Plugin.WebViewNewParams>;
+export type WebViewParams = Partial<WebViewNewParams>;
 
 /**
  * A rgb(a) color
@@ -34,35 +44,35 @@ export class WebView {
   constructor(params: WebViewParams) {
     params = Object.assign(DEFAULT_PARAMS, params);
 
-    this.id = Plugin.WebViewNew(params as Plugin.WebViewNewParams).id;
+    this.id = WebViewNew(params as WebViewNewParams).id;
   }
 
   /**
      * Runs the event loop to completion
      */
   public async run() {
-    await Plugin.WebViewRun({ id: this.id });
+    await WebViewRun({ id: this.id });
   }
 
   /**
      * Iterates the event loop and returns `false` if the the `WebView` has been closed
      */
   public step(): boolean {
-    return Plugin.WebViewLoop({ id: this.id, blocking: 1 }).code === 0;
+    return WebViewLoop({ id: this.id, blocking: 1 }).code === 0;
   }
 
   /**
      * Exits the `WebView`
      */
   public exit() {
-    Plugin.WebViewExit({ id: this.id });
+    WebViewExit({ id: this.id });
   }
 
   /**
      * Evaluates the provided js code in the `WebView`
      */
   public eval(js: string) {
-    Plugin.WebViewEval({
+    WebViewEval({
       id: this.id,
       js: js,
     });
@@ -72,7 +82,7 @@ export class WebView {
      * Sets the color of the title bar
      */
   public setColor(color: WebViewColor) {
-    Plugin.WebViewSetColor({
+    WebViewSetColor({
       id: this.id,
       r: color.r,
       g: color.g,
@@ -85,7 +95,7 @@ export class WebView {
      * Sets the window title
      */
   public setTitle(title: string) {
-    Plugin.WebViewSetTitle({
+    WebViewSetTitle({
       id: this.id,
       title: title,
     });
@@ -95,9 +105,11 @@ export class WebView {
      * Enables or disables fullscreen
      */
   public setFullscreen(fullscreen: boolean) {
-    Plugin.WebViewSetFullscreen({
+    WebViewSetFullscreen({
       id: this.id,
       fullscreen: fullscreen,
     });
   }
 }
+
+export { close } from "./plugin.ts";
