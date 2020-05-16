@@ -1,12 +1,10 @@
 import { prepare, deferred } from "./deps.ts";
 
-const DEV = Deno.env.get("DEV");
-const IS_DEV = DEV !== undefined;
-const MSHTML = Deno.env.get("MSHTML");
-const IS_MSHTML = MSHTML !== undefined;
-const PLUGIN_PATH = IS_DEV
-  ? DEV
-  : "https://github.com/eliassjogreen/deno_webview/releases/download/0.4.1";
+export const PLUGIN_URL_BASE = Deno.env.get("DENO_WEBVIEW_PLUGIN_BASE") || "https://github.com/eliassjogreen/deno_webview/releases/download/0.4.1"
+const PLUGIN_URL = Deno.env.get("DENO_WEBVIEW_PLUGIN");
+const DEBUG = Boolean(Deno.env.get("DENO_WEBVIEW_DEBUG"));
+
+let pluginId: number | null = null;
 
 // @ts-ignore
 const core = Deno.core as {
@@ -43,7 +41,7 @@ function getOpId(op: string): number {
 }
 
 function opSync<R extends WebViewResponse<any>>(op: string, data: object): R {
-  if (!pluginId) {
+  if (pluginId === null) {
     throw "The plugin must be initialized before use";
   }
 
@@ -57,7 +55,7 @@ async function opAsync<R extends WebViewResponse<any>>(
   op: string,
   data: object,
 ): Promise<R> {
-  if (!pluginId) {
+  if (pluginId === null) {
     throw "The plugin must be initialized before use";
   }
 
@@ -90,22 +88,29 @@ function unwrapResponse<T, R extends WebViewResponse<T>>(response: R): T {
   throw "Invalid response";
 }
 
-const pluginId = await prepare({
-  name: "deno_webview",
-  checkCache: !IS_DEV,
-  printLog: IS_DEV,
-  urls: {
-    darwin: `${PLUGIN_PATH}/libdeno_webview.dylib`,
-    windows: IS_MSHTML ? MSHTML : `${PLUGIN_PATH}/deno_webview.dll`,
-    linux: `${PLUGIN_PATH}/libdeno_webview.so`,
-  },
-});
+/**
+ * Load the plugin
+ */
+export async function load(cache = true, verbose = false) {
+  unload();
+  pluginId = await prepare({
+    name: "deno_webview",
+    checkCache: cache,
+    printLog: verbose,
+    urls: {
+      darwin: PLUGIN_URL || `${PLUGIN_URL_BASE}/libdeno_webview.dylib`,
+      windows: PLUGIN_URL || `${PLUGIN_URL_BASE}/deno_webview.dll`,
+      linux: PLUGIN_URL || `${PLUGIN_URL_BASE}/libdeno_webview.so`,
+    },
+  });
+}
 
 /**
- * Closes the plugin resource
+ * Free the plugin resource
  */
-export function close(): void {
-  Deno.close(pluginId);
+export function unload(): void {
+  if (pluginId !== null) Deno.close(pluginId);
+  pluginId = null;
 }
 
 export interface WebViewResponse<T> {
@@ -220,3 +225,6 @@ export async function WebViewRun(params: WebViewRunParams): Promise<
 > {
   return unwrapResponse(await opAsync("webview_run", params));
 }
+
+await load(!DEBUG, DEBUG)
+window.addEventListener("unload", unload)

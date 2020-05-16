@@ -5,11 +5,12 @@ export async function run(
   const env: {
     [key: string]: string;
   } = {
-    DEV: "file://./target/release",
+    DENO_WEBVIEW_PLUGIN_BASE: "file://./target/release",
+    DENO_WEBVIEW_DEBUG: "1",
   };
 
   if (mshtml) {
-    env["MSHTML"] = "file://./target/release/deno_webview.dll";
+    env["DENO_WEBVIEW_PLUGIN"] = "file://./target/release/deno_webview.dll";
   }
 
   const process = Deno.run({

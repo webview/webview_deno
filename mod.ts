@@ -111,5 +111,3 @@ export class WebView {
     });
   }
 }
-
-export { close } from "./plugin.ts";
