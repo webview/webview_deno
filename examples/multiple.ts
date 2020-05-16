@@ -9,8 +9,8 @@ const webview1 = new WebView({
     </body>
     </html>
     `,
-  width: 800,
-  height: 600,
+  width: 400,
+  height: 200,
   resizable: true,
   debug: true,
   frameless: false,
@@ -25,8 +25,8 @@ const webview2 = new WebView({
     </body>
     </html>
     `,
-  width: 800,
-  height: 600,
+  width: 400,
+  height: 200,
   resizable: true,
   debug: true,
   frameless: false,

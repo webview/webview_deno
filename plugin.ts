@@ -1,6 +1,6 @@
 import { prepare, deferred } from "./deps.ts";
 
-export const PLUGIN_URL_BASE = Deno.env.get("DENO_WEBVIEW_PLUGIN_BASE") || "https://github.com/eliassjogreen/deno_webview/releases/download/0.4.0"
+export const PLUGIN_URL_BASE = Deno.env.get("DENO_WEBVIEW_PLUGIN_BASE") || "https://github.com/eliassjogreen/deno_webview/releases/download/0.4.1"
 const PLUGIN_URL = Deno.env.get("DENO_WEBVIEW_PLUGIN");
 const DEBUG = Boolean(Deno.env.get("DENO_WEBVIEW_DEBUG"));
 

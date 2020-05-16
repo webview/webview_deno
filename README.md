@@ -24,7 +24,8 @@ applications using web technologies.
 
 ## Example
 
-Run the following with the `-A` and `--unstable` flags enabled to get the example shown above:
+Run the following code with the `-A` and `--unstable` (and `-r` if you have
+used this module before) flags enabled to get the example shown above:
 
 ```ts
 import { WebView } from "https://deno.land/x/webview/mod.ts";
@@ -38,8 +39,8 @@ const webview1 = new WebView({
     </body>
     </html>
     `,
-  width: 800,
-  height: 600,
+  width: 400,
+  height: 200,
   resizable: true,
   debug: true,
   frameless: false,
@@ -54,8 +55,8 @@ const webview2 = new WebView({
     </body>
     </html>
     `,
-  width: 800,
-  height: 600,
+  width: 400,
+  height: 200,
   resizable: true,
   debug: true,
   frameless: false,
@@ -67,7 +68,7 @@ await Promise.all([webview1.run(), webview2.run()]);
 or just run the following in the terminal:
 
 ```
-deno run -A --unstable https://deno.land/x/webview/examples/multiple.ts
+deno run -A -r --unstable https://deno.land/x/webview/examples/multiple.ts
 ```
 
 ## Docs
@@ -85,25 +86,21 @@ deno is required (mostly).
 
 #### Linux
 
--   [webkit2gtk](https://webkitgtk.org/) (to install using apt:
-    `sudo apt-get install libwebkit2gtk-4.0-dev`)
+- [webkit2gtk](https://webkitgtk.org/) (to install using apt:
+  `sudo apt-get install libwebkit2gtk-4.0-dev`)
 
 ### Cloning
 
 To clone the repo simply run the following:
 
 ```
-
 git clone https://github.com/eliassjogreen/deno_webview.git
-
 ```
 
 and then cd into the repo:
 
 ```
-
 cd deno_webview
-
 ```
 
 ### Building
@@ -113,33 +110,25 @@ minute) depending on your operating system. When building on Windows admin is
 required. Building is easiest done by running:
 
 ```
-
 deno -A scripts/build.ts
-
 ```
 
 or
 
 ```
-
 cargo build --release --locked
-
 ```
 
 optionally with mshtml
 
 ```
-
 deno -A scripts/build.ts mshtml
-
 ```
 
 or
 
 ```
-
 cargo build --release --locked --no-default-features
-
 ```
 
 ### Running
@@ -175,29 +164,11 @@ Just remember to format using `deno -A scripts/fmt.ts` (`deno fmt` and
 
 ### Deno
 
--   [plugin_prepare](https://deno.land/x/plugin_prepare)
+- [plugin_prepare](https://deno.land/x/plugin_prepare)
 
 ### Rust
 
--   [deno_core](https://crates.io/crates/deno_core)
--   [webview-sys](https://crates.io/crates/webview-sys)
--   [serde](https://crates.io/crates/serde)
--   [serde_json](https://crates.io/crates/serde_json)
-
-## Todo
-
--   [x] Implement ~~all~~ most webview
-        [instance methods](https://docs.rs/web-view/0.6.0/web_view/struct.WebView.html)
--   [x] Docs
--   [x] Multiple windows/instances? ~~(Help, need to create a static HashMap of
-        `*mut CWebView`)~~ Used solution found
-        [here](https://github.com/crabmusket/deno_sqlite_plugin/blob/2df9e495f34d246881de0b48c9c79cc9e271abeb/src/lib.rs#L18)
--   [x] Better errors and responses from rust land
--   [x] Update ci so building with Edge works
-        [#3](https://github.com/eliassjogreen/deno_webview/issues/3)
--   [ ] Two-way deno bindings (to call deno from javascript)
--   [ ] More examples
--   [ ] Tests (unsure of how though also [#4670](https://github.com/denoland/deno/issues/4670))
--   [ ] Wait for the [rust bindings](https://github.com/Boscop/web-view) to
-        update to the latest [webview](https://github.com/zserge/webview) api.
-    -   [ ] Polyfill for new API?
+- [deno_core](https://crates.io/crates/deno_core)
+- [webview-sys](https://crates.io/crates/webview-sys)
+- [serde](https://crates.io/crates/serde)
+- [serde_json](https://crates.io/crates/serde_json)
