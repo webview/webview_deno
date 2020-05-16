@@ -146,7 +146,7 @@ cargo build --release --locked --no-default-features
 
 To run deno_webview without automatically downloading the binaries from
 [releases](https://github.com/eliassjogreen/deno_webview/releases) you will need
-to use the enviornment variable `DEV` and set it to the path where the binaries
+to use the enviornment variable `DENO_WEBVIEW_PLUGIN` and set it to the path where the binaries
 are located. This is usually `file://./target/release`. The process of running a
 using local binaries can be easier to do using the
 [dev script](https://github.com/eliassjogreen/deno_webview/tree/master/scripts/dev.ts):
@@ -157,10 +157,10 @@ deno -A scripts/dev.ts example.ts
 
 ## Environment variables
 
--   `DEV` - When developing locally `DEV` should be set to the local release
+-   `DENO_WEBVIEW_PLUGIN` - When developing locally `DENO_WEBVIEW_PLUGIN` should be set to the local release
     path, usually `file://./target/release`
--   `MSHTML` - Due to MSHTML (ie) no longer being enabled by default the only
-    way to enable it is to set the `MSHTML` variable to the path of a binary
+-   `DENO_WEBVIEW_MSHTML` - Due to DENO_WEBVIEW_MSHTML (ie) no longer being enabled by default the only
+    way to enable it is to set the `DENO_WEBVIEW_MSHTML` variable to the path of a binary
     build built with the `--no-default-features` flag or using
     `deno -A scripts/build.ts mshtml`
 
