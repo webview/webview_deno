@@ -157,12 +157,13 @@ deno -A scripts/dev.ts example.ts
 
 ## Environment variables
 
--   `DENO_WEBVIEW_PLUGIN` - When developing locally `DENO_WEBVIEW_PLUGIN` should be set to the local release
-    path, usually `file://./target/release`
--   `DENO_WEBVIEW_MSHTML` - Due to DENO_WEBVIEW_MSHTML (ie) no longer being enabled by default the only
-    way to enable it is to set the `DENO_WEBVIEW_MSHTML` variable to the path of a binary
+-   `DENO_WEBVIEW_PLUGIN` - The URL of the plugin  
+    Due to MSHTML (ie) no longer being enabled by default, the only way to enable it is to set the `DENO_WEBVIEW_PLUGIN` variable to the path of a binary
     build built with the `--no-default-features` flag or using
     `deno -A scripts/build.ts mshtml`
+-   `DENO_WEBVIEW_PLUGIN_BASE` - The URL of the plugin except the last part. Ignored if `DENO_WEBVIEW_PLUGIN` is set.  
+    When developing locally `DENO_WEBVIEW_PLUGIN_BASE` should be set to the directory containing the plugin binary, usually `file://./target/release`. Otherwise, don't set this.
+-   `DENO_WEBVIEW_DEBUG` - Disable cache and enable logs for `deno-plugin-prepare`. Used for debugging.
 
 ## Contributing
 
