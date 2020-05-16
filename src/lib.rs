@@ -1,24 +1,19 @@
-extern crate deno_core;
-extern crate futures;
-extern crate serde;
-extern crate serde_json;
-extern crate webview_sys;
-
 use deno_core::plugin_api::Buf;
 use deno_core::plugin_api::Interface;
 use deno_core::plugin_api::Op;
 use deno_core::plugin_api::ZeroCopyBuf;
 
 use futures::future::FutureExt;
+use futures::future::poll_fn;
 
 use serde::Deserialize;
 use serde::Serialize;
 
 use std::cell::RefCell;
 use std::collections::HashMap;
-// use std::ffi::CStr;
+use std::ffi::CStr;
 use std::ffi::CString;
-// use std::os::raw::*;
+use std::os::raw::*;
 use std::ptr::null_mut;
 
 use webview_sys::*;
@@ -111,6 +106,8 @@ fn op_webview_new(
 // extern "C" fn ffi_invoke_handler(webview: *mut CWebView, arg: *const c_char) {
 //     unsafe {
 //         let arg = CStr::from_ptr(arg).to_string_lossy().to_string();
+// 
+//         println!("{}", arg);
 //     }
 // }
 

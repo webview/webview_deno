@@ -92,7 +92,7 @@ function unwrapResponse<T, R extends WebViewResponse<T>>(response: R): T {
 
 const pluginId = await prepare({
   name: "deno_webview",
-  checkCache: IS_DEV,
+  checkCache: !IS_DEV,
   printLog: IS_DEV,
   urls: {
     darwin: `${PLUGIN_PATH}/libdeno_webview.dylib`,

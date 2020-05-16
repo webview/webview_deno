@@ -9,9 +9,7 @@ await new WebView({
     <body>
       <h1>asdasdasd</h1>
       <script>
-        onload = () => {
-          external.invoke("hello from window");
-        }
+        external.invoke("hello from window");
       </script>
     </body>
     </html>
