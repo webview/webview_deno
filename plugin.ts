@@ -6,7 +6,7 @@ const MSHTML = Deno.env.get("MSHTML");
 const IS_MSHTML = MSHTML !== undefined;
 const PLUGIN_PATH = IS_DEV
   ? DEV
-  : "https://github.com/eliassjogreen/deno_webview/releases/download/0.4.0";
+  : "https://github.com/eliassjogreen/deno_webview/releases/download/0.4.1";
 
 // @ts-ignore
 const core = Deno.core as {
