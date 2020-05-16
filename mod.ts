@@ -42,9 +42,7 @@ export class WebView {
   private id: number = 0;
 
   constructor(params: WebViewParams) {
-    params = Object.assign(DEFAULT_PARAMS, params);
-
-    this.id = WebViewNew(params as WebViewNewParams).id;
+    this.id = WebViewNew({ ...DEFAULT_PARAMS, ...params }).id;
   }
 
   /**
