@@ -1,6 +1,7 @@
 import { prepare, deferred } from "./deps.ts";
 
-export const PLUGIN_URL_BASE = Deno.env.get("DENO_WEBVIEW_PLUGIN_BASE") || "https://github.com/eliassjogreen/deno_webview/releases/download/0.4.1"
+export const PLUGIN_URL_BASE = Deno.env.get("DENO_WEBVIEW_PLUGIN_BASE") ||
+  "https://github.com/eliassjogreen/deno_webview/releases/download/0.4.1";
 const PLUGIN_URL = Deno.env.get("DENO_WEBVIEW_PLUGIN");
 const DEBUG = Boolean(Deno.env.get("DENO_WEBVIEW_DEBUG"));
 
@@ -226,5 +227,5 @@ export async function WebViewRun(params: WebViewRunParams): Promise<
   return unwrapResponse(await opAsync("webview_run", params));
 }
 
-await load(!DEBUG, DEBUG)
-window.addEventListener("unload", unload)
+await load(!DEBUG, DEBUG);
+window.addEventListener("unload", unload);

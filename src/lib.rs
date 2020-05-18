@@ -4,16 +4,15 @@ use deno_core::plugin_api::Op;
 use deno_core::plugin_api::ZeroCopyBuf;
 
 use futures::future::FutureExt;
-use futures::future::poll_fn;
 
 use serde::Deserialize;
 use serde::Serialize;
 
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::ffi::CStr;
+// use std::ffi::CStr;
 use std::ffi::CString;
-use std::os::raw::*;
+// use std::os::raw::*;
 use std::ptr::null_mut;
 
 use webview_sys::*;
@@ -74,27 +73,24 @@ fn op_webview_new(
         instance_id = cell.replace_with(|&mut i| i + 1);
     });
 
-    unsafe {
-        INSTANCE_MAP.with(|cell| {
-            let title = CString::new(params.title).unwrap();
-            let url = CString::new(params.url).unwrap();
+    INSTANCE_MAP.with(|cell| {
+        let title = CString::new(params.title).unwrap();
+        let url = CString::new(params.url).unwrap();
 
-            cell.borrow_mut().insert(
-                instance_id,
-                webview_new(
-                    title.as_ptr(),
-                    url.as_ptr(),
-                    params.width,
-                    params.height,
-                    params.resizable as i32,
-                    params.debug as i32,
-                    params.frameless as i32,
-                    None, // Some(ffi_invoke_handler),
-                    null_mut(),
-                ),
-            );
+        cell.borrow_mut().insert(instance_id, unsafe {
+            webview_new(
+                title.as_ptr(),
+                url.as_ptr(),
+                params.width,
+                params.height,
+                params.resizable as i32,
+                params.debug as i32,
+                params.frameless as i32,
+                None, // Some(ffi_invoke_handler),
+                null_mut(),
+            )
         });
-    }
+    });
 
     response.ok = Some(WebViewNewResult { id: instance_id });
 
@@ -106,7 +102,7 @@ fn op_webview_new(
 // extern "C" fn ffi_invoke_handler(webview: *mut CWebView, arg: *const c_char) {
 //     unsafe {
 //         let arg = CStr::from_ptr(arg).to_string_lossy().to_string();
-// 
+//
 //         println!("{}", arg);
 //     }
 // }
@@ -124,30 +120,30 @@ fn op_webview_exit(
     data: &[u8],
     _zero_copy: Option<ZeroCopyBuf>,
 ) -> Op {
-    unsafe {
-        let mut response: WebViewResponse<WebViewExitResult> = WebViewResponse {
-            err: None,
-            ok: None,
-        };
+    let mut response: WebViewResponse<WebViewExitResult> = WebViewResponse {
+        err: None,
+        ok: None,
+    };
 
-        let params: WebViewExitParams = serde_json::from_slice(data).unwrap();
+    let params: WebViewExitParams = serde_json::from_slice(data).unwrap();
 
-        INSTANCE_MAP.with(|cell| {
-            let instance_map = cell.borrow_mut();
+    INSTANCE_MAP.with(|cell| {
+        let instance_map = cell.borrow_mut();
 
-            if !instance_map.contains_key(&params.id) {
-                response.err = Some(format!("Could not find instance of id {}", &params.id))
-            } else {
-                let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
+        if !instance_map.contains_key(&params.id) {
+            response.err = Some(format!("Could not find instance of id {}", &params.id))
+        } else {
+            let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
 
+            unsafe {
                 webview_exit(instance);
-
-                response.ok = Some(WebViewExitResult {});
             }
-        });
 
-        Op::Sync(serde_json::to_vec(&response).unwrap().into_boxed_slice())
-    }
+            response.ok = Some(WebViewExitResult {});
+        }
+    });
+
+    Op::Sync(serde_json::to_vec(&response).unwrap().into_boxed_slice())
 }
 
 #[derive(Deserialize)]
@@ -164,34 +160,34 @@ fn op_webview_eval(
     data: &[u8],
     _zero_copy: Option<ZeroCopyBuf>,
 ) -> Op {
-    unsafe {
-        let mut response: WebViewResponse<WebViewEvalResult> = WebViewResponse {
-            err: None,
-            ok: None,
-        };
+    let mut response: WebViewResponse<WebViewEvalResult> = WebViewResponse {
+        err: None,
+        ok: None,
+    };
 
-        let params: WebViewEvalParams = serde_json::from_slice(data).unwrap();
+    let params: WebViewEvalParams = serde_json::from_slice(data).unwrap();
 
-        INSTANCE_MAP.with(|cell| {
-            let instance_map = cell.borrow_mut();
+    INSTANCE_MAP.with(|cell| {
+        let instance_map = cell.borrow_mut();
 
-            if !instance_map.contains_key(&params.id) {
-                response.err = Some(format!("Could not find instance of id {}", &params.id))
-            } else {
-                let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
-                let js = CString::new(params.js).unwrap();
+        if !instance_map.contains_key(&params.id) {
+            response.err = Some(format!("Could not find instance of id {}", &params.id))
+        } else {
+            let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
+            let js = CString::new(params.js).unwrap();
 
-                match webview_eval(instance, js.as_ptr()) {
-                    0 => {
-                        response.ok = Some(WebViewEvalResult {});
-                    }
-                    _ => response.err = Some("Could not evaluate javascript".to_string()),
+            let result = unsafe { webview_eval(instance, js.as_ptr()) };
+
+            match result {
+                0 => {
+                    response.ok = Some(WebViewEvalResult {});
                 }
+                _ => response.err = Some("Could not evaluate javascript".to_string()),
             }
-        });
+        }
+    });
 
-        Op::Sync(serde_json::to_vec(&response).unwrap().into_boxed_slice())
-    }
+    Op::Sync(serde_json::to_vec(&response).unwrap().into_boxed_slice())
 }
 
 #[derive(Deserialize)]
@@ -211,30 +207,30 @@ fn op_webview_set_color(
     data: &[u8],
     _zero_copy: Option<ZeroCopyBuf>,
 ) -> Op {
-    unsafe {
-        let mut response: WebViewResponse<WebViewSetColorResult> = WebViewResponse {
-            err: None,
-            ok: None,
-        };
+    let mut response: WebViewResponse<WebViewSetColorResult> = WebViewResponse {
+        err: None,
+        ok: None,
+    };
 
-        let params: WebViewSetColorParams = serde_json::from_slice(data).unwrap();
+    let params: WebViewSetColorParams = serde_json::from_slice(data).unwrap();
 
-        INSTANCE_MAP.with(|cell| {
-            let instance_map = cell.borrow_mut();
+    INSTANCE_MAP.with(|cell| {
+        let instance_map = cell.borrow_mut();
 
-            if !instance_map.contains_key(&params.id) {
-                response.err = Some(format!("Could not find instance of id {}", &params.id))
-            } else {
-                let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
+        if !instance_map.contains_key(&params.id) {
+            response.err = Some(format!("Could not find instance of id {}", &params.id))
+        } else {
+            let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
 
+            unsafe {
                 webview_set_color(instance, params.r, params.g, params.b, params.a);
-
-                response.ok = Some(WebViewSetColorResult {});
             }
-        });
 
-        Op::Sync(serde_json::to_vec(&response).unwrap().into_boxed_slice())
-    }
+            response.ok = Some(WebViewSetColorResult {});
+        }
+    });
+
+    Op::Sync(serde_json::to_vec(&response).unwrap().into_boxed_slice())
 }
 
 #[derive(Deserialize)]
@@ -251,31 +247,31 @@ fn op_webview_set_title(
     data: &[u8],
     _zero_copy: Option<ZeroCopyBuf>,
 ) -> Op {
-    unsafe {
-        let mut response: WebViewResponse<WebViewSetTitleResult> = WebViewResponse {
-            err: None,
-            ok: None,
-        };
+    let mut response: WebViewResponse<WebViewSetTitleResult> = WebViewResponse {
+        err: None,
+        ok: None,
+    };
 
-        let params: WebViewSetTitleParams = serde_json::from_slice(data).unwrap();
+    let params: WebViewSetTitleParams = serde_json::from_slice(data).unwrap();
 
-        INSTANCE_MAP.with(|cell| {
-            let instance_map = cell.borrow_mut();
+    INSTANCE_MAP.with(|cell| {
+        let instance_map = cell.borrow_mut();
 
-            if !instance_map.contains_key(&params.id) {
-                response.err = Some(format!("Could not find instance of id {}", &params.id))
-            } else {
-                let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
-                let title = CString::new(params.title).unwrap();
+        if !instance_map.contains_key(&params.id) {
+            response.err = Some(format!("Could not find instance of id {}", &params.id))
+        } else {
+            let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
+            let title = CString::new(params.title).unwrap();
 
+            unsafe {
                 webview_set_title(instance, title.as_ptr());
-
-                response.ok = Some(WebViewSetTitleResult {});
             }
-        });
 
-        Op::Sync(serde_json::to_vec(&response).unwrap().into_boxed_slice())
-    }
+            response.ok = Some(WebViewSetTitleResult {});
+        }
+    });
+
+    Op::Sync(serde_json::to_vec(&response).unwrap().into_boxed_slice())
 }
 
 #[derive(Deserialize)]
@@ -292,30 +288,30 @@ fn op_webview_set_fullscreen(
     data: &[u8],
     _zero_copy: Option<ZeroCopyBuf>,
 ) -> Op {
-    unsafe {
-        let mut response: WebViewResponse<WebViewSetFullscreenResult> = WebViewResponse {
-            err: None,
-            ok: None,
-        };
+    let mut response: WebViewResponse<WebViewSetFullscreenResult> = WebViewResponse {
+        err: None,
+        ok: None,
+    };
 
-        let params: WebViewSetFullscreenParams = serde_json::from_slice(data).unwrap();
+    let params: WebViewSetFullscreenParams = serde_json::from_slice(data).unwrap();
 
-        INSTANCE_MAP.with(|cell| {
-            let instance_map = cell.borrow_mut();
+    INSTANCE_MAP.with(|cell| {
+        let instance_map = cell.borrow_mut();
 
-            if !instance_map.contains_key(&params.id) {
-                response.err = Some(format!("Could not find instance of id {}", &params.id))
-            } else {
-                let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
+        if !instance_map.contains_key(&params.id) {
+            response.err = Some(format!("Could not find instance of id {}", &params.id))
+        } else {
+            let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
 
+            unsafe {
                 webview_set_fullscreen(instance, params.fullscreen as i32);
-
-                response.ok = Some(WebViewSetFullscreenResult {});
             }
-        });
 
-        Op::Sync(serde_json::to_vec(&response).unwrap().into_boxed_slice())
-    }
+            response.ok = Some(WebViewSetFullscreenResult {});
+        }
+    });
+
+    Op::Sync(serde_json::to_vec(&response).unwrap().into_boxed_slice())
 }
 
 #[derive(Deserialize)]
@@ -334,30 +330,28 @@ fn op_webview_loop(
     data: &[u8],
     _zero_copy: Option<ZeroCopyBuf>,
 ) -> Op {
-    unsafe {
-        let mut response: WebViewResponse<WebViewLoopResult> = WebViewResponse {
-            err: None,
-            ok: None,
-        };
+    let mut response: WebViewResponse<WebViewLoopResult> = WebViewResponse {
+        err: None,
+        ok: None,
+    };
 
-        let params: WebViewLoopParams = serde_json::from_slice(data).unwrap();
+    let params: WebViewLoopParams = serde_json::from_slice(data).unwrap();
 
-        INSTANCE_MAP.with(|cell| {
-            let instance_map = cell.borrow_mut();
+    INSTANCE_MAP.with(|cell| {
+        let instance_map = cell.borrow_mut();
 
-            if !instance_map.contains_key(&params.id) {
-                response.err = Some(format!("Could not find instance of id {}", &params.id))
-            } else {
-                let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
+        if !instance_map.contains_key(&params.id) {
+            response.err = Some(format!("Could not find instance of id {}", &params.id))
+        } else {
+            let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
 
-                response.ok = Some(WebViewLoopResult {
-                    code: webview_loop(instance, params.blocking),
-                });
-            }
-        });
+            let code = unsafe { webview_loop(instance, params.blocking) };
 
-        Op::Sync(serde_json::to_vec(&response).unwrap().into_boxed_slice())
-    }
+            response.ok = Some(WebViewLoopResult { code });
+        }
+    });
+
+    Op::Sync(serde_json::to_vec(&response).unwrap().into_boxed_slice())
 }
 
 #[derive(Deserialize)]
@@ -373,38 +367,37 @@ fn op_webview_run(
     data: &[u8],
     _zero_copy: Option<ZeroCopyBuf>,
 ) -> Op {
-    unsafe {
-        let mut response: WebViewResponse<WebViewRunResult> = WebViewResponse {
-            err: None,
-            ok: None,
-        };
+    let mut response: WebViewResponse<WebViewRunResult> = WebViewResponse {
+        err: None,
+        ok: None,
+    };
 
-        let params: WebViewRunParams = serde_json::from_slice(data).unwrap();
+    let params: WebViewRunParams = serde_json::from_slice(data).unwrap();
 
-        let fut = async move {
-            INSTANCE_MAP.with(|cell| {
-                let instance_map = cell.borrow_mut();
+    let fut = async move {
+        INSTANCE_MAP.with(|cell| {
+            let instance_map = cell.borrow_mut();
 
-                if !instance_map.contains_key(&params.id) {
-                    response.err = Some(format!("Could not find instance of id {}", &params.id))
-                } else {
-                    let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
+            if !instance_map.contains_key(&params.id) {
+                response.err = Some(format!("Could not find instance of id {}", &params.id))
+            } else {
+                let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
 
-                    loop {
-                        match webview_loop(instance, 1) {
-                            0 => (),
-                            _ => {
-                                response.ok = Some(WebViewRunResult {});
-                                break;
-                            }
+                loop {
+                    let code = unsafe { webview_loop(instance, 1) };
+                    match code {
+                        0 => (),
+                        _ => {
+                            response.ok = Some(WebViewRunResult {});
+                            break;
                         }
                     }
                 }
-            });
+            }
+        });
 
-            serde_json::to_vec(&response).unwrap().into_boxed_slice()
-        };
+        serde_json::to_vec(&response).unwrap().into_boxed_slice()
+    };
 
-        Op::Async(fut.boxed())
-    }
+    Op::Async(fut.boxed())
 }

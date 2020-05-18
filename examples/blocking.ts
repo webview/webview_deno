@@ -1,6 +1,6 @@
 import { WebView } from "../mod.ts";
 
-const html = `data:text/html,
+const html = `
   <html>
   <body>
     <h1>Hello from deno</h1>
@@ -8,11 +8,20 @@ const html = `data:text/html,
   </html>
 `;
 
-await new WebView({
+const webview = new WebView({
   title: "Local deno_webview example",
   url: `data:text/html,${encodeURIComponent(html)}`,
+  width: 800,
   height: 600,
   resizable: true,
   debug: true,
   frameless: false,
-}).run();
+});
+
+setTimeout(() => {
+  console.log("Print from timeout after running");
+}, 1000);
+
+webview.run();
+
+console.log("Print from top level after running");

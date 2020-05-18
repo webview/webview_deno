@@ -1,14 +1,17 @@
 import { WebView } from "../mod.ts";
 
+const html = (n: number) =>
+  `
+  <html>
+  <body>
+    <h1>${n}</h1>
+  </body>
+  </html>
+`;
+
 const webview1 = new WebView({
   title: "Multiple deno_webview example",
-  url: `data:text/html,
-    <html>
-    <body>
-      <h1>1</h1>
-    </body>
-    </html>
-    `,
+  url: `data:text/html,${encodeURIComponent(html(1))}`,
   width: 400,
   height: 200,
   resizable: true,
@@ -18,13 +21,7 @@ const webview1 = new WebView({
 
 const webview2 = new WebView({
   title: "Multiple deno_webview example",
-  url: `data:text/html,
-    <html>
-    <body>
-      <h1>2</h1>
-    </body>
-    </html>
-    `,
+  url: `data:text/html,${encodeURIComponent(html(2))}`,
   width: 400,
   height: 200,
   resizable: true,

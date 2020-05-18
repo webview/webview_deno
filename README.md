@@ -28,17 +28,20 @@ Run the following code with the `-A` and `--unstable` (and `-r` if you have
 used this module before) flags enabled to get the example shown above:
 
 ```ts
-import { WebView } from "https://deno.land/x/webview/mod.ts";
+import { WebView } from "../mod.ts";
+
+const html = (n: number) =>
+  `
+  <html>
+  <body>
+    <h1>${n}</h1>
+  </body>
+  </html>
+`;
 
 const webview1 = new WebView({
   title: "Multiple deno_webview example",
-  url: `data:text/html,
-    <html>
-    <body>
-      <h1>1</h1>
-    </body>
-    </html>
-    `,
+  url: `data:text/html,${encodeURIComponent(html(1))}`,
   width: 400,
   height: 200,
   resizable: true,
@@ -48,13 +51,7 @@ const webview1 = new WebView({
 
 const webview2 = new WebView({
   title: "Multiple deno_webview example",
-  url: `data:text/html,
-    <html>
-    <body>
-      <h1>2</h1>
-    </body>
-    </html>
-    `,
+  url: `data:text/html,${encodeURIComponent(html(2))}`,
   width: 400,
   height: 200,
   resizable: true,
@@ -75,6 +72,8 @@ deno run -A -r --unstable https://deno.land/x/webview/examples/multiple.ts
 
 Docs can be found
 [here](https://doc.deno.land/https/deno.land/x/webview/mod.ts).
+
+Mac specific: To use inline html you must first `encodeURIComponent` (#15).
 
 ## Development
 
