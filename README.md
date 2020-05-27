@@ -109,7 +109,7 @@ minute) depending on your operating system. When building on Windows admin is
 required. Building is easiest done by running:
 
 ```
-deno -A scripts/build.ts
+deno run -A scripts/build.ts
 ```
 
 or
@@ -121,7 +121,7 @@ cargo build --release --locked
 optionally with mshtml
 
 ```
-deno -A scripts/build.ts mshtml
+deno run -A scripts/build.ts mshtml
 ```
 
 or
