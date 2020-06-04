@@ -59,7 +59,7 @@ struct WebViewNewResult {
 fn op_webview_new(
     _interface: &mut dyn Interface,
     data: &[u8],
-    _zero_copy: Option<ZeroCopyBuf>,
+    _zero_copy: &mut [ZeroCopyBuf],
 ) -> Op {
     let mut response: WebViewResponse<WebViewNewResult> = WebViewResponse {
         err: None,
@@ -118,7 +118,7 @@ struct WebViewExitResult {}
 fn op_webview_exit(
     _interface: &mut dyn Interface,
     data: &[u8],
-    _zero_copy: Option<ZeroCopyBuf>,
+    _zero_copy: &mut [ZeroCopyBuf],
 ) -> Op {
     let mut response: WebViewResponse<WebViewExitResult> = WebViewResponse {
         err: None,
@@ -158,7 +158,7 @@ struct WebViewEvalResult {}
 fn op_webview_eval(
     _interface: &mut dyn Interface,
     data: &[u8],
-    _zero_copy: Option<ZeroCopyBuf>,
+    _zero_copy: &mut [ZeroCopyBuf],
 ) -> Op {
     let mut response: WebViewResponse<WebViewEvalResult> = WebViewResponse {
         err: None,
@@ -205,7 +205,7 @@ struct WebViewSetColorResult {}
 fn op_webview_set_color(
     _interface: &mut dyn Interface,
     data: &[u8],
-    _zero_copy: Option<ZeroCopyBuf>,
+    _zero_copy: &mut [ZeroCopyBuf],
 ) -> Op {
     let mut response: WebViewResponse<WebViewSetColorResult> = WebViewResponse {
         err: None,
@@ -245,7 +245,7 @@ struct WebViewSetTitleResult {}
 fn op_webview_set_title(
     _interface: &mut dyn Interface,
     data: &[u8],
-    _zero_copy: Option<ZeroCopyBuf>,
+    _zero_copy: &mut [ZeroCopyBuf],
 ) -> Op {
     let mut response: WebViewResponse<WebViewSetTitleResult> = WebViewResponse {
         err: None,
@@ -286,7 +286,7 @@ struct WebViewSetFullscreenResult {}
 fn op_webview_set_fullscreen(
     _interface: &mut dyn Interface,
     data: &[u8],
-    _zero_copy: Option<ZeroCopyBuf>,
+    _zero_copy: &mut [ZeroCopyBuf],
 ) -> Op {
     let mut response: WebViewResponse<WebViewSetFullscreenResult> = WebViewResponse {
         err: None,
@@ -328,7 +328,7 @@ struct WebViewLoopResult {
 fn op_webview_loop(
     _interface: &mut dyn Interface,
     data: &[u8],
-    _zero_copy: Option<ZeroCopyBuf>,
+    _zero_copy: &mut [ZeroCopyBuf],
 ) -> Op {
     let mut response: WebViewResponse<WebViewLoopResult> = WebViewResponse {
         err: None,
@@ -365,7 +365,7 @@ struct WebViewRunResult {}
 fn op_webview_run(
     _interface: &mut dyn Interface,
     data: &[u8],
-    _zero_copy: Option<ZeroCopyBuf>,
+    _zero_copy: &mut [ZeroCopyBuf],
 ) -> Op {
     let mut response: WebViewResponse<WebViewRunResult> = WebViewResponse {
         err: None,
