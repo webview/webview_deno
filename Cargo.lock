@@ -592,9 +592,9 @@ dependencies = [
 
 [[package]]
 name = "webview-sys"
-version = "0.5.0"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ebd4dcacd0996a4ba60f7d661408172f9ba2e0176b0841876993df368bfa97cb"
+checksum = "d42a307d2fbc6a13aab6d8ece1356c1b7b736b4877e54bed49beec92ab457803"
 dependencies = [
  "cc",
  "gdk-sys",

@@ -1,6 +1,6 @@
 import { WebView } from "../mod.ts";
 
-const html = `data:text/html,
+const html = `
   <html>
   <body>
     <h1>Hello from deno</h1>

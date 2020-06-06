@@ -228,4 +228,6 @@ export async function WebViewRun(params: WebViewRunParams): Promise<
 }
 
 await load(!DEBUG, DEBUG);
-window.addEventListener("unload", unload);
+
+//@ts-ignore
+if (typeof window !== "undefined") window.addEventListener("unload", unload);
