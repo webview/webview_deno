@@ -1,17 +1,15 @@
+import { requires, run } from "./util.ts";
+
 export async function build(mshtml: boolean = Deno.args.includes("mshtml")) {
+  await requires("cargo");
+
   const command = ["cargo", "build", "--release", "--locked"];
 
   if (mshtml) {
     command.push("--no-default-features");
   }
 
-  const cargo = Deno.run({
-    cmd: command,
-  });
-
-  if (!(await cargo.status()).success) {
-    Deno.exit(1);
-  }
+  await run("Building...", command);
 }
 
 if (import.meta.main) {

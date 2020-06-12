@@ -5,8 +5,8 @@ export async function dev(
   file: string = Deno.args[0],
   mshtml: boolean = Deno.args.includes("mshtml"),
 ) {
-  await build();
-  await run();
+  await build(mshtml);
+  await run(file, mshtml);
 }
 
 if (import.meta.main) {

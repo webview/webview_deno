@@ -1,7 +1,11 @@
+import * as util from "./util.ts";
+
 export async function run(
   file: string = Deno.args[0],
   mshtml: boolean = Deno.args.includes("mshtml"),
 ) {
+  await util.requires("deno");
+
   const env: {
     [key: string]: string;
   } = {
@@ -13,14 +17,11 @@ export async function run(
     env["DENO_WEBVIEW_PLUGIN"] = "file://./target/release/deno_webview.dll";
   }
 
-  const process = Deno.run({
-    cmd: ["deno", "run", "-A", "-r", "--unstable", file],
+  await util.run(
+    `Running deno run -A -r --unstable ${file}`,
+    ["deno", "run", "-A", "-r", "--unstable", file],
     env,
-  });
-
-  if (!(await process.status()).success) {
-    Deno.exit(1);
-  }
+  );
 }
 
 if (import.meta.main) {
