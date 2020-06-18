@@ -10,7 +10,7 @@ const html = `
 `;
 
 const webview = new WebView({
-  title: "Worker deno_webview example",
+  title: "Worker webview_deno example",
   url: `data:text/html,${encodeURIComponent(html)}`,
   width: 800,
   height: 600,

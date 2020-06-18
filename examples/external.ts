@@ -14,7 +14,7 @@ const html = `
 `;
 
 await new WebView({
-  title: "External deno_webview example",
+  title: "External webview_deno example",
   url: `data:text/html,${encodeURIComponent(html)}`,
   width: 800,
   height: 600,

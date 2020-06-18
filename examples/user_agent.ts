@@ -9,7 +9,7 @@ const html = `
 `;
 
 await new WebView({
-  title: "User agent deno_webview example",
+  title: "User agent webview_deno example",
   url: `data:text/html,${encodeURIComponent(html)}`,
   width: 800,
   height: 600,

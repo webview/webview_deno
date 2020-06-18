@@ -9,12 +9,12 @@ export async function run(
   const env: {
     [key: string]: string;
   } = {
-    DENO_WEBVIEW_PLUGIN_BASE: "file://./target/release",
-    DENO_WEBVIEW_DEBUG: "1",
+    WEBVIEW_DENO_PLUGIN_BASE: "file://./target/release",
+    WEBVIEW_DENO_DEBUG: "1",
   };
 
   if (mshtml) {
-    env["DENO_WEBVIEW_PLUGIN"] = "file://./target/release/deno_webview.dll";
+    env["WEBVIEW_DENO_PLUGIN"] = "file://./target/release/webview_deno.dll";
   }
 
   await util.run(
