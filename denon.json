@@ -1,0 +1,41 @@
+{
+  "$schema": "https://deno.land/x/denon/schema.json",
+  "scripts": {
+    "dev:blocking": {
+      "cmd": "deno run -A --unstable scripts/dev.ts examples/blocking.ts",
+      "desc": "run `blocking` example",
+      "watch": false
+    },
+    "dev:external": {
+      "cmd": "deno run -A --unstable scripts/dev.ts examples/external.ts",
+      "desc": "run `external` example",
+      "watch": false
+    },
+    "dev:local": {
+      "cmd": "deno run -A --unstable scripts/dev.ts examples/local.ts",
+      "desc": "run `local` example",
+      "watch": false
+    },
+    "dev:multiple": {
+      "cmd": "deno run -A --unstable scripts/dev.ts examples/multiple.ts",
+      "desc": "run `multiple` example",
+      "watch": false
+    },
+    "dev:remote": {
+      "cmd": "deno run -A --unstable scripts/dev.ts examples/remote.ts",
+      "desc": "run `remote` example",
+      "watch": false
+    },
+    "dev:user_agent": {
+      "cmd": "deno run -A --unstable scripts/dev.ts examples/user_agent.ts",
+      "desc": "run `user_agent` example",
+      "watch": false
+    },
+    "fmt": {
+      "cmd": "deno run -A --unstable scripts/fmt.ts",
+      "desc": "prettify project",
+      "watch": false
+    }
+  }
+}
+

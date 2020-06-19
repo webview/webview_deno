@@ -10,7 +10,7 @@ const html = (n: number) =>
 `;
 
 const webview1 = new WebView({
-  title: "Multiple deno_webview example",
+  title: "Multiple webview_deno example",
   url: `data:text/html,${encodeURIComponent(html(1))}`,
   width: 400,
   height: 200,
@@ -20,7 +20,7 @@ const webview1 = new WebView({
 });
 
 const webview2 = new WebView({
-  title: "Multiple deno_webview example",
+  title: "Multiple webview_deno example",
   url: `data:text/html,${encodeURIComponent(html(2))}`,
   width: 400,
   height: 200,

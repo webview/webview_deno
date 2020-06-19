@@ -63,17 +63,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "deno_webview"
-version = "0.4.2"
-dependencies = [
- "deno_core",
- "futures 0.3.5",
- "serde",
- "serde_json",
- "webview-sys",
-]
-
-[[package]]
 name = "downcast-rs"
 version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -605,6 +594,17 @@ dependencies = [
  "libc",
  "pkg-config",
  "webkit2gtk-sys",
+]
+
+[[package]]
+name = "webview_deno"
+version = "0.4.2"
+dependencies = [
+ "deno_core",
+ "futures 0.3.5",
+ "serde",
+ "serde_json",
+ "webview-sys",
 ]
 
 [[package]]

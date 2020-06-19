@@ -1,2 +1,8 @@
+# ide
+.idea
+
+# rust build
 target/
+
+# plugin cache
 .deno_plugins/

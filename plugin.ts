@@ -1,9 +1,11 @@
 import { prepare, deferred } from "./deps.ts";
 
-export const PLUGIN_URL_BASE = Deno.env.get("DENO_WEBVIEW_PLUGIN_BASE") ||
-  "https://github.com/eliassjogreen/deno_webview/releases/download/0.4.2";
-const PLUGIN_URL = Deno.env.get("DENO_WEBVIEW_PLUGIN");
-const DEBUG = Boolean(Deno.env.get("DENO_WEBVIEW_DEBUG"));
+const VERSION = "0.4.2";
+
+export const PLUGIN_URL_BASE = Deno.env.get("WEBVIEW_DENO_PLUGIN_BASE") ||
+  `https://github.com/webview/webview_deno/releases/download/${VERSION}`;
+const PLUGIN_URL = Deno.env.get("WEBVIEW_DENO_PLUGIN");
+const DEBUG = Boolean(Deno.env.get("WEBVIEW_DENO_DEBUG"));
 
 let pluginId: number | null = null;
 
@@ -95,13 +97,13 @@ function unwrapResponse<T, R extends WebViewResponse<T>>(response: R): T {
 export async function load(cache = true, verbose = false) {
   unload();
   pluginId = await prepare({
-    name: "deno_webview",
+    name: "webview_deno",
     checkCache: cache,
     printLog: verbose,
     urls: {
-      darwin: PLUGIN_URL || `${PLUGIN_URL_BASE}/libdeno_webview.dylib`,
-      windows: PLUGIN_URL || `${PLUGIN_URL_BASE}/deno_webview.dll`,
-      linux: PLUGIN_URL || `${PLUGIN_URL_BASE}/libdeno_webview.so`,
+      darwin: PLUGIN_URL || `${PLUGIN_URL_BASE}/libwebview_deno.dylib`,
+      windows: PLUGIN_URL || `${PLUGIN_URL_BASE}/webview_deno.dll`,
+      linux: PLUGIN_URL || `${PLUGIN_URL_BASE}/libwebview_deno.so`,
     },
   });
 }

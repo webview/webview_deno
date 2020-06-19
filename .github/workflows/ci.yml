@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         os: [macOS-latest, windows-latest, ubuntu-latest]
-    
+
     env:
       GH_ACTIONS: true
       RUST_BACKTRACE: full
@@ -82,10 +82,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: "deno_webview release"
+          tag_name: "webview_deno release"
           draft: true
           files: |
-            target/release/libdeno_webview.dylib
-            target/release/libdeno_webview.so
-            target/release/deno_webview.dll
- 
+            target/release/libwebview_deno.dylib
+            target/release/libwebview_deno.so
+            target/release/webview_deno.dll

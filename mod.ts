@@ -11,7 +11,7 @@ import {
 } from "./plugin.ts";
 
 const DEFAULT_PARAMS: WebViewNewParams = {
-  title: "deno_webview",
+  title: "webview_deno",
   url: "about:blank",
   width: 800,
   height: 600,
@@ -39,49 +39,49 @@ export interface WebViewColor {
  * A WebView instance
  */
 export class WebView {
-  private id: number = 0;
+  readonly #id: number = 0;
 
   constructor(params: WebViewParams) {
-    this.id = WebViewNew({ ...DEFAULT_PARAMS, ...params }).id;
+    this.#id = WebViewNew({ ...DEFAULT_PARAMS, ...params }).id;
   }
 
   /**
-     * Runs the event loop to completion
-     */
+   * Runs the event loop to completion
+   */
   public async run() {
-    await WebViewRun({ id: this.id });
+    await WebViewRun({ id: this.#id });
   }
 
   /**
-     * Iterates the event loop and returns `false` if the the `WebView` has been closed
-     */
+   * Iterates the event loop and returns `false` if the the `WebView` has been closed
+   */
   public step(): boolean {
-    return WebViewLoop({ id: this.id, blocking: 1 }).code === 0;
+    return WebViewLoop({ id: this.#id, blocking: 1 }).code === 0;
   }
 
   /**
-     * Exits the `WebView`
-     */
+   * Exits the `WebView`
+   */
   public exit() {
-    WebViewExit({ id: this.id });
+    WebViewExit({ id: this.#id });
   }
 
   /**
-     * Evaluates the provided js code in the `WebView`
-     */
+   * Evaluates the provided js code in the `WebView`
+   */
   public eval(js: string) {
     WebViewEval({
-      id: this.id,
+      id: this.#id,
       js: js,
     });
   }
 
   /**
-     * Sets the color of the title bar
-     */
+   * Sets the color of the title bar
+   */
   public setColor(color: WebViewColor) {
     WebViewSetColor({
-      id: this.id,
+      id: this.#id,
       r: color.r,
       g: color.g,
       b: color.b,
@@ -90,21 +90,21 @@ export class WebView {
   }
 
   /**
-     * Sets the window title
-     */
+   * Sets the window title
+   */
   public setTitle(title: string) {
     WebViewSetTitle({
-      id: this.id,
+      id: this.#id,
       title: title,
     });
   }
 
   /**
-     * Enables or disables fullscreen
-     */
+   * Enables or disables fullscreen
+   */
   public setFullscreen(fullscreen: boolean) {
     WebViewSetFullscreen({
-      id: this.id,
+      id: this.#id,
       fullscreen: fullscreen,
     });
   }

@@ -9,7 +9,7 @@ const html = `
 `;
 
 const webview = new WebView({
-  title: "Local deno_webview example",
+  title: "Local webview_deno example",
   url: `data:text/html,${encodeURIComponent(html)}`,
   width: 800,
   height: 600,

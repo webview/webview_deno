@@ -1,7 +1,7 @@
 import { WebView } from "../mod.ts";
 
 await new WebView({
-  title: "Remote deno_webview example",
+  title: "Remote webview_deno example",
   url: `https://deno.land/`,
   width: 800,
   height: 600,

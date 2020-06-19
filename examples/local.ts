@@ -9,7 +9,7 @@ const html = `
 `;
 
 await new WebView({
-  title: "Local deno_webview example",
+  title: "Local webview_deno example",
   url: `data:text/html,${encodeURIComponent(html)}`,
   height: 600,
   resizable: true,
