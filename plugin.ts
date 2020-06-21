@@ -101,9 +101,9 @@ export async function load(cache = true, verbose = false) {
     checkCache: cache,
     printLog: verbose,
     urls: {
-      darwin: PLUGIN_URL || `${PLUGIN_URL_BASE}/libwebview_deno.dylib`,
-      windows: PLUGIN_URL || `${PLUGIN_URL_BASE}/webview_deno.dll`,
-      linux: PLUGIN_URL || `${PLUGIN_URL_BASE}/libwebview_deno.so`,
+      darwin: PLUGIN_URL || `${PLUGIN_URL_BASE}/libdeno_webview.dylib`,
+      windows: PLUGIN_URL || `${PLUGIN_URL_BASE}/deno_webview.dll`,
+      linux: PLUGIN_URL || `${PLUGIN_URL_BASE}/libdeno_webview.so`,
     },
   });
 }
