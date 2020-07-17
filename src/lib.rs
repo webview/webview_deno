@@ -297,10 +297,8 @@ fn op_webview_set_fullscreen(
       ok: None,
     };
 
-
   let buf = &zero_copy[0][..];
-  let params: WebViewSetFullscreenParams =
-    serde_json::from_slice(buf).unwrap();
+  let params: WebViewSetFullscreenParams = serde_json::from_slice(buf).unwrap();
 
   INSTANCE_MAP.with(|cell| {
     let instance_map = cell.borrow_mut();
