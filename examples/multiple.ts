@@ -5,6 +5,7 @@ const html = (n: number) =>
   <html>
   <body>
     <h1>${n}</h1>
+    <h2>Hello from deno v${Deno.version.deno}</h2>
   </body>
   </html>
 `;

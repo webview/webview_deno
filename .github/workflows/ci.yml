@@ -1,4 +1,4 @@
-name: ci
+name: CI release
 
 on:
   push:
@@ -21,20 +21,20 @@ jobs:
     env:
       GH_ACTIONS: true
       RUST_BACKTRACE: full
-      DENO_BUILD_MODE: release
 
     steps:
       - name: Clone repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
-      - name: Install rust
-        uses: hecrj/setup-rust-action@v1
+      - name: Install stable rust toolchain
+        uses: actions-rs/toolchain@v1
         with:
-          rust-version: "1.43.1"
+          profile: minimal
+          toolchain: stable
+          override: true
 
       - name: Log versions
         run: |
-          node -v
           rustc --version
           cargo --version
 
@@ -60,22 +60,17 @@ jobs:
           rm target/release/gn_root -Recurse -ErrorAction Ignore
           rm target/debug/gn_root -Recurse -ErrorAction Ignore
 
-      - name: Install python
-        uses: actions/setup-python@v1
-        with:
-          python-version: "2.7.x"
-          architecture: x64
-
       - name: Install webkit2gtk
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install libwebkit2gtk-4.0-dev
 
-      - name: Build
-        env:
-          RUST_BACKTRACE: 1
-        run: cargo build --release
+      - name: Run cargo fmt
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release
 
       - name: Release Plugin
         uses: softprops/action-gh-release@master
