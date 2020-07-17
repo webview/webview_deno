@@ -1,6 +1,6 @@
 import { prepare, deferred } from "./deps.ts";
 
-const VERSION = "0.4.2";
+const VERSION = "0.4.3";
 
 export const PLUGIN_URL_BASE = Deno.env.get("WEBVIEW_DENO_PLUGIN_BASE") ||
   `https://github.com/webview/webview_deno/releases/download/${VERSION}`;
@@ -101,9 +101,9 @@ export async function load(cache = true, verbose = false) {
     checkCache: cache,
     printLog: verbose,
     urls: {
-      darwin: PLUGIN_URL || `${PLUGIN_URL_BASE}/libdeno_webview.dylib`,
-      windows: PLUGIN_URL || `${PLUGIN_URL_BASE}/deno_webview.dll`,
-      linux: PLUGIN_URL || `${PLUGIN_URL_BASE}/libdeno_webview.so`,
+      darwin: PLUGIN_URL || `${PLUGIN_URL_BASE}/libwebview_deno.dylib`,
+      windows: PLUGIN_URL || `${PLUGIN_URL_BASE}/webview_deno.dll`,
+      linux: PLUGIN_URL || `${PLUGIN_URL_BASE}/libwebview_deno.so`,
     },
   });
 }
