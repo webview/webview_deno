@@ -5,7 +5,7 @@ import { WebView } from "../mod.ts";
 const html = `
   <html>
   <body>
-    <h1>asdasdasd</h1>
+    <h1>Hello from deno v${Deno.version.deno}</h1>
     <script>
       external.invoke("hello from window");
     </script>

@@ -3,7 +3,7 @@ import { WebView } from "../mod.ts";
 const html = `
   <html>
   <body>
-    <h1>Hello from deno</h1>
+    <h1>Hello from deno v${Deno.version.deno}</h1>
   </body>
   </html>
 `;
