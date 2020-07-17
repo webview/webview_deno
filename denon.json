@@ -35,6 +35,11 @@
       "cmd": "deno run -A --unstable scripts/fmt.ts",
       "desc": "prettify project",
       "watch": false
+    },
+    "build": {
+      "cmd": "deno run -A --unstable scripts/build.ts",
+      "desc": "build crate",
+      "watch": false
     }
   }
 }

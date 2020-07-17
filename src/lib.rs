@@ -58,15 +58,15 @@ struct WebViewNewResult {
 
 fn op_webview_new(
   _interface: &mut dyn Interface,
-  data: &[u8],
-  _zero_copy: &mut [ZeroCopyBuf],
+  zero_copy: &mut [ZeroCopyBuf],
 ) -> Op {
   let mut response: WebViewResponse<WebViewNewResult> = WebViewResponse {
     err: None,
     ok: None,
   };
 
-  let params: WebViewNewParams = serde_json::from_slice(data).unwrap();
+  let buf = &zero_copy[0][..];
+  let params: WebViewNewParams = serde_json::from_slice(buf).unwrap();
 
   let mut instance_id: u32 = 0;
   INSTANCE_INDEX.with(|cell| {
@@ -117,15 +117,15 @@ struct WebViewExitResult {}
 
 fn op_webview_exit(
   _interface: &mut dyn Interface,
-  data: &[u8],
-  _zero_copy: &mut [ZeroCopyBuf],
+  zero_copy: &mut [ZeroCopyBuf],
 ) -> Op {
   let mut response: WebViewResponse<WebViewExitResult> = WebViewResponse {
     err: None,
     ok: None,
   };
 
-  let params: WebViewExitParams = serde_json::from_slice(data).unwrap();
+  let buf = &zero_copy[0][..];
+  let params: WebViewExitParams = serde_json::from_slice(buf).unwrap();
 
   INSTANCE_MAP.with(|cell| {
     let instance_map = cell.borrow_mut();
@@ -158,15 +158,15 @@ struct WebViewEvalResult {}
 
 fn op_webview_eval(
   _interface: &mut dyn Interface,
-  data: &[u8],
-  _zero_copy: &mut [ZeroCopyBuf],
+  zero_copy: &mut [ZeroCopyBuf],
 ) -> Op {
   let mut response: WebViewResponse<WebViewEvalResult> = WebViewResponse {
     err: None,
     ok: None,
   };
 
-  let params: WebViewEvalParams = serde_json::from_slice(data).unwrap();
+  let buf = &zero_copy[0][..];
+  let params: WebViewEvalParams = serde_json::from_slice(buf).unwrap();
 
   INSTANCE_MAP.with(|cell| {
     let instance_map = cell.borrow_mut();
@@ -206,15 +206,15 @@ struct WebViewSetColorResult {}
 
 fn op_webview_set_color(
   _interface: &mut dyn Interface,
-  data: &[u8],
-  _zero_copy: &mut [ZeroCopyBuf],
+  zero_copy: &mut [ZeroCopyBuf],
 ) -> Op {
   let mut response: WebViewResponse<WebViewSetColorResult> = WebViewResponse {
     err: None,
     ok: None,
   };
 
-  let params: WebViewSetColorParams = serde_json::from_slice(data).unwrap();
+  let buf = &zero_copy[0][..];
+  let params: WebViewSetColorParams = serde_json::from_slice(&buf).unwrap();
 
   INSTANCE_MAP.with(|cell| {
     let instance_map = cell.borrow_mut();
@@ -247,15 +247,15 @@ struct WebViewSetTitleResult {}
 
 fn op_webview_set_title(
   _interface: &mut dyn Interface,
-  data: &[u8],
-  _zero_copy: &mut [ZeroCopyBuf],
+  zero_copy: &mut [ZeroCopyBuf],
 ) -> Op {
   let mut response: WebViewResponse<WebViewSetTitleResult> = WebViewResponse {
     err: None,
     ok: None,
   };
 
-  let params: WebViewSetTitleParams = serde_json::from_slice(data).unwrap();
+  let buf = &zero_copy[0][..];
+  let params: WebViewSetTitleParams = serde_json::from_slice(buf).unwrap();
 
   INSTANCE_MAP.with(|cell| {
     let instance_map = cell.borrow_mut();
@@ -289,8 +289,7 @@ struct WebViewSetFullscreenResult {}
 
 fn op_webview_set_fullscreen(
   _interface: &mut dyn Interface,
-  data: &[u8],
-  _zero_copy: &mut [ZeroCopyBuf],
+  zero_copy: &mut [ZeroCopyBuf],
 ) -> Op {
   let mut response: WebViewResponse<WebViewSetFullscreenResult> =
     WebViewResponse {
@@ -298,8 +297,10 @@ fn op_webview_set_fullscreen(
       ok: None,
     };
 
+
+  let buf = &zero_copy[0][..];
   let params: WebViewSetFullscreenParams =
-    serde_json::from_slice(data).unwrap();
+    serde_json::from_slice(buf).unwrap();
 
   INSTANCE_MAP.with(|cell| {
     let instance_map = cell.borrow_mut();
@@ -334,15 +335,15 @@ struct WebViewLoopResult {
 
 fn op_webview_loop(
   _interface: &mut dyn Interface,
-  data: &[u8],
-  _zero_copy: &mut [ZeroCopyBuf],
+  zero_copy: &mut [ZeroCopyBuf],
 ) -> Op {
   let mut response: WebViewResponse<WebViewLoopResult> = WebViewResponse {
     err: None,
     ok: None,
   };
 
-  let params: WebViewLoopParams = serde_json::from_slice(data).unwrap();
+  let buf = &zero_copy[0][..];
+  let params: WebViewLoopParams = serde_json::from_slice(buf).unwrap();
 
   INSTANCE_MAP.with(|cell| {
     let instance_map = cell.borrow_mut();
@@ -372,15 +373,15 @@ struct WebViewRunResult {}
 
 fn op_webview_run(
   _interface: &mut dyn Interface,
-  data: &[u8],
-  _zero_copy: &mut [ZeroCopyBuf],
+  zero_copy: &mut [ZeroCopyBuf],
 ) -> Op {
   let mut response: WebViewResponse<WebViewRunResult> = WebViewResponse {
     err: None,
     ok: None,
   };
 
-  let params: WebViewRunParams = serde_json::from_slice(data).unwrap();
+  let buf = &zero_copy[0][..];
+  let params: WebViewRunParams = serde_json::from_slice(buf).unwrap();
 
   let fut = async move {
     INSTANCE_MAP.with(|cell| {
