@@ -3,7 +3,7 @@ name: CI release
 on:
   push:
     branches:
-      - [master]
+      - master
     paths:
       - "Cargo.toml"
       - "src/**"

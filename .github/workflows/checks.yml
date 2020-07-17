@@ -16,6 +16,11 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
+      
+      - name: Install webkit2gtk
+        run: |
+          sudo apt-get update
+          sudo apt-get install libwebkit2gtk-4.0-dev
 
       - name: Run cargo check
         uses: actions-rs/cargo@v1
@@ -36,6 +41,11 @@ jobs:
           toolchain: stable
           override: true
 
+      - name: Install webkit2gtk
+        run: |
+          sudo apt-get update
+          sudo apt-get install libwebkit2gtk-4.0-dev
+
       - name: Run cargo test
         uses: actions-rs/cargo@v1
         with:
@@ -55,6 +65,11 @@ jobs:
           toolchain: stable
           override: true
           components: rustfmt, clippy
+
+      - name: Install webkit2gtk
+        run: |
+          sudo apt-get update
+          sudo apt-get install libwebkit2gtk-4.0-dev
 
       - name: Run cargo fmt
         uses: actions-rs/cargo@v1
