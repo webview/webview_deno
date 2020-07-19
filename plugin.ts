@@ -1,24 +1,13 @@
-import { prepare, deferred } from "./deps.ts";
+import { Plug, deferred } from "./deps.ts";
 
 const VERSION = "0.4.3";
 
 export const PLUGIN_URL_BASE = Deno.env.get("WEBVIEW_DENO_PLUGIN_BASE") ||
-  `https://github.com/webview/webview_deno/releases/download/${VERSION}`;
+  `https://github.com/webview/webview_deno/releases/download/${VERSION}/`;
 const PLUGIN_URL = Deno.env.get("WEBVIEW_DENO_PLUGIN");
 const DEBUG = Boolean(Deno.env.get("WEBVIEW_DENO_DEBUG"));
 
 let pluginId: number | null = null;
-
-// @ts-ignore
-const core = Deno.core as {
-  ops: () => { [key: string]: number };
-  setAsyncHandler(rid: number, handler: (response: Uint8Array) => void): void;
-  dispatch(
-    rid: number,
-    msg: any,
-    buf?: ArrayBufferView,
-  ): Uint8Array | undefined;
-};
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -33,23 +22,13 @@ function encode(data: object): Uint8Array {
   return encoder.encode(text);
 }
 
-function getOpId(op: string): number {
-  const id = core.ops()[op];
-
-  if (!(id > 0)) {
-    throw `Bad op id for ${op}`;
-  }
-
-  return id;
-}
-
 function opSync<R extends WebViewResponse<any>>(op: string, data: object): R {
   if (pluginId === null) {
     throw "The plugin must be initialized before use";
   }
 
-  const opId = getOpId(op);
-  const response = core.dispatch(opId, encode(data))!;
+  const opId = Plug.getOpId(op);
+  const response = Plug.core.dispatch(opId, encode(data))!;
 
   return decode(response) as R;
 }
@@ -62,15 +41,15 @@ async function opAsync<R extends WebViewResponse<any>>(
     throw "The plugin must be initialized before use";
   }
 
-  const opId = getOpId(op);
+  const opId = Plug.getOpId(op);
   const promise = deferred<R>();
 
-  core.setAsyncHandler(
+  Plug.core.setAsyncHandler(
     opId,
     (response) => promise.resolve(decode(response) as R),
   );
 
-  const response = core.dispatch(opId, encode(data));
+  const response = Plug.core.dispatch(opId, encode(data));
 
   if (response != null || response != undefined) {
     throw "Expected null response!";
@@ -94,17 +73,12 @@ function unwrapResponse<T, R extends WebViewResponse<T>>(response: R): T {
 /**
  * Load the plugin
  */
-export async function load(cache = true, verbose = false) {
+export async function load(cache: boolean) {
   unload();
-  pluginId = await prepare({
+  pluginId = await Plug.prepare({
     name: "webview_deno",
-    checkCache: cache,
-    printLog: verbose,
-    urls: {
-      darwin: PLUGIN_URL || `${PLUGIN_URL_BASE}/libwebview_deno.dylib`,
-      windows: PLUGIN_URL || `${PLUGIN_URL_BASE}/webview_deno.dll`,
-      linux: PLUGIN_URL || `${PLUGIN_URL_BASE}/libwebview_deno.so`,
-    },
+    url: PLUGIN_URL ?? PLUGIN_URL_BASE,
+    policy: cache ? Plug.CachePolicy.STORE : Plug.CachePolicy.NONE,
   });
 }
 
@@ -229,7 +203,7 @@ export async function WebViewRun(params: WebViewRunParams): Promise<
   return unwrapResponse(await opAsync("webview_run", params));
 }
 
-await load(!DEBUG, DEBUG);
+await load(!DEBUG);
 
 //@ts-ignore
 if (typeof window !== "undefined") window.addEventListener("unload", unload);
