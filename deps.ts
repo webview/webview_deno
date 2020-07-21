@@ -1,2 +1,2 @@
-export { Plug } from "https://deno.land/x/plug@0.1.0/mod.ts";
+export { Plug } from "https://x.nest.land/plug@0.0.3/mod.ts";
 export { deferred } from "https://deno.land/std@0.61.0/async/mod.ts";
