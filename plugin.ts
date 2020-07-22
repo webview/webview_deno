@@ -1,6 +1,6 @@
 import { Plug, deferred } from "./deps.ts";
 
-const VERSION = "0.4.3";
+const VERSION = "0.4.4";
 
 export const PLUGIN_URL_BASE = Deno.env.get("WEBVIEW_DENO_PLUGIN_BASE") ||
   `https://github.com/webview/webview_deno/releases/download/${VERSION}/`;

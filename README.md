@@ -89,20 +89,10 @@ deno run -A scripts/build.ts
 
 which internally runs: 
 
-```
-cargo build --release --locked
-```
-
 optionally you can use **mshtml**:
 
 ```
 deno run -A scripts/build.ts mshtml
-```
-
-which internally runs:
-
-```
-cargo build --release --locked --no-default-features
 ```
 
 ### Running
@@ -126,7 +116,7 @@ deno -A scripts/dev.ts [example.ts]
     `deno -A scripts/build.ts mshtml`
 -   `WEBVIEW_DENO_PLUGIN_BASE` - The URL of the plugin except the last part. Ignored if `WEBVIEW_DENO_PLUGIN` is set.  
     When developing locally `WEBVIEW_DENO_PLUGIN_BASE` should be set to the directory containing the plugin binary, usually `file://./target/release`. Otherwise, don't set this.
--   `WEBVIEW_DENO_DEBUG` - Disable cache and enable logs for `deno-plugin-prepare`. Used for debugging.
+-   `WEBVIEW_DENO_DEBUG` - Disable cache and enable logs for `plug`. Used for debugging.
 
 ## Dependencies
 
