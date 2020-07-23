@@ -79,6 +79,7 @@ export async function load(cache: boolean) {
     name: "webview_deno",
     url: PLUGIN_URL ?? PLUGIN_URL_BASE,
     policy: cache ? Plug.CachePolicy.STORE : Plug.CachePolicy.NONE,
+    cache: cache ? undefined : ".cache",
   });
 }
 
@@ -95,17 +96,11 @@ export interface WebViewResponse<T> {
   ok?: T;
 }
 
-export interface WebViewNewParams {
-  title: string;
-  url: string;
-  width: number;
-  height: number;
-  resizable: boolean;
+export interface WebviewCreateParams {
   debug: boolean;
-  frameless: boolean;
 }
 
-export interface WebViewNewResult {
+export interface WebviewCreateResult {
   id: number;
 }
 
@@ -161,12 +156,12 @@ export interface WebViewRunParams {
 
 export interface WebViewRunResult {}
 
-export function WebViewNew(params: WebViewNewParams): WebViewNewResult {
-  return unwrapResponse(opSync("webview_new", params));
+export function WebviewCreate(params: WebviewCreateParams): WebviewCreateResult {
+  return unwrapResponse(opSync("webview_create", params));
 }
 
 export function WebViewExit(params: WebViewExitParams): WebViewExitResult {
-  return unwrapResponse(opSync("webview_exit", params));
+  return unwrapResponse(opSync("webview_terminate", params));
 }
 
 export function WebViewEval(params: WebViewEvalParams): WebViewEvalResult {
@@ -197,10 +192,8 @@ export function WebViewLoop(params: WebViewLoopParams): WebViewLoopResult {
   return unwrapResponse(opSync("webview_loop", params));
 }
 
-export async function WebViewRun(params: WebViewRunParams): Promise<
-  WebViewRunResult
-> {
-  return unwrapResponse(await opAsync("webview_run", params));
+export function WebViewRun(params: WebViewRunParams): WebViewRunResult {
+  return unwrapResponse(opSync("webview_run", params));
 }
 
 await load(!DEBUG);

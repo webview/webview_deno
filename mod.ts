@@ -42,7 +42,7 @@ export class WebView {
   readonly #id: number = 0;
 
   constructor(params: WebViewParams) {
-    this.#id = WebViewNew({ ...DEFAULT_PARAMS, ...params }).id;
+    this.#id = WebviewCreate({ ...DEFAULT_PARAMS, ...params }).id;
   }
 
   /**

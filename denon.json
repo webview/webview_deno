@@ -37,6 +37,12 @@
       "unstable": true,
       "watch": false
     },
+    "dev:new": {
+      "cmd": "deno run -A scripts/dev.ts examples/new.ts",
+      "desc": "run `new` example",
+      "unstable": true,
+      "watch": false
+    },
     "fmt": {
       "cmd": "deno run -A scripts/fmt.ts",
       "desc": "prettify project",

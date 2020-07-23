@@ -8,404 +8,255 @@ use futures::future::FutureExt;
 use serde::Deserialize;
 use serde::Serialize;
 
-use std::cell::RefCell;
+use webview_official::{WebviewBuilder, WebviewMut, SizeHint, Webview};
+use serde_json::json;
+use lazy_static::lazy_static;
+
 use std::collections::HashMap;
-// use std::ffi::CStr;
-use std::ffi::CString;
-// use std::os::raw::*;
-use std::ptr::null_mut;
+use std::sync::{Mutex, Arc};
+use std::thread::{self, JoinHandle};
+use std::cell::RefCell;
+use std::sync::mpsc::{channel, Sender, Receiver};
 
-use webview_sys::*;
+pub fn sync_response<T>(data: T) -> Buf
+where
+    T: Serialize,
+{
+    let result = WebviewResponse {
+        ok: Some(data),
+        err: None,
+    };
 
-thread_local! {
-  static INSTANCE_INDEX: RefCell<u32> = RefCell::new(0);
-  static INSTANCE_MAP: RefCell<HashMap<u32, *mut CWebView>> = RefCell::new(HashMap::new());
+    let json = json!(result);
+    let data = serde_json::to_vec(&json).unwrap();
+    Buf::from(data)
 }
 
 #[no_mangle]
 pub fn deno_plugin_init(interface: &mut dyn Interface) {
-  interface.register_op("webview_new", op_webview_new);
-  interface.register_op("webview_exit", op_webview_exit);
-  interface.register_op("webview_eval", op_webview_eval);
-  interface.register_op("webview_set_color", op_webview_set_color);
-  interface.register_op("webview_set_title", op_webview_set_title);
-  interface.register_op("webview_set_fullscreen", op_webview_set_fullscreen);
-  interface.register_op("webview_loop", op_webview_loop);
+  interface.register_op("webview_create", op_webview_create);
   interface.register_op("webview_run", op_webview_run);
+  interface.register_op("webview_terminate", op_webview_terminate);
+  interface.register_op("webview_set_title", op_webview_set_title);
+  interface.register_op("webview_set_size", op_webview_set_size);
+  interface.register_op("webview_navigate", op_webview_navigate);
+  interface.register_op("webview_init", op_webview_init);
+  interface.register_op("webview_eval", op_webview_eval);
 }
 
 #[derive(Serialize)]
-struct WebViewResponse<T> {
+struct WebviewResponse<T> {
   err: Option<String>,
   ok: Option<T>,
 }
 
 #[derive(Deserialize)]
-struct WebViewNewParams {
-  title: String,
-  url: String,
-  width: i32,
-  height: i32,
-  resizable: bool,
+struct WebviewIdParams {
+  id: usize,
+}
+
+#[derive(Serialize)]
+struct WebviewEmptyResult { }
+
+#[derive(Deserialize)]
+struct WebviewCreateParams {
   debug: bool,
-  frameless: bool,
 }
 
 #[derive(Serialize)]
-struct WebViewNewResult {
-  id: u32,
+struct WebviewCreateResult {
+  id: usize,
 }
 
-fn op_webview_new(
+lazy_static! {
+  static ref CHANNELS: Mutex<HashMap<usize, (Sender<WebviewEvent>, Receiver<WebviewEvent>)>> = Mutex::new(HashMap::new());
+  static ref NEXT_ID: Mutex<usize> = Mutex::new(0);
+}
+
+thread_local! {
+  static WEBVIEW: RefCell<Option<WebviewMut>> = RefCell::new(None);
+}
+
+enum WebviewEvent {
+  Create(bool),
+  Run,
+  Terminate, // i think we should stop at this for a quick demo to see if we are on the right track
+  // SetTitle(WebviewSetSizeParams), // Good idea
+
+  Ok
+}
+
+fn op_webview_create(
   _interface: &mut dyn Interface,
   zero_copy: &mut [ZeroCopyBuf],
 ) -> Op {
-  let mut response: WebViewResponse<WebViewNewResult> = WebViewResponse {
-    err: None,
-    ok: None,
-  };
-
   let buf = &zero_copy[0][..];
-  let params: WebViewNewParams = serde_json::from_slice(buf).unwrap();
+  let params: WebviewCreateParams = serde_json::from_slice(buf).unwrap();
 
-  let mut instance_id: u32 = 0;
-  INSTANCE_INDEX.with(|cell| {
-    instance_id = cell.replace_with(|&mut i| i + 1);
-  });
+  let (threadSender, rx1) = channel::<WebviewEvent>();
+  let (tx2, threadReciever) = channel::<WebviewEvent>();
 
-  INSTANCE_MAP.with(|cell| {
-    let title = CString::new(params.title).unwrap();
-    let url = CString::new(params.url).unwrap();
+  thread::spawn(move || loop {
 
-    cell.borrow_mut().insert(instance_id, unsafe {
-      webview_new(
-        title.as_ptr(),
-        url.as_ptr(),
-        params.width,
-        params.height,
-        params.resizable as i32,
-        params.debug as i32,
-        params.frameless as i32,
-        None, // Some(ffi_invoke_handler),
-        null_mut(),
-      )
-    });
-  });
+    let event = threadReciever.recv().unwrap();
 
-  response.ok = Some(WebViewNewResult { id: instance_id });
-
-  let result: Buf = serde_json::to_vec(&response).unwrap().into_boxed_slice();
-
-  Op::Sync(result)
-}
-
-// extern "C" fn ffi_invoke_handler(webview: *mut CWebView, arg: *const c_char) {
-//     unsafe {
-//         let arg = CStr::from_ptr(arg).to_string_lossy().to_string();
-//
-//         println!("{}", arg);
-//     }
-// }
-
-#[derive(Deserialize)]
-struct WebViewExitParams {
-  id: u32,
-}
-
-#[derive(Serialize)]
-struct WebViewExitResult {}
-
-fn op_webview_exit(
-  _interface: &mut dyn Interface,
-  zero_copy: &mut [ZeroCopyBuf],
-) -> Op {
-  let mut response: WebViewResponse<WebViewExitResult> = WebViewResponse {
-    err: None,
-    ok: None,
-  };
-
-  let buf = &zero_copy[0][..];
-  let params: WebViewExitParams = serde_json::from_slice(buf).unwrap();
-
-  INSTANCE_MAP.with(|cell| {
-    let instance_map = cell.borrow_mut();
-
-    if !instance_map.contains_key(&params.id) {
-      response.err =
-        Some(format!("Could not find instance of id {}", &params.id))
-    } else {
-      let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
-
-      unsafe {
-        webview_exit(instance);
-      }
-
-      response.ok = Some(WebViewExitResult {});
+    match event {
+      WebviewEvent::Create(debug) =>
+        WEBVIEW.with(|webview| {
+          if let None = *webview.borrow_mut() {
+            // IF SOMETHING DOES NOT WORK IS THIS THE PROBLEM:
+            *webview.borrow_mut() = Some(Webview::create(debug, None).as_mut()); // I think we succeeded in creating a webview instance on the create event
+          }
+        }),
+      WebviewEvent::Run => 
+        WEBVIEW.with(|webview| {
+          if let Some(webview) = &mut *webview.borrow_mut() {
+            webview.dispatch(|w| {
+              w.run();
+            });
+          }
+        }),
+      WebviewEvent::Terminate => {
+        WEBVIEW.with(|webview| {
+          if let Some(webview) = &mut *webview.borrow_mut() { // fucking genious
+            webview.terminate();
+          }
+        });
+      },
+      _ => {}
     }
+
+    tx2.send(WebviewEvent::Ok).unwrap();
   });
 
-  Op::Sync(serde_json::to_vec(&response).unwrap().into_boxed_slice())
+  threadSender.send(WebviewEvent::Create(false)).unwrap();
+  rx1.recv().unwrap();
+
+  // How in the fuck did that not error and (prob) work first try
+  let id = *NEXT_ID.lock().unwrap();
+  CHANNELS.lock().unwrap().insert(id, (threadSender, rx1));
+  *NEXT_ID.lock().unwrap() += 1;
+
+  Op::Sync(sync_response(WebviewCreateResult {
+    id
+  }))
 }
 
-#[derive(Deserialize)]
-struct WebViewEvalParams {
-  id: u32,
-  js: String,
-}
-
-#[derive(Serialize)]
-struct WebViewEvalResult {}
-
-fn op_webview_eval(
-  _interface: &mut dyn Interface,
-  zero_copy: &mut [ZeroCopyBuf],
-) -> Op {
-  let mut response: WebViewResponse<WebViewEvalResult> = WebViewResponse {
-    err: None,
-    ok: None,
-  };
-
-  let buf = &zero_copy[0][..];
-  let params: WebViewEvalParams = serde_json::from_slice(buf).unwrap();
-
-  INSTANCE_MAP.with(|cell| {
-    let instance_map = cell.borrow_mut();
-
-    if !instance_map.contains_key(&params.id) {
-      response.err =
-        Some(format!("Could not find instance of id {}", &params.id))
-    } else {
-      let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
-      let js = CString::new(params.js).unwrap();
-
-      let result = unsafe { webview_eval(instance, js.as_ptr()) };
-
-      match result {
-        0 => {
-          response.ok = Some(WebViewEvalResult {});
-        }
-        _ => response.err = Some("Could not evaluate javascript".to_string()),
-      }
-    }
-  });
-
-  Op::Sync(serde_json::to_vec(&response).unwrap().into_boxed_slice())
-}
-
-#[derive(Deserialize)]
-struct WebViewSetColorParams {
-  id: u32,
-  r: u8,
-  g: u8,
-  b: u8,
-  a: u8,
-}
-
-#[derive(Serialize)]
-struct WebViewSetColorResult {}
-
-fn op_webview_set_color(
-  _interface: &mut dyn Interface,
-  zero_copy: &mut [ZeroCopyBuf],
-) -> Op {
-  let mut response: WebViewResponse<WebViewSetColorResult> = WebViewResponse {
-    err: None,
-    ok: None,
-  };
-
-  let buf = &zero_copy[0][..];
-  let params: WebViewSetColorParams = serde_json::from_slice(&buf).unwrap();
-
-  INSTANCE_MAP.with(|cell| {
-    let instance_map = cell.borrow_mut();
-
-    if !instance_map.contains_key(&params.id) {
-      response.err =
-        Some(format!("Could not find instance of id {}", &params.id))
-    } else {
-      let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
-
-      unsafe {
-        webview_set_color(instance, params.r, params.g, params.b, params.a);
-      }
-
-      response.ok = Some(WebViewSetColorResult {});
-    }
-  });
-
-  Op::Sync(serde_json::to_vec(&response).unwrap().into_boxed_slice())
-}
-
-#[derive(Deserialize)]
-struct WebViewSetTitleParams {
-  id: u32,
-  title: String,
-}
-
-#[derive(Serialize)]
-struct WebViewSetTitleResult {}
-
-fn op_webview_set_title(
-  _interface: &mut dyn Interface,
-  zero_copy: &mut [ZeroCopyBuf],
-) -> Op {
-  let mut response: WebViewResponse<WebViewSetTitleResult> = WebViewResponse {
-    err: None,
-    ok: None,
-  };
-
-  let buf = &zero_copy[0][..];
-  let params: WebViewSetTitleParams = serde_json::from_slice(buf).unwrap();
-
-  INSTANCE_MAP.with(|cell| {
-    let instance_map = cell.borrow_mut();
-
-    if !instance_map.contains_key(&params.id) {
-      response.err =
-        Some(format!("Could not find instance of id {}", &params.id))
-    } else {
-      let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
-      let title = CString::new(params.title).unwrap();
-
-      unsafe {
-        webview_set_title(instance, title.as_ptr());
-      }
-
-      response.ok = Some(WebViewSetTitleResult {});
-    }
-  });
-
-  Op::Sync(serde_json::to_vec(&response).unwrap().into_boxed_slice())
-}
-
-#[derive(Deserialize)]
-struct WebViewSetFullscreenParams {
-  id: u32,
-  fullscreen: bool,
-}
-
-#[derive(Serialize)]
-struct WebViewSetFullscreenResult {}
-
-fn op_webview_set_fullscreen(
-  _interface: &mut dyn Interface,
-  zero_copy: &mut [ZeroCopyBuf],
-) -> Op {
-  let mut response: WebViewResponse<WebViewSetFullscreenResult> =
-    WebViewResponse {
-      err: None,
-      ok: None,
-    };
-
-  let buf = &zero_copy[0][..];
-  let params: WebViewSetFullscreenParams = serde_json::from_slice(buf).unwrap();
-
-  INSTANCE_MAP.with(|cell| {
-    let instance_map = cell.borrow_mut();
-
-    if !instance_map.contains_key(&params.id) {
-      response.err =
-        Some(format!("Could not find instance of id {}", &params.id))
-    } else {
-      let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
-
-      unsafe {
-        webview_set_fullscreen(instance, params.fullscreen as i32);
-      }
-
-      response.ok = Some(WebViewSetFullscreenResult {});
-    }
-  });
-
-  Op::Sync(serde_json::to_vec(&response).unwrap().into_boxed_slice())
-}
-
-#[derive(Deserialize)]
-struct WebViewLoopParams {
-  id: u32,
-  blocking: i32,
-}
-
-#[derive(Serialize)]
-struct WebViewLoopResult {
-  code: i32,
-}
-
-fn op_webview_loop(
-  _interface: &mut dyn Interface,
-  zero_copy: &mut [ZeroCopyBuf],
-) -> Op {
-  let mut response: WebViewResponse<WebViewLoopResult> = WebViewResponse {
-    err: None,
-    ok: None,
-  };
-
-  let buf = &zero_copy[0][..];
-  let params: WebViewLoopParams = serde_json::from_slice(buf).unwrap();
-
-  INSTANCE_MAP.with(|cell| {
-    let instance_map = cell.borrow_mut();
-
-    if !instance_map.contains_key(&params.id) {
-      response.err =
-        Some(format!("Could not find instance of id {}", &params.id))
-    } else {
-      let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
-
-      let code = unsafe { webview_loop(instance, params.blocking) };
-
-      response.ok = Some(WebViewLoopResult { code });
-    }
-  });
-
-  Op::Sync(serde_json::to_vec(&response).unwrap().into_boxed_slice())
-}
-
-#[derive(Deserialize)]
-struct WebViewRunParams {
-  id: u32,
-}
-
-#[derive(Serialize)]
-struct WebViewRunResult {}
+// found a few issues with caching Plug. 
+// alright but thats for later
 
 fn op_webview_run(
   _interface: &mut dyn Interface,
   zero_copy: &mut [ZeroCopyBuf],
 ) -> Op {
-  let mut response: WebViewResponse<WebViewRunResult> = WebViewResponse {
-    err: None,
-    ok: None,
-  };
-
   let buf = &zero_copy[0][..];
-  let params: WebViewRunParams = serde_json::from_slice(buf).unwrap();
+  let params: WebviewIdParams = serde_json::from_slice(buf).unwrap();
 
-  let fut = async move {
-    INSTANCE_MAP.with(|cell| {
-      let instance_map = cell.borrow_mut();
+  let channels = CHANNELS.lock().unwrap();
+  if !channels.contains_key(&params.id) {
+    // not ok
+  } else {
+    let channel = channels.get(&params.id);
 
-      if !instance_map.contains_key(&params.id) {
-        response.err =
-          Some(format!("Could not find instance of id {}", &params.id))
-      } else {
-        let instance: *mut CWebView = *instance_map.get(&params.id).unwrap();
+    if let Some(channel) = channel {
+      channel.0.send(WebviewEvent::Run).unwrap(); // maybe this works? ; no need for parenthesis, removed that for the stuff only requiring id
+      channel.1.recv().unwrap();
+    }
+  }
+  
+  Op::Sync(sync_response(WebviewEmptyResult { }))
+}
 
-        loop {
-          let code = unsafe { webview_loop(instance, 1) };
-          match code {
-            0 => (),
-            _ => {
-              response.ok = Some(WebViewRunResult {});
-              break;
-            }
-          }
-        }
-      }
-    });
+fn op_webview_terminate(
+  _interface: &mut dyn Interface,
+  zero_copy: &mut [ZeroCopyBuf],
+) -> Op {
+  let buf = &zero_copy[0][..];
+  let params: WebviewIdParams = serde_json::from_slice(buf).unwrap();
 
-    serde_json::to_vec(&response).unwrap().into_boxed_slice()
-  };
+  let channels = CHANNELS.lock().unwrap();
+  if !channels.contains_key(&params.id) {
+    // not ok
+  } else {
+    let channel = channels.get(&params.id);
 
-  Op::Async(fut.boxed())
+    if let Some(channel) = channel {
+      channel.0.send(WebviewEvent::Terminate).unwrap(); // maybe this works? ; no need for parenthesis, removed that for the stuff only requiring id
+      channel.1.recv().unwrap();
+    }
+  }
+
+  Op::Sync(sync_response(WebviewEmptyResult { }))
+}
+
+#[derive(Deserialize)]
+struct WebviewSetTitleParams {
+  title: String,
+}
+
+fn op_webview_set_title(
+  _interface: &mut dyn Interface,
+  zero_copy: &mut [ZeroCopyBuf],
+) -> Op {
+  let buf = &zero_copy[0][..];
+  let params: WebviewSetTitleParams = serde_json::from_slice(buf).unwrap();
+  
+  Op::Sync(sync_response(WebviewEmptyResult { }))
+}
+
+#[derive(Deserialize)]
+struct WebviewSetSizeParams {
+  width: u32,
+  height: u32,
+  hint: u32,
+}
+
+fn op_webview_set_size(
+  _interface: &mut dyn Interface,
+  zero_copy: &mut [ZeroCopyBuf],
+) -> Op {
+  let buf = &zero_copy[0][..];
+  let params: WebviewSetSizeParams = serde_json::from_slice(buf).unwrap();
+  
+  Op::Sync(sync_response(WebviewEmptyResult { }))
+}
+
+#[derive(Deserialize)]
+struct WebviewNavigateParams {
+  url: String,
+}
+
+fn op_webview_navigate(
+  _interface: &mut dyn Interface,
+  zero_copy: &mut [ZeroCopyBuf],
+) -> Op {
+  let buf = &zero_copy[0][..];
+  let params: WebviewNavigateParams = serde_json::from_slice(buf).unwrap();
+  
+  Op::Sync(sync_response(WebviewEmptyResult { }))
+}
+
+#[derive(Deserialize)]
+struct WebviewJsParams {
+  js: String,
+}
+
+fn op_webview_init(
+  _interface: &mut dyn Interface,
+  zero_copy: &mut [ZeroCopyBuf],
+) -> Op {
+  let buf = &zero_copy[0][..];
+  let params: WebviewJsParams = serde_json::from_slice(buf).unwrap();
+  
+  Op::Sync(sync_response(WebviewEmptyResult { }))
+}
+
+fn op_webview_eval(
+  _interface: &mut dyn Interface,
+  zero_copy: &mut [ZeroCopyBuf],
+) -> Op {
+  let buf = &zero_copy[0][..];
+  let params: WebviewJsParams = serde_json::from_slice(buf).unwrap();
+  
+  Op::Sync(sync_response(WebviewEmptyResult { }))
 }

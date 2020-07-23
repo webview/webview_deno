@@ -5,4 +5,4 @@
 target/
 
 # plugin cache
-.deno_plugins/
+.cache
