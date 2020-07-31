@@ -22,7 +22,7 @@ function encode(data: object): Uint8Array {
   return encoder.encode(text);
 }
 
-function opSync<R extends WebViewResponse<any>>(op: string, data: object): R {
+function opSync<R extends WebviewResponse<any>>(op: string, data: object): R {
   if (pluginId === null) {
     throw "The plugin must be initialized before use";
   }
@@ -33,7 +33,7 @@ function opSync<R extends WebViewResponse<any>>(op: string, data: object): R {
   return decode(response) as R;
 }
 
-async function opAsync<R extends WebViewResponse<any>>(
+async function opAsync<R extends WebviewResponse<any>>(
   op: string,
   data: object,
 ): Promise<R> {
@@ -58,7 +58,7 @@ async function opAsync<R extends WebViewResponse<any>>(
   return promise;
 }
 
-function unwrapResponse<T, R extends WebViewResponse<T>>(response: R): T {
+function unwrapResponse<T, R extends WebviewResponse<T>>(response: R): T {
   if (response.err) {
     throw response.err;
   }
@@ -90,116 +90,82 @@ export function unload(): void {
   pluginId = null;
 }
 
-export interface WebViewResponse<T> {
+export interface WebviewResponse<T> {
   err?: string;
   ok?: T;
 }
 
-export interface WebViewNewParams {
-  title: string;
-  url: string;
-  width: number;
-  height: number;
-  resizable: boolean;
+export interface WebviewEmptyResult {}
+
+export interface WebviewCreateResult {
+  id: number;
+}
+
+export interface WebviewIdParams {
+  id: number;
+}
+
+export interface WebviewCreateParams {
   debug: boolean;
-  frameless: boolean;
 }
 
-export interface WebViewNewResult {
-  id: number;
-}
-
-export interface WebViewExitParams {
-  id: number;
-}
-
-export interface WebViewExitResult {}
-
-export interface WebViewEvalParams {
+export interface WebviewJsParams {
   id: number;
   js: string;
 }
 
-export interface WebViewEvalResult {}
-
-export interface WebViewSetColorParams {
+export interface WebviewUrlParams {
   id: number;
-  r: number;
-  g: number;
-  b: number;
-  a: number;
+  url: string;
 }
 
-export interface WebViewSetColorResult {}
-
-export interface WebViewSetTitleParams {
+export interface WebviewSetSizeParams {
   id: number;
-  title: String;
+  width: number;
+  height: number;
+  hint: number;
 }
 
-export interface WebViewSetTitleResult {}
-
-export interface WebViewSetFullscreenParams {
+export interface WebviewSetTitleParams {
   id: number;
-  fullscreen: boolean;
+  title: string;
 }
 
-export interface WebViewSetFullscreenResult {}
-
-export interface WebViewLoopParams {
-  id: number;
-  blocking: number;
+export function WebviewCreate(
+  params: WebviewCreateParams,
+): WebviewCreateResult {
+  return unwrapResponse(opSync("webview_create", params));
 }
 
-export interface WebViewLoopResult {
-  code: number;
+export function WebviewDestroy(params: WebviewIdParams): void {
+  unwrapResponse(opSync("webview_destroy", params));
 }
 
-export interface WebViewRunParams {
-  id: number;
+export function WebviewTerminate(params: WebviewIdParams): void {
+  unwrapResponse(opSync("webview_terminate", params));
 }
 
-export interface WebViewRunResult {}
-
-export function WebViewNew(params: WebViewNewParams): WebViewNewResult {
-  return unwrapResponse(opSync("webview_new", params));
+export function WebviewSetTitle(params: WebviewSetTitleParams): void {
+  unwrapResponse(opSync("webview_set_title", params));
 }
 
-export function WebViewExit(params: WebViewExitParams): WebViewExitResult {
-  return unwrapResponse(opSync("webview_exit", params));
+export function WebviewSetSize(params: WebviewSetSizeParams): void {
+  unwrapResponse(opSync("webview_set_size", params));
 }
 
-export function WebViewEval(params: WebViewEvalParams): WebViewEvalResult {
-  return unwrapResponse(opSync("webview_eval", params));
+export function WebviewEval(params: WebviewJsParams): void {
+  unwrapResponse(opSync("webview_eval", params));
 }
 
-export function WebViewSetColor(
-  params: WebViewSetColorParams,
-): WebViewSetColorResult {
-  return unwrapResponse(opSync("webview_set_color", params));
+export function WebviewInit(params: WebviewJsParams): void {
+  unwrapResponse(opSync("webview_init", params));
 }
 
-export function WebViewSetTitle(
-  params: WebViewSetTitleParams,
-): WebViewSetTitleResult {
-  return unwrapResponse(opSync("webview_set_title", params));
+export function WebviewNavigate(params: WebviewUrlParams): void {
+  unwrapResponse(opSync("webview_navigate", params));
 }
 
-export function WebViewSetFullscreen(
-  params: WebViewSetFullscreenParams,
-): WebViewSetFullscreenResult {
-  return unwrapResponse(
-    opSync("webview_set_fullscreen", params),
-  );
-}
-
-export function WebViewLoop(params: WebViewLoopParams): WebViewLoopResult {
-  return unwrapResponse(opSync("webview_loop", params));
-}
-
-export async function WebViewRun(params: WebViewRunParams): Promise<
-  WebViewRunResult
-> {
+export async function WebviewRun(params: WebviewIdParams): Promise<void> {
   return unwrapResponse(await opAsync("webview_run", params));
 }
 

@@ -1,91 +1,73 @@
 import {
-  WebViewNew,
-  WebViewNewParams,
-  WebViewRun,
-  WebViewLoop,
-  WebViewExit,
-  WebViewEval,
-  WebViewSetColor,
-  WebViewSetTitle,
-  WebViewSetFullscreen,
+  WebviewCreate, WebviewCreateParams, WebviewRun, WebviewDestroy, WebviewTerminate, WebviewEval, WebviewSetTitle, WebviewSetSize, WebviewInit, WebviewNavigate,
 } from "./plugin.ts";
 
-const DEFAULT_PARAMS: WebViewNewParams = {
-  title: "webview_deno",
-  url: "about:blank",
-  width: 800,
-  height: 600,
-  resizable: true,
-  debug: true,
-  frameless: false,
-};
-
-/**
- * The constructor parameters
- */
-export type WebViewParams = Partial<WebViewNewParams>;
-
-/**
- * A rgb(a) color
- */
-export interface WebViewColor {
-  r: number;
-  g: number;
-  b: number;
-  a?: number;
+export enum SizeHint {
+  NONE = 0,
+  MIN = 1,
+  MAX = 2,
+  FIXED = 3,
 }
 
 /**
- * A WebView instance
+ * A Webview instance
  */
-export class WebView {
+export class Webview {
   readonly #id: number = 0;
 
-  constructor(params: WebViewParams) {
-    this.#id = WebViewNew({ ...DEFAULT_PARAMS, ...params }).id;
+  constructor(params: WebviewCreateParams = { debug: false }) {
+    this.#id = WebviewCreate(params).id;
   }
 
   /**
    * Runs the event loop to completion
    */
   public async run() {
-    await WebViewRun({ id: this.#id });
+    await WebviewRun({ id: this.#id });
   }
 
   /**
-   * Iterates the event loop and returns `false` if the the `WebView` has been closed
+   * Drops the `Webview`
    */
-  public step(): boolean {
-    return WebViewLoop({ id: this.#id, blocking: 1 }).code === 0;
+  public drop() {
+    WebviewTerminate({ id: this.#id });
+    WebviewDestroy({ id: this.#id });
   }
 
   /**
-   * Exits the `WebView`
+   * Terminates the instance
    */
-  public exit() {
-    WebViewExit({ id: this.#id });
+  public terminate() {
+    WebviewTerminate({ id: this.#id });
   }
 
   /**
-   * Evaluates the provided js code in the `WebView`
+   * Evaluates the provided js code
    */
   public eval(js: string) {
-    WebViewEval({
+    WebviewEval({
       id: this.#id,
       js: js,
     });
   }
 
   /**
-   * Sets the color of the title bar
+   * Initializes the provided js code
    */
-  public setColor(color: WebViewColor) {
-    WebViewSetColor({
+  public init(js: string) {
+    WebviewInit({
       id: this.#id,
-      r: color.r,
-      g: color.g,
-      b: color.b,
-      a: color.a ?? 1,
+      js: js,
+    });
+  }
+
+  /**
+   * Navigates to the provided url
+   */
+  public navigate(url: string) {
+    WebviewNavigate({
+      id: this.#id,
+      url,
     });
   }
 
@@ -93,19 +75,21 @@ export class WebView {
    * Sets the window title
    */
   public setTitle(title: string) {
-    WebViewSetTitle({
+    WebviewSetTitle({
       id: this.#id,
       title: title,
     });
   }
 
   /**
-   * Enables or disables fullscreen
+   * Sets the window size
    */
-  public setFullscreen(fullscreen: boolean) {
-    WebViewSetFullscreen({
+  public setSize(width: number, height: number, hint: SizeHint = SizeHint.NONE) {
+    WebviewSetSize({
       id: this.#id,
-      fullscreen: fullscreen,
+      width,
+      height,
+      hint
     });
   }
 }
