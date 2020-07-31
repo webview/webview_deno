@@ -1,18 +1,10 @@
-import { WebView } from "../mod.ts";
+import { WebviewBuilder } from "../mod.ts";
 
-const html = `
-  <html>
-  <body>
-    <h1>Hello from deno v${Deno.version.deno}</h1>
-  </body>
-  </html>
-`;
+const builder = new WebviewBuilder();
+builder.title("Hello World");
+builder.width(300);
+builder.height(400);
+builder.url("https://google.com");
 
-await new WebView({
-  title: "Local webview_deno example",
-  url: `data:text/html,${encodeURIComponent(html)}`,
-  height: 600,
-  resizable: true,
-  debug: true,
-  frameless: false,
-}).run();
+const view = builder.build();
+await view.run();

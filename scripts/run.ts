@@ -19,7 +19,7 @@ export async function run(
 
   await util.run(
     `Running deno run -A -r --unstable ${file}`,
-    ["deno", "run", "-A", "-r", "--unstable", file],
+    ["deno", "run", "-A", "-r", "-q", "--unstable", file],
     env,
   );
 }

@@ -16,7 +16,7 @@ use std::ffi::CString;
 // use std::os::raw::*;
 use std::ptr::null_mut;
 
-use webview_offical_sys::*;
+use webview_official_sys::*;
 
 thread_local! {
   static INSTANCE_INDEX: RefCell<u32> = RefCell::new(0);
@@ -37,7 +37,7 @@ pub fn deno_plugin_init(interface: &mut dyn Interface) {
 }
 
 #[derive(Serialize)]
-struct WebviewResponse<T> {
+struct WebviewResponse<T = ()> {
   err: Option<String>,
   ok: Option<T>,
 }
@@ -57,7 +57,7 @@ where
 }
 
 pub fn sync_err(msg: String) -> Buf {
-  let result = WebviewResponse {
+  let result: WebviewResponse<()> = WebviewResponse {
     ok: None,
     err: Some(msg),
   };
@@ -109,11 +109,14 @@ fn op_webview_create(
   });
 
   INSTANCE_MAP.with(|cell| {
-    let title = CString::new(params.title).unwrap();
-    let url = CString::new(params.url).unwrap();
-
     cell.borrow_mut().insert(instance_id, unsafe {
-      webview_create(params.debug, null_mut())
+      webview_create(
+        match params.debug {
+          true => 1,
+          false => 0,
+        },
+        null_mut(),
+      )
     });
   });
 
@@ -126,7 +129,8 @@ fn op_webview_destroy(
 ) -> Op {
   let buf = &zero_copy[0][..];
   let params: WebviewIdParams = serde_json::from_slice(buf).unwrap();
-  let ret: Option<Op> = None;
+
+  let mut ret = None;
 
   INSTANCE_MAP.with(|cell| {
     let instance_map = cell.borrow_mut();
@@ -156,7 +160,8 @@ fn op_webview_terminate(
 ) -> Op {
   let buf = &zero_copy[0][..];
   let params: WebviewIdParams = serde_json::from_slice(buf).unwrap();
-  let ret: Option<Op> = None;
+
+  let mut ret = None;
 
   INSTANCE_MAP.with(|cell| {
     let instance_map = cell.borrow_mut();
@@ -186,7 +191,8 @@ fn op_webview_navigate(
 ) -> Op {
   let buf = &zero_copy[0][..];
   let params: WebviewUrlParams = serde_json::from_slice(buf).unwrap();
-  let ret: Option<Op> = None;
+
+  let mut ret = None;
 
   INSTANCE_MAP.with(|cell| {
     let instance_map = cell.borrow_mut();
@@ -213,7 +219,8 @@ fn op_webview_eval(
 ) -> Op {
   let buf = &zero_copy[0][..];
   let params: WebviewJsParams = serde_json::from_slice(buf).unwrap();
-  let ret: Option<Op> = None;
+
+  let mut ret = None;
 
   INSTANCE_MAP.with(|cell| {
     let instance_map = cell.borrow_mut();
@@ -240,7 +247,8 @@ fn op_webview_init(
 ) -> Op {
   let buf = &zero_copy[0][..];
   let params: WebviewJsParams = serde_json::from_slice(buf).unwrap();
-  let ret: Option<Op> = None;
+
+  let mut ret = None;
 
   INSTANCE_MAP.with(|cell| {
     let instance_map = cell.borrow_mut();
@@ -273,7 +281,7 @@ fn op_webview_set_title(
 ) -> Op {
   let buf = &zero_copy[0][..];
   let params: WebviewSetTitleParams = serde_json::from_slice(buf).unwrap();
-  let ret: Option<Op> = None;
+  let mut ret = None;
 
   INSTANCE_MAP.with(|cell| {
     let instance_map = cell.borrow_mut();
@@ -286,6 +294,7 @@ fn op_webview_set_title(
     } else {
       let instance: webview_t = *instance_map.get(&params.id).unwrap();
 
+      let title = CString::new(params.title).unwrap();
       unsafe {
         webview_set_title(instance, title.as_ptr());
       }
@@ -294,15 +303,15 @@ fn op_webview_set_title(
     }
   });
 
-  ret.unwrap()
+  Op::Sync(ret.unwrap())
 }
 
 #[derive(Deserialize)]
 struct WebviewSetSizeParams {
   id: u32,
-  width: u32,
-  height: u32,
-  hint: u32,
+  width: i32,
+  height: i32,
+  hint: i32,
 }
 
 fn op_webview_set_size(
@@ -310,8 +319,9 @@ fn op_webview_set_size(
   zero_copy: &mut [ZeroCopyBuf],
 ) -> Op {
   let buf = &zero_copy[0][..];
-  let params: WebviewSetTitleParams = serde_json::from_slice(buf).unwrap();
-  let ret: Option<Op> = None;
+  let params: WebviewSetSizeParams = serde_json::from_slice(buf).unwrap();
+
+  let mut ret = None;
 
   INSTANCE_MAP.with(|cell| {
     let instance_map = cell.borrow_mut();
@@ -325,14 +335,14 @@ fn op_webview_set_size(
       let instance: webview_t = *instance_map.get(&params.id).unwrap();
 
       unsafe {
-        webview_set_size(instance, &params.width, &params.height, &params.hint);
+        webview_set_size(instance, params.width, params.height, params.hint);
       }
 
       ret = Some(sync_ok(WebviewEmptyResult {}));
     }
   });
 
-  ret.unwrap()
+  Op::Sync(ret.unwrap())
 }
 
 fn op_webview_run(
@@ -343,7 +353,7 @@ fn op_webview_run(
   let params: WebviewIdParams = serde_json::from_slice(buf).unwrap();
 
   let fut = async move {
-    let ret = None;
+    let mut ret = None;
     INSTANCE_MAP.with(|cell| {
       let instance_map = cell.borrow_mut();
 
@@ -353,11 +363,11 @@ fn op_webview_run(
           &params.id
         )));
       } else {
-        let instance: *mut webview_t = *instance_map.get(&params.id).unwrap();
+        let instance = *instance_map.get(&params.id).unwrap();
 
         unsafe { webview_run(instance) };
 
-        ret = some(sync_ok(WebviewEmptyResult {}))
+        ret = Some(sync_ok(WebviewEmptyResult {}))
       }
     });
 
