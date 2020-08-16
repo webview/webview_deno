@@ -55,7 +55,7 @@ or in your development environment:
 $ deno run -A -r --unstable app.ts
 ```
 
-you can find other examples in the [`example/`](examples) directory.
+you can find other examples in the [`examples/`](examples) directory.
 
 ## Documentation
 
