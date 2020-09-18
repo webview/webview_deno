@@ -122,7 +122,7 @@ deno -A scripts/dev.ts [example.ts]
 
 ### Deno
 
-- [plugin_prepare](https://deno.land/x/plugin_prepare)
+- [plug](https://deno.land/x/plug)
 
 ### Rust
 

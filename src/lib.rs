@@ -1,4 +1,3 @@
-use deno_core::plugin_api::Buf;
 use deno_core::plugin_api::Interface;
 use deno_core::plugin_api::Op;
 use deno_core::plugin_api::ZeroCopyBuf;
@@ -94,7 +93,7 @@ fn op_webview_new(
 
   response.ok = Some(WebViewNewResult { id: instance_id });
 
-  let result: Buf = serde_json::to_vec(&response).unwrap().into_boxed_slice();
+  let result = serde_json::to_vec(&response).unwrap().into_boxed_slice();
 
   Op::Sync(result)
 }
