@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog],
 and this project adheres to [Semantic Versioning].
 
+## [0.4.8] - 2020-09-19
+
+### Bug Fixes
+
+- worker example ([`8b2fb91`])
+- typo in ci ([`900c023`])
+
 ## [0.4.7] - 2020-09-18
 
 ## [0.4.6] - 2020-09-02
@@ -69,6 +76,9 @@ and this project adheres to [Semantic Versioning].
 
 [keep a changelog]: https://keepachangelog.com/en/1.0.0/
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
+[0.4.8]: https://github.com/eliassjogreen/deno_webview/compare/0.4.7...0.4.8
+[`8b2fb91`]: https://github.com/eliassjogreen/deno_webview/commit/8b2fb913ae7abab5ea955f20d66d886352e29fa3
+[`900c023`]: https://github.com/eliassjogreen/deno_webview/commit/900c02311f4e59d85209a72a2f18c0aee11dbb16
 [0.4.7]: https://github.com/eliassjogreen/deno_webview/compare/0.4.6...0.4.7
 [0.4.6]: https://github.com/eliassjogreen/deno_webview/compare/0.4.5...0.4.6
 [0.4.5]: https://github.com/eliassjogreen/deno_webview/compare/0.4.4...0.4.5
