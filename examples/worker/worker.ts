@@ -1,4 +1,4 @@
-import { WebView } from "../../mod.ts";
+import { Webview } from "../../mod.ts";
 import { unload } from "../../plugin.ts";
 
 const html = `
@@ -9,7 +9,7 @@ const html = `
   </html>
 `;
 
-const webview = new WebView({
+const webview = new Webview({
   title: "Worker webview_deno example",
   url: `data:text/html,${encodeURIComponent(html)}`,
   width: 800,

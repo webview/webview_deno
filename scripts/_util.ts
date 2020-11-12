@@ -10,7 +10,7 @@ export async function requires(...executables: string[]) {
     });
 
     if (!(await process.status()).success) {
-      err(`Could not find required build tool ${executable}`);
+      console.error(`Could not find required build tool ${executable}`);
     }
   }
 }
@@ -20,20 +20,11 @@ export async function run(
   cmd: string[],
   env?: { [key: string]: string },
 ) {
-  log(msg);
+  console.log(msg);
 
   const process = Deno.run({ cmd, env });
 
   if (!(await process.status()).success) {
-    err(`${msg} failed`);
+    console.error(`${msg} failed`);
   }
-}
-
-export function log(text: string): void {
-  console.log(`[log] ${text}`);
-}
-
-export function err(text: string): never {
-  console.log(`[err] ${text}`);
-  return Deno.exit(1);
 }

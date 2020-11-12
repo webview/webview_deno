@@ -1,5 +1,6 @@
 # ide
 .idea
+.vscode
 
 # rust build
 target/

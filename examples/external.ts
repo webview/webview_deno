@@ -1,4 +1,4 @@
-import { WebView } from "../mod.ts";
+import { Webview } from "../mod.ts";
 
 // DOES NOT WORK YET
 
@@ -13,7 +13,7 @@ const html = `
   </html>
 `;
 
-await new WebView({
+await new Webview({
   title: "External webview_deno example",
   url: `data:text/html,${encodeURIComponent(html)}`,
   width: 800,

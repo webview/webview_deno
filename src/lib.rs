@@ -216,6 +216,7 @@ fn op_webview_navigate(
 ) -> Result<Value, AnyError> {
   let mut res = Ok(json!(()));
   let arr = json.as_array().unwrap();
+  println!("{:?}", arr);
   let id = arr[0].as_u64().unwrap();
   let url = arr[1].as_str().unwrap();
 

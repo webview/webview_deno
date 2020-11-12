@@ -22,6 +22,11 @@ function encode(data: unknown): Uint8Array {
   return encoder.encode(text);
 }
 
+export interface Result<T> {
+  err?: string;
+  ok?: T;
+}
+
 function sync<R extends Result<any>>(op: string, data: unknown): R {
   if (pluginId === null) {
     throw "The plugin must be initialized before use";
@@ -88,11 +93,6 @@ export async function load(cache: boolean) {
 export function unload(): void {
   if (pluginId !== null) Deno.close(pluginId);
   pluginId = null;
-}
-
-export interface Result<T> {
-  err?: string;
-  ok?: T;
 }
 
 export function WebviewCreate(debug: boolean): number {

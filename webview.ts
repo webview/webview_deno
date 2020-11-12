@@ -47,8 +47,7 @@ export class Webview {
   }
 
   public set title(title: string) {
-    this.#title = title;
-    WebviewSetTitle(this.id, this.#title);
+    this.rename(title);
   }
 
   public get url(): string {
@@ -59,6 +58,9 @@ export class Webview {
     this.navigate(url);
   }
 
+  /**
+   * Creates a new `Webview` instance
+   */
   constructor(debug = false) {
     this.id = WebviewCreate(debug);
   }
@@ -84,6 +86,14 @@ export class Webview {
   public resize(size: Size): void {
     this.#size = size;
     WebviewSetSize(this.id, size.width, size.height, size.hint);
+  }
+
+  /**
+   * Renames the `Webview`
+   */
+  public rename(title: string): void {
+    this.#title = title;
+    WebviewSetTitle(this.id, title);
   }
 
   /**

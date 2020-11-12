@@ -1,4 +1,4 @@
-import { WebView } from "../mod.ts";
+import { Webview } from "../mod.ts";
 
 const html = (n: number) =>
   `
@@ -10,7 +10,7 @@ const html = (n: number) =>
   </html>
 `;
 
-const webview1 = new WebView({
+const webview1 = new Webview({
   title: "Multiple webview_deno example",
   url: `data:text/html,${encodeURIComponent(html(1))}`,
   width: 400,
@@ -20,7 +20,7 @@ const webview1 = new WebView({
   frameless: false,
 });
 
-const webview2 = new WebView({
+const webview2 = new Webview({
   title: "Multiple webview_deno example",
   url: `data:text/html,${encodeURIComponent(html(2))}`,
   width: 400,

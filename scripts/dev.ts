@@ -3,10 +3,9 @@ import { run } from "./run.ts";
 
 export async function dev(
   file: string = Deno.args[0],
-  mshtml: boolean = Deno.args.includes("mshtml"),
 ) {
-  await build(mshtml);
-  await run(file, mshtml);
+  await build();
+  await run(file);
 }
 
 if (import.meta.main) {
