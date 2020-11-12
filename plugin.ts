@@ -1,6 +1,6 @@
-import { Plug, deferred } from "./deps.ts";
+import { deferred, Plug } from "./deps.ts";
 
-const VERSION = "0.4.5";
+const VERSION = "0.5.0";
 
 export const PLUGIN_URL_BASE = Deno.env.get("WEBVIEW_DENO_PLUGIN_BASE") ||
   `https://github.com/webview/webview_deno/releases/download/${VERSION}/`;
@@ -17,12 +17,12 @@ function decode(data: Uint8Array): object {
   return JSON.parse(text);
 }
 
-function encode(data: object): Uint8Array {
+function encode(data: unknown): Uint8Array {
   const text = JSON.stringify(data);
   return encoder.encode(text);
 }
 
-function opSync<R extends WebviewResponse<any>>(op: string, data: object): R {
+function sync<R extends Result<any>>(op: string, data: unknown): R {
   if (pluginId === null) {
     throw "The plugin must be initialized before use";
   }
@@ -33,9 +33,9 @@ function opSync<R extends WebviewResponse<any>>(op: string, data: object): R {
   return decode(response) as R;
 }
 
-async function opAsync<R extends WebviewResponse<any>>(
+async function async<R extends Result<any>>(
   op: string,
-  data: object,
+  data: unknown,
 ): Promise<R> {
   if (pluginId === null) {
     throw "The plugin must be initialized before use";
@@ -51,14 +51,14 @@ async function opAsync<R extends WebviewResponse<any>>(
 
   const response = Plug.core.dispatch(opId, encode(data));
 
-  if (response != null || response != undefined) {
+  if (response) {
     throw "Expected null response!";
   }
 
   return promise;
 }
 
-function unwrapResponse<T, R extends WebviewResponse<T>>(response: R): T {
+function unwrap<T, R extends Result<T>>(response: R): T {
   if (response.err) {
     throw response.err;
   }
@@ -90,83 +90,50 @@ export function unload(): void {
   pluginId = null;
 }
 
-export interface WebviewResponse<T> {
+export interface Result<T> {
   err?: string;
   ok?: T;
 }
 
-export interface WebviewEmptyResult {}
-
-export interface WebviewCreateResult {
-  id: number;
+export function WebviewCreate(debug: boolean): number {
+  return unwrap(sync("webview_create", debug));
 }
 
-export interface WebviewIdParams {
-  id: number;
+export function WebviewDestroy(id: number): void {
+  unwrap(sync("webview_destroy", id));
 }
 
-export interface WebviewCreateParams {
-  debug: boolean;
+export function WebviewRun(id: number): void {
+  unwrap(sync("webview_run", id));
 }
 
-export interface WebviewJsParams {
-  id: number;
-  js: string;
+export function WebviewTerminate(id: number): void {
+  unwrap(sync("webview_terminate", id));
 }
 
-export interface WebviewUrlParams {
-  id: number;
-  url: string;
+export function WebviewSetTitle(id: number, title: string): void {
+  unwrap(sync("webview_set_title", [id, title]));
 }
 
-export interface WebviewSetSizeParams {
-  id: number;
-  width: number;
-  height: number;
-  hint: number;
+export function WebviewSetSize(
+  id: number,
+  width: number,
+  height: number,
+  hint: number,
+): void {
+  unwrap(sync("webview_set_size", [id, width, height, hint]));
 }
 
-export interface WebviewSetTitleParams {
-  id: number;
-  title: string;
+export function WebviewNavigate(id: number, url: string): void {
+  unwrap(sync("webview_navigate", [id, url]));
 }
 
-export function WebviewCreate(
-  params: WebviewCreateParams,
-): WebviewCreateResult {
-  return unwrapResponse(opSync("webview_create", params));
+export function WebviewInit(id: number, js: string): void {
+  unwrap(sync("webview_init", [id, js]));
 }
 
-export function WebviewDestroy(params: WebviewIdParams): void {
-  unwrapResponse(opSync("webview_destroy", params));
-}
-
-export function WebviewTerminate(params: WebviewIdParams): void {
-  unwrapResponse(opSync("webview_terminate", params));
-}
-
-export function WebviewSetTitle(params: WebviewSetTitleParams): void {
-  unwrapResponse(opSync("webview_set_title", params));
-}
-
-export function WebviewSetSize(params: WebviewSetSizeParams): void {
-  unwrapResponse(opSync("webview_set_size", params));
-}
-
-export function WebviewEval(params: WebviewJsParams): void {
-  unwrapResponse(opSync("webview_eval", params));
-}
-
-export function WebviewInit(params: WebviewJsParams): void {
-  unwrapResponse(opSync("webview_init", params));
-}
-
-export function WebviewNavigate(params: WebviewUrlParams): void {
-  unwrapResponse(opSync("webview_navigate", params));
-}
-
-export async function WebviewRun(params: WebviewIdParams): Promise<void> {
-  return unwrapResponse(await opAsync("webview_run", params));
+export function WebviewEval(id: number, js: string): void {
+  unwrap(sync("webview_eval", [id, js]));
 }
 
 await load(!DEBUG);
