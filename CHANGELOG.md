@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog],
 and this project adheres to [Semantic Versioning].
 
+## [0.5.1] - 2020-12-01
+
+### Bug Fixes
+
+- cache plugin by default ([`093a942`])
+
 ## [0.5.0] - 2020-12-01
 
 ### Bug Fixes
@@ -76,6 +82,8 @@ and this project adheres to [Semantic Versioning].
 
 [keep a changelog]: https://keepachangelog.com/en/1.0.0/
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
+[0.5.1]: https://github.com/webview/webview_deno/compare/0.5.0...0.5.1
+[`093a942`]: https://github.com/webview/webview_deno/commit/093a94211a3be1123ab4f11e3803809048177f4c
 [0.5.0]: https://github.com/webview/webview_deno/compare/0.4.7...0.5.0
 [`8b2fb91`]: https://github.com/webview/webview_deno/commit/8b2fb913ae7abab5ea955f20d66d886352e29fa3
 [`900c023`]: https://github.com/webview/webview_deno/commit/900c02311f4e59d85209a72a2f18c0aee11dbb16
