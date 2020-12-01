@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog],
 and this project adheres to [Semantic Versioning].
 
+## [0.5.2] - 2020-12-01
+
 ## [0.5.1] - 2020-12-01
 
 ### Bug Fixes
@@ -82,6 +84,7 @@ and this project adheres to [Semantic Versioning].
 
 [keep a changelog]: https://keepachangelog.com/en/1.0.0/
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
+[0.5.2]: https://github.com/webview/webview_deno/compare/0.5.1...0.5.2
 [0.5.1]: https://github.com/webview/webview_deno/compare/0.5.0...0.5.1
 [`093a942`]: https://github.com/webview/webview_deno/commit/093a94211a3be1123ab4f11e3803809048177f4c
 [0.5.0]: https://github.com/webview/webview_deno/compare/0.4.7...0.5.0
