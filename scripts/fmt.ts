@@ -1,14 +1,10 @@
-import { requires, run } from "./util.ts";
+import { requires, run } from "./_util.ts";
 
-export async function fmt(mshtml: boolean = Deno.args.includes("mshtml")) {
+export async function fmt() {
   await requires("cargo", "deno");
 
-  await run(
-    "Running cargo clippy",
-    ["cargo", "clippy", "--release", "--locked"],
-  );
-  await run("Running cargo fmt", ["cargo", "fmt"]);
-  await run("Running deno fmt", ["deno", "fmt"]);
+  await run("formatting rust", ["cargo", "fmt"]);
+  await run("formatting deno", ["deno", "fmt"]);
 }
 
 if (import.meta.main) {

@@ -1,54 +1,52 @@
 {
   "$schema": "https://deno.land/x/denon/schema.json",
+  "watch": false,
+  "unstable": true,
+  "allow": "all",
   "scripts": {
+    "dev": {
+      "cmd": "deno run scripts/dev.ts",
+      "desc": "runs the dev command"
+    },
     "dev:blocking": {
-      "cmd": "deno run -A scripts/dev.ts examples/blocking.ts",
-      "desc": "run `blocking` example",
-      "unstable": true,
-      "watch": false
+      "cmd": "deno run scripts/dev.ts examples/blocking.ts",
+      "desc": "run `blocking` example"
     },
     "dev:external": {
-      "cmd": "deno run -A scripts/dev.ts examples/external.ts",
-      "desc": "run `external` example",
-      "unstable": true,
-      "watch": false
+      "cmd": "deno run scripts/dev.ts examples/external.ts",
+      "desc": "run `external` example"
     },
     "dev:local": {
-      "cmd": "deno run -A scripts/dev.ts examples/local.ts",
-      "desc": "run `local` example",
-      "unstable": true,
-      "watch": false
+      "cmd": "deno run scripts/dev.ts examples/local.ts",
+      "desc": "run `local` example"
     },
     "dev:multiple": {
-      "cmd": "deno run -A scripts/dev.ts examples/multiple.ts",
-      "desc": "run `multiple` example",
-      "unstable": true,
-      "watch": false
+      "cmd": "deno run scripts/dev.ts examples/multiple.ts",
+      "desc": "run `multiple` example"
     },
     "dev:remote": {
-      "cmd": "deno run -A scripts/dev.ts examples/remote.ts",
-      "desc": "run `remote` example",
-      "unstable": true,
-      "watch": false
+      "cmd": "deno run scripts/dev.ts examples/remote.ts",
+      "desc": "run `remote` example"
     },
     "dev:user_agent": {
-      "cmd": "deno run -A scripts/dev.ts examples/user_agent.ts",
-      "desc": "run `user_agent` example",
-      "unstable": true,
-      "watch": false
+      "cmd": "deno run scripts/dev.ts examples/user_agent.ts",
+      "desc": "run `user_agent` example"
+    },
+    "dev:worker": {
+      "cmd": "deno run scripts/dev.ts examples/worker/runned.ts",
+      "desc": "run `worker` example"
     },
     "fmt": {
-      "cmd": "deno run -A scripts/fmt.ts",
-      "desc": "prettify project",
-      "unstable": true,
-      "watch": false
+      "cmd": "deno run scripts/fmt.ts",
+      "desc": "prettify project"
+    },
+    "lint": {
+      "cmd": "deno run scripts/lint.ts",
+      "desc": "lint project"
     },
     "build": {
-      "cmd": "deno run -A scripts/build.ts",
-      "desc": "build crate",
-      "unstable": true,
-      "watch": false
+      "cmd": "deno run scripts/build.ts",
+      "desc": "build crate"
     }
   }
 }
-

@@ -1,4 +1,4 @@
-import { WebView } from "../mod.ts";
+import { Webview } from "../mod.ts";
 
 const html = `
   <html>
@@ -8,11 +8,7 @@ const html = `
   </html>
 `;
 
-await new WebView({
-  title: "Local webview_deno example",
-  url: `data:text/html,${encodeURIComponent(html)}`,
-  height: 600,
-  resizable: true,
-  debug: true,
-  frameless: false,
-}).run();
+const webview = new Webview(
+  { url: `data:text/html,${encodeURIComponent(html)}` },
+);
+await webview.run();

@@ -1,4 +1,4 @@
-import { WebView } from "../../mod.ts";
+import { Webview } from "../../mod.ts";
 import { unload } from "../../plugin.ts";
 
 const html = `
@@ -9,22 +9,16 @@ const html = `
   </html>
 `;
 
-const webview = new WebView({
-  title: "Worker webview_deno example",
-  url: `data:text/html,${encodeURIComponent(html)}`,
-  width: 800,
-  height: 600,
-  resizable: true,
-  debug: true,
-  frameless: false,
-});
-
-webview.run();
+const webview = new Webview(
+  { url: `data:text/html,${encodeURIComponent(html)}` },
+);
 
 onmessage = (event) => {
   if (event.data === "close") {
-    webview.exit();
+    webview.drop();
     unload();
     self.close();
   }
 };
+
+webview.run();

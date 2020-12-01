@@ -6,7 +6,7 @@ export async function dev(
   mshtml: boolean = Deno.args.includes("mshtml"),
 ) {
   await build(mshtml);
-  await run(file, mshtml);
+  await run(file);
 }
 
 if (import.meta.main) {

@@ -1,4 +1,4 @@
-import { WebView } from "../mod.ts";
+import { Webview } from "../mod.ts";
 
 const html = `
   <html>
@@ -8,20 +8,17 @@ const html = `
   </html>
 `;
 
-const webview = new WebView({
-  title: "Local webview_deno example",
-  url: `data:text/html,${encodeURIComponent(html)}`,
-  width: 800,
-  height: 600,
-  resizable: true,
-  debug: true,
-  frameless: false,
-});
+const webview = new Webview(
+  { url: `data:text/html,${encodeURIComponent(html)}` },
+);
 
 setTimeout(() => {
   console.log("Print from timeout after running");
 }, 1000);
 
-webview.run();
+const promise = webview.run();
 
 console.log("Print from top level after running");
+
+// await closing of webview
+await promise;

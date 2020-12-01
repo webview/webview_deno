@@ -8,14 +8,14 @@
 [![deno doc](https://img.shields.io/badge/deno-doc-informational?logo=deno)](https://doc.deno.land/https/deno.land/x/webview/mod.ts)
 [![license](https://img.shields.io/github/license/webview/webview_deno?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAEFCu8CAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAHKADAAQAAAABAAAAHAAAAABHddaYAAAC5UlEQVRIDd2WPWtVQRCGby5pVASLiGghQSxyG8Ui2KWwCfkH9olY2JneQkiR0oCIxH/gB+qVFDYBIWBAbAIRSbCRpLXwIxLiPT7vnNm9e87ZxJtUwYH3zO47Mzv7Mbv3tlo5KYriGtgAJ81OY1ENdG/YI4boFEOI911BXgY/pdtwGuAtXpvmB1tAXHDnUolE5urkPOQo6MqA3pXWmJJL4Bb4rQ7yEYfxsjnIF29NJIoNC6e5fxOL/qN+9KCz7AaLpN8zI415N2i2EptpGrkRIjGeAuvR6IY1hSFLFUOug9Ms2M7ZxIUNytm1mnME186sdI2BOCwAyQMg54ugzSmKmwbPwSbolKH+hbAtQdsOoF+BsF3anUVwBdiOWRidFZDKTTrKEAJTm3GVrGkHzw/uPZbyx7DNNLfB7KGmRsCcr+/gjaiPSpAOTyX9qG4L/XBDdWXDDf1M+wtQ5fwCOtcb4Dto6VpLmzByB6gqdHbTItGSJdAGqibJQhmRfCF7IN4beSF2G9CqnGXQrxofXU+EykllNeoczRgYytDKMubDIRK0g5MF8rE69cGu0u9nlUcqaUZ41W0qK2nGcSzr4D2wV9U9wxp1rnpxn8agXAOHMQ9cy9kbHM7ngY4gFb03TxrO/yfBUifTtXt78jCrjY/jgEFnMn45LuNWUtknuu7NSm7D3QEn3HbatV1Q2jvgIRf1sfODKQaeymxZoMLlTqsq1LF+HvaTqQOzEzUCfni0/eNIA+DfuE3KEtbsegckGmMktTXacnBHPVe687ugkpT+axCkkhBSyRSjWI2xf1KMMVmYiQdWksK9BEFiQoiYLIlvJA3/zeTzCejP0RbB6YPbhZuB+0pR3KcdX0LaJtju0ZgBL8Bd+sbz2QIaU2OfBX3BaQLsgZysQtrk0M8Sh1A0w3DyyYnGnAiZ4gqZ/TvI2A8OGd1YIbF7+F3P+B6dYpYdsJNZgrjO0UdOIhmom0nwL0pnfnzkL1803jAoKhvyAAAAAElFTkSuQmCC)](https://github.com/webview/webview_deno/blob/master/LICENSE)
 
-
 [deno](https://github.com/denoland/deno) bindings for
 [webview](https://github.com/zserge/webview) using the
-[webview_rust](https://github.com/Boscop/web-view). 
+[webview_rust](https://github.com/Boscop/web-view) library.
+
 Webview is a tiny cross-platform library to render **web-based GUIs for desktop applications**.
 
 ---
-> ⚠️ This project is still in an early stage of development. Expect breaking changes.
+> ⚠️ This project is still in an development. Expect breaking changes.
 ---
 
 ![Example Image](images/webview_deno.png)
@@ -23,36 +23,32 @@ Webview is a tiny cross-platform library to render **web-based GUIs for desktop 
 ## Example
 
 ```typescript
-import { WebView } from "https://deno.land/x/webview/mod.ts";
+import { Webview } from "../mod.ts";
 
 const html = `
   <html>
   <body>
-    <h1>Hello from deno</h1>
+    <h1>Hello from deno v${Deno.version.deno}</h1>
   </body>
   </html>
 `;
 
-await new WebView({
-  title: "Local webview_deno example",
-  url: `data:text/html,${encodeURIComponent(html)}`,
-  height: 600,
-  resizable: true,
-  debug: true,
-  frameless: false,
-}).run();
+const webview = new Webview(
+  { url: `data:text/html,${encodeURIComponent(html)}` },
+);
+await webview.run();
 ```
 
 you can run this example directly from the web:
 
 ```bash
-$ deno run -A -r --unstable https://deno.land/x/webview/examples/local.ts
+deno run -Ar --unstable https://deno.land/x/webview/examples/local.ts
 ```
 
 or in your development environment:
 
 ```bash
-$ deno run -A -r --unstable app.ts
+deno run -Ar --unstable examples/local.ts
 ```
 
 you can find other examples in the [`examples/`](examples) directory.
@@ -70,6 +66,9 @@ For building webview_deno the same
 [prerequisites](https://deno.land/std/manual.md#prerequisites) as for building
 deno is required.
 
+A recommended dependency is [denon](https://github.com/denosaurs/denon) which is
+used for the built in scripts found in the `denon.json` file.
+
 #### Linux dependencies
 
 - [webkit2gtk](https://webkitgtk.org/) (to install using apt:
@@ -83,40 +82,40 @@ Building on Windows requires admin privileges.
 
 For a default build you can use the provided script:
 
-```
-deno run -A scripts/build.ts
+```bash
+deno run --unstable -A scripts/build.ts
 ```
 
-which internally runs: 
+which internally runs:
 
 optionally you can use **mshtml**:
 
-```
-deno run -A scripts/build.ts mshtml
+```bash
+deno run --unstable -A scripts/build.ts mshtml
 ```
 
 ### Running
 
 To run webview_deno without automatically downloading the binaries from
 [releases](https://github.com/webview/webview_deno/releases) you will need
-to use the environment variable `WEBVIEW_DENO_PLUGIN` and set it to the path where the 
-built binaries are located. This is usually `file://./target/release`. 
+to use the environment variable `PLUGIN_URL` and set it to the path where the
+built binaries are located. This is usually `file://./target/release`.
 The process of running and using local binaries can be easier to using the
 [dev script](https://github.com/webview/webview_deno/tree/master/scripts/dev.ts):
 
-```
-deno -A scripts/dev.ts [example.ts]
+```bash
+deno run --unstable -A scripts/dev.ts examples/local.ts
 ```
 
 ## Environment variables
 
--   `WEBVIEW_DENO_PLUGIN` - The URL of the plugin  
-    Due to MSHTML (ie) no longer being enabled by default, the only way to enable it is to set the `WEBVIEW_DENO_PLUGIN` variable to the path of a binary
-    build built with the `--no-default-features` flag or using
-    `deno -A scripts/build.ts mshtml`
--   `WEBVIEW_DENO_PLUGIN_BASE` - The URL of the plugin except the last part. Ignored if `WEBVIEW_DENO_PLUGIN` is set.  
-    When developing locally `WEBVIEW_DENO_PLUGIN_BASE` should be set to the directory containing the plugin binary, usually `file://./target/release`. Otherwise, don't set this.
--   `WEBVIEW_DENO_DEBUG` - Disable cache and enable logs for `plug`. Used for debugging.
+- `PLUGIN_URL` - The URL of the plugin  
+  Due to MSHTML (internet explorer) no longer being enabled by default, the only
+  way to enable it is to set the `PLUGIN_URL` variable to the path of a binary
+  build built with the `--no-default-features` flag or using
+  `deno --unstable -A scripts/build.ts mshtml`. This is usually `./target/release/`
+  when developing locally.
+- `DEBUG` - Disable cache and enable logs for `plug`. Used for debugging.
 
 ## Dependencies
 
@@ -127,9 +126,8 @@ deno -A scripts/dev.ts [example.ts]
 ### Rust
 
 - [deno_core](https://crates.io/crates/deno_core)
+- [deno_json_op](https://github.com/denosaurs/deno_json_op)
 - [webview-sys](https://crates.io/crates/webview-sys)
-- [serde](https://crates.io/crates/serde)
-- [serde_json](https://crates.io/crates/serde_json)
 
 ## Other
 
