@@ -70,7 +70,7 @@ export function unwrap<T>(result: Result<T>): T {
 /**
  * Loads the plugin
  */
-export async function load(cache = DEBUG) {
+export async function load(cache = !DEBUG) {
   unload();
   rid = await Plug.prepare({
     name: "webview_deno",
