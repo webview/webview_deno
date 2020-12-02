@@ -1,6 +1,6 @@
 import { Plug } from "./deps.ts";
 
-const VERSION = "0.5.0";
+const VERSION = "0.5.3";
 const PLUGIN_URL = Deno.env.get("PLUGIN_URL") ??
   `https://github.com/webview/webview_deno/releases/download/${VERSION}/`;
 const DEBUG = Boolean(Deno.env.get("DEBUG"));
