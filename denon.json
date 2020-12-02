@@ -28,6 +28,10 @@
       "cmd": "deno run scripts/dev.ts examples/remote.ts",
       "desc": "run `remote` example"
     },
+    "dev:server": {
+      "cmd": "deno run scripts/dev.ts examples/server.ts",
+      "desc": "run `server` example"
+    },
     "dev:user_agent": {
       "cmd": "deno run scripts/dev.ts examples/user_agent.ts",
       "desc": "run `user_agent` example"

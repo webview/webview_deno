@@ -92,12 +92,26 @@ export class Webview {
   }
 
   /**
+   * Steps one step in the event loop popping all accumulated events from the stack
+   */
+  step(): string[] {
+    return unwrap(sync("webview_step", { id: this.id }));
+  }
+
+  /**
    * Iterates over the event loop, returns once closed or terminated
    */
-  async run(delta = 1000 / 60, block = false): Promise<void> {
+  run(delta = 1000 / 60, block = false): Promise<void> {
     return new Promise((resolve) => {
       const interval = setInterval(() => {
-        if (!this.loop(false)) {
+        const succ = this.loop(block);
+
+        // for (const event of this.step()) {
+        //   // Make this into a async iterator?
+        //   console.log(event);
+        // }
+
+        if (!succ) {
           resolve();
           clearInterval(interval);
         }
