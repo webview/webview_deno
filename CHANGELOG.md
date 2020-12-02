@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog],
 and this project adheres to [Semantic Versioning].
 
+## [0.5.3] - 2020-12-02
+
+### Features
+
+- two-way deno bindings with support for external.invoke ([`050332f`])
+
 ## [0.5.2] - 2020-12-01
 
 ## [0.5.1] - 2020-12-01
@@ -84,6 +90,8 @@ and this project adheres to [Semantic Versioning].
 
 [keep a changelog]: https://keepachangelog.com/en/1.0.0/
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
+[0.5.3]: https://github.com/webview/webview_deno/compare/0.5.2...0.5.3
+[`050332f`]: https://github.com/webview/webview_deno/commit/050332f6362f58211002a8854740e8ee03e6092a
 [0.5.2]: https://github.com/webview/webview_deno/compare/0.5.1...0.5.2
 [0.5.1]: https://github.com/webview/webview_deno/compare/0.5.0...0.5.1
 [`093a942`]: https://github.com/webview/webview_deno/commit/093a94211a3be1123ab4f11e3803809048177f4c
