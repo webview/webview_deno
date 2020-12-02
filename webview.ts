@@ -1,4 +1,18 @@
 import { sync, unwrap } from "./plugin.ts";
+import { delay } from "./deps.ts";
+
+function debounce<T extends unknown[], R>(
+  func: (...args: T) => Promise<R>,
+  time: number,
+): (...args: T) => Promise<R> {
+  return async (...args) => {
+    const promise = func(...args);
+    const timer = delay(time);
+    const response = await promise;
+    await timer;
+    return response;
+  };
+}
 
 export interface WebviewParams {
   title: string;
@@ -99,17 +113,13 @@ export class Webview {
   }
 
   /**
-   * Iterates over the event loop, returns once closed or terminated
+   * Iterates over the event loop until closed or terminated without
+   * handling events
    */
   run(delta = 1000 / 60, block = false): Promise<void> {
     return new Promise((resolve) => {
       const interval = setInterval(() => {
         const succ = this.loop(block);
-
-        // for (const event of this.step()) {
-        //   // Make this into a async iterator?
-        //   console.log(event);
-        // }
 
         if (!succ) {
           resolve();
@@ -117,6 +127,33 @@ export class Webview {
         }
       }, delta);
     });
+  }
+
+  /**
+   * Iterates over the event loop, yielding external invoke events as strings and
+   * returning once closed or terminated
+   */
+  async *iter(delta = 1000 / 60, block = false): AsyncIterableIterator<string> {
+    let finished = false;
+    
+    const runner = debounce(async () => {
+      const succ = this.loop(block);
+      const evts = this.step();
+
+      if (!succ) {
+        finished = true;
+      }
+
+      return evts;
+    }, delta);
+
+    while (!finished) {
+      const events = await runner();
+
+      for (const event of events) {
+        yield event;
+      }
+    }
   }
 
   /**

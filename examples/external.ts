@@ -14,15 +14,6 @@ const webview = new Webview(
   { url: `data:text/html,${encodeURIComponent(html)}` },
 );
 
-const interval = setInterval(() => {
-  const success = webview.loop();
-  const events = webview.step();
-
-  if (events.length > 0) {
-    console.log(events);
-  }
-
-  if (!success) {
-    clearInterval(interval);
-  }
-}, 1000 / 60);
+for await (const event of webview.iter()) {
+  webview.setTitle(event);
+}
