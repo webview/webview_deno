@@ -17,3 +17,5 @@ const webview = new Webview(
 for await (const event of webview.iter()) {
   webview.setTitle(event);
 }
+
+// await webview.run((event) => webview.setTitle(event));

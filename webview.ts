@@ -116,12 +116,23 @@ export class Webview {
    * Iterates over the event loop until closed or terminated without
    * handling events
    */
-  run(delta = 1000 / 60, block = false): Promise<void> {
+  run(
+    callback?: (events: string) => unknown,
+    delta = 1000 / 60,
+  ): Promise<void> {
     return new Promise((resolve) => {
       const interval = setInterval(() => {
-        const succ = this.loop(block);
+        const success = this.loop();
 
-        if (!succ) {
+        if (callback !== undefined) {
+          const events = this.step();
+
+          for (const event of events) {
+            callback(event);
+          }
+        }
+
+        if (!success) {
           resolve();
           clearInterval(interval);
         }
@@ -133,18 +144,18 @@ export class Webview {
    * Iterates over the event loop, yielding external invoke events as strings and
    * returning once closed or terminated
    */
-  async *iter(delta = 1000 / 60, block = false): AsyncIterableIterator<string> {
+  async *iter(delta = 1000 / 60): AsyncIterableIterator<string> {
     let finished = false;
-    
-    const runner = debounce(async () => {
-      const succ = this.loop(block);
-      const evts = this.step();
 
-      if (!succ) {
+    const runner = debounce(async () => {
+      const success = this.loop();
+      const events = this.step();
+
+      if (!success) {
         finished = true;
       }
 
-      return evts;
+      return events;
     }, delta);
 
     while (!finished) {
