@@ -23,7 +23,7 @@ Webview is a tiny cross-platform library to render **web-based GUIs for desktop 
 ## Example
 
 ```typescript
-import { Webview } from "../mod.ts";
+import { Webview } from "https://deno.land/x/webview/mod.ts";
 
 const html = `
   <html>
