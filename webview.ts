@@ -187,7 +187,7 @@ export class Webview {
   }
 
   /**
-   * Evaluates the provided js in the Webview instance, returns false if unsuccessful
+   * Sets window title
    */
   setTitle(title: string) {
     unwrap(sync("webview_set_title", { id: this.id, title }));
