@@ -24,6 +24,10 @@
       "cmd": "deno run scripts/dev.ts examples/multiple.ts",
       "desc": "run `multiple` example"
     },
+    "dev:perf": {
+      "cmd": "deno run scripts/dev.ts examples/perf.ts",
+      "desc": "run `perf` example"
+    },
     "dev:remote": {
       "cmd": "deno run scripts/dev.ts examples/remote.ts",
       "desc": "run `remote` example"
