@@ -10,7 +10,7 @@ crate-type = ["cdylib"]
 [dependencies]
 deno_core = "0.77.1"
 deno_json_op = "0.1.1"
-webview-sys = "0.6.0"
+webview-sys = { git = "https://github.com/Boscop/web-view", rev = "1c20b92" }
 
 [features]
 default = ["webview-sys/edge"]

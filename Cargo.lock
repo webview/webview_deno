@@ -693,8 +693,7 @@ dependencies = [
 [[package]]
 name = "webview-sys"
 version = "0.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d938595ad694c40284038a2b779d47c1e971dc4d33f008a907ad425762312f48"
+source = "git+https://github.com/Boscop/web-view?rev=1c20b92#1c20b9256aa786163fe4eed291f517eb5d3f02d5"
 dependencies = [
  "cc",
  "gdk-sys",
