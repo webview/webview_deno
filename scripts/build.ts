@@ -1,6 +1,6 @@
 import { requires, run } from "./_util.ts";
 
-export async function build(mshtml: boolean = Deno.args.includes("mshtml")) {
+export async function build(mshtml: boolean) {
   await requires("cargo");
 
   const command = ["cargo", "build", "--release"];
@@ -13,5 +13,5 @@ export async function build(mshtml: boolean = Deno.args.includes("mshtml")) {
 }
 
 if (import.meta.main) {
-  await build();
+  await build(Deno.args.includes("mshtml"));
 }

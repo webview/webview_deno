@@ -1,6 +1,6 @@
 import * as util from "./_util.ts";
 
-export async function run(file: string = Deno.args[0]) {
+export async function run(file: string) {
   await util.requires("deno");
 
   await util.run(
@@ -14,5 +14,5 @@ export async function run(file: string = Deno.args[0]) {
 }
 
 if (import.meta.main) {
-  await run();
+  await run(Deno.args[0]);
 }

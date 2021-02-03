@@ -12,10 +12,13 @@
 [webview](https://github.com/zserge/webview) using the
 [webview_rust](https://github.com/Boscop/web-view) library.
 
-Webview is a tiny cross-platform library to render **web-based GUIs for desktop applications**.
+Webview is a tiny cross-platform library to render **web-based GUIs for desktop
+applications**.
 
 ---
+
 > ⚠️ This project is still in an development. Expect breaking changes.
+
 ---
 
 ![Example Image](images/webview_deno.png)
@@ -76,9 +79,9 @@ used for the built in scripts found in the `denon.json` file.
 
 ### Building
 
-Building webview_deno can take a nontrivial amount of time depending on your operating system.
-After the first build most files will be cached so building time will be reduced.
-Building on Windows requires admin privileges.
+Building webview_deno can take a nontrivial amount of time depending on your
+operating system. After the first build most files will be cached so building
+time will be reduced. Building on Windows requires admin privileges.
 
 For a default build you can use the provided script:
 
@@ -97,10 +100,10 @@ deno run --unstable -A scripts/build.ts mshtml
 ### Running
 
 To run webview_deno without automatically downloading the binaries from
-[releases](https://github.com/webview/webview_deno/releases) you will need
-to use the environment variable `PLUGIN_URL` and set it to the path where the
-built binaries are located. This is usually `file://./target/release`.
-The process of running and using local binaries can be easier to using the
+[releases](https://github.com/webview/webview_deno/releases) you will need to
+use the environment variable `PLUGIN_URL` and set it to the path where the built
+binaries are located. This is usually `file://./target/release`. The process of
+running and using local binaries can be easier to using the
 [dev script](https://github.com/webview/webview_deno/tree/master/scripts/dev.ts):
 
 ```bash
@@ -109,12 +112,12 @@ deno run --unstable -A scripts/dev.ts examples/local.ts
 
 ## Environment variables
 
-- `PLUGIN_URL` - The URL of the plugin  
+- `PLUGIN_URL` - The URL of the plugin 
   Due to MSHTML (internet explorer) no longer being enabled by default, the only
   way to enable it is to set the `PLUGIN_URL` variable to the path of a binary
   build built with the `--no-default-features` flag or using
-  `deno --unstable -A scripts/build.ts mshtml`. This is usually `./target/release/`
-  when developing locally.
+  `deno --unstable -A scripts/build.ts mshtml`. This is usually
+  `./target/release/` when developing locally.
 - `DEBUG` - Disable cache and enable logs for `plug`. Used for debugging.
 
 ## Dependencies
@@ -133,8 +136,9 @@ deno run --unstable -A scripts/dev.ts examples/local.ts
 
 ### Contribution
 
-Pull request, issues and feedback are very welcome. Code style is formatted with `denon fmt`
-(which internally runs `deno fmt` and `cargo fmt`) and commit messages are done following 
+Pull request, issues and feedback are very welcome. Code style is formatted with
+`denon fmt` (which internally runs `deno fmt` and `cargo fmt`) and commit
+messages are done following
 [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) spec.
 
 ### Licence

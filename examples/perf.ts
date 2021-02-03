@@ -15,8 +15,8 @@ const webview = new Webview(
   { url: `data:text/html,${encodeURIComponent(html)}` },
 );
 
-await webview.run((event) => {  
-  switch(event) {
+await webview.run((event) => {
+  switch (event) {
     case "test":
       console.time();
       webview.eval("test();");
