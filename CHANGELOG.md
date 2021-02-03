@@ -2,8 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog], and this project adheres to
-[Semantic Versioning].
+The format is based on [Keep a Changelog],
+and this project adheres to [Semantic Versioning].
+
+## [0.5.6] - 2021-02-03
+
+### Features
+
+- add perf example ([`9b852cd`])
+
+### Bug Fixes
+
+- build ([`8af68f4`])
+- unbump webview-sys crate ([`c0d96d7`])
+- example ([`8114c4c`])
 
 ## [0.5.5] - 2020-12-04
 
@@ -98,6 +110,11 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 [keep a changelog]: https://keepachangelog.com/en/1.0.0/
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
+[0.5.6]: https://github.com/webview/webview_deno/compare/0.5.5...0.5.6
+[`9b852cd`]: https://github.com/webview/webview_deno/commit/9b852cd13f8b2528896285db89f1ba12122ddfb4
+[`8af68f4`]: https://github.com/webview/webview_deno/commit/8af68f4adb75dd1467815accd641b450708eed00
+[`c0d96d7`]: https://github.com/webview/webview_deno/commit/c0d96d756dca3d5296c025d42367adf137f2d17c
+[`8114c4c`]: https://github.com/webview/webview_deno/commit/8114c4cb639ed7a9d55c970edab0c99e3281d3d9
 [0.5.5]: https://github.com/webview/webview_deno/compare/0.5.4...0.5.5
 [0.5.4]: https://github.com/webview/webview_deno/compare/0.5.3...0.5.4
 [`ce18528`]: https://github.com/webview/webview_deno/commit/ce18528abbdf1ac6df52e5272b6f56633cb36d73
