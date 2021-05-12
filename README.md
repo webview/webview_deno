@@ -112,10 +112,10 @@ deno run --unstable -A scripts/dev.ts examples/local.ts
 
 ## Environment variables
 
-- `PLUGIN_URL` - The URL of the plugin 
-  Due to MSHTML (internet explorer) no longer being enabled by default, the only
-  way to enable it is to set the `PLUGIN_URL` variable to the path of a binary
-  build built with the `--no-default-features` flag or using
+- `PLUGIN_URL` - The URL of the plugin Due to MSHTML (internet explorer) no
+  longer being enabled by default, the only way to enable it is to set the
+  `PLUGIN_URL` variable to the path of a binary build built with the
+  `--no-default-features` flag or using
   `deno --unstable -A scripts/build.ts mshtml`. This is usually
   `./target/release/` when developing locally.
 - `DEBUG` - Disable cache and enable logs for `plug`. Used for debugging.

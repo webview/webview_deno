@@ -1,213 +1,72 @@
-import { sync, unwrap } from "./plugin.ts";
-import { delay } from "./deps.ts";
+import { Plug } from "./deps.ts";
 
-function debounce<T extends unknown[], R>(
-  func: (...args: T) => Promise<R>,
-  time: number,
-): (...args: T) => Promise<R> {
-  return async (...args) => {
-    const promise = func(...args);
-    const timer = delay(time);
-    const response = await promise;
-    await timer;
-    return response;
-  };
-}
+export type SizeHint = 0 | 1 | 2 | 3;
 
-export interface WebviewParams {
-  title: string;
-  url: string;
-  width: number;
-  height: number;
-  minWidth: number;
-  minHeight: number;
-  resizable: boolean;
-  debug: boolean;
-  frameless: boolean;
-  visible: boolean;
-}
-
-export interface RGBA {
-  r: number;
-  g: number;
-  b: number;
-  a: number;
-}
+export const SizeHint = {
+  NONE: 0,
+  MIN: 1,
+  MAX: 2,
+  FIXED: 3,
+} as const;
 
 /**
  * A Webview instance
  */
 export class Webview {
-  readonly id: bigint;
+  readonly rid: number;
 
-  /**
-   * Creates a new Webview instance
-   */
-  constructor({
-    title = "webview_deno",
-    url = "about:blank",
-    width = 800,
-    height = 600,
-    minWidth = 300,
-    minHeight = 300,
-    resizable = true,
-    debug = false,
-    frameless = false,
-    visible = true,
-  }: Partial<WebviewParams>) {
-    this.id = unwrap(sync("webview_new", {
-      title,
-      url,
-      width,
-      height,
-      minWidth,
-      minHeight,
-      resizable,
-      debug,
-      frameless,
-      visible,
-    }));
+  constructor(debug = false) {
+    this.rid = Plug.core.opSync("webview_create", debug);
   }
 
-  /**
-   * Frees the Webview instance
-   */
-  free() {
-    unwrap(sync("webview_free", { id: this.id }));
+  run() {
+    Plug.core.opSync("webview_run", this.rid);
   }
 
-  /**
-   * Exits the Webview instance
-   */
-  exit() {
-    unwrap(sync("webview_exit", { id: this.id }));
+  terminate() {
+    Plug.core.opSync("webview_terminate", this.rid);
   }
 
-  /**
-   * Exits and frees the Webview instance
-   */
-  drop() {
-    this.exit();
-    this.free();
+  setTitle(title: string) {
+    Plug.core.opSync("webview_set_title", [this.rid, title]);
   }
 
-  /**
-   * Evaluates the provided js in the Webview instance, returns false if unsuccessful
-   */
-  eval(js: string): boolean {
-    return unwrap(sync("webview_eval", { id: this.id, js })) === 0;
+  setSize(width: number, height: number, hints: SizeHint) {
+    Plug.core.opSync("webview_set_title", [this.rid, width, height, hints]);
   }
 
-  /**
-   * Iterates one step in the event loop, returns false if closed or terminated
-   */
-  loop(block = false): boolean {
-    return unwrap(sync("webview_loop", { id: this.id, block })) === 0;
+  navigate(url: string) {
+    Plug.core.opSync("webview_navigate", [this.rid, url]);
   }
 
-  /**
-   * Steps one step in the event loop popping all accumulated events from the stack
-   */
-  step(): string[] {
-    return unwrap(sync("webview_step", { id: this.id }));
+  init(js: string) {
+    Plug.core.opSync("webview_init", [this.rid, js]);
   }
 
-  /**
-   * Iterates over the event loop until closed or terminated without
-   * handling events
-   */
-  run(
-    callback?: (events: string) => unknown,
-    delta = 1000 / 60,
-  ): Promise<void> {
-    return new Promise((resolve) => {
-      const interval = setInterval(() => {
-        const success = this.loop();
+  eval(js: string) {
+    Plug.core.opSync("webview_eval", [this.rid, js]);
+  }
 
-        if (callback !== undefined) {
-          const events = this.step();
+  bind(name: string, callback: (seq: string, req: string) => void) {
+    Plug.core.opSync("webview_bind", [this.rid, name]);
 
-          for (const event of events) {
-            callback(event);
-          }
-        }
+    Plug.core.opAsync("webview_poll_next", this.rid).then((value) => {
+      if (value !== undefined) {
+        const [seq, req] = value as [string, string];
 
-        if (!success) {
-          resolve();
-          clearInterval(interval);
-        }
-      }, delta);
+        callback(seq, req);
+      } else {
+        throw new Error("Poll value is undefined");
+      }
     });
   }
 
-  /**
-   * Iterates over the event loop, yielding external invoke events as strings and
-   * returning once closed or terminated
-   */
-  async *iter(delta = 1000 / 60): AsyncIterableIterator<string> {
-    let finished = false;
-
-    const runner = debounce(async () => {
-      const success = this.loop();
-      const events = this.step();
-
-      if (!success) {
-        finished = true;
-      }
-
-      return events;
-    }, delta);
-
-    while (!finished) {
-      const events = await runner();
-
-      for (const event of events) {
-        yield event;
-      }
-    }
-  }
-
-  /**
-   * Sets the color of the title bar
-   */
-  setColor(
-    { r, g, b, a = 255 }: RGBA,
-  ) {
-    unwrap(sync("webview_set_color", { id: this.id, r, g, b, a }));
-  }
-
-  /**
-   * Enables or disables fullscreen
-   */
-  setFullscreen(fullscreen: boolean) {
-    unwrap(sync("webview_set_fullscreen", { id: this.id, fullscreen }));
-  }
-
-  /**
-   * Toggles window maximized
-   */
-  setMaximized(maximized: boolean) {
-    unwrap(sync("webview_set_maximized", { id: this.id, maximized }));
-  }
-
-  /**
-   * Toggles window minimized
-   */
-  setMinimized(minimized: boolean) {
-    unwrap(sync("webview_set_minimized", { id: this.id, minimized }));
-  }
-
-  /**
-   * Sets window title
-   */
-  setTitle(title: string) {
-    unwrap(sync("webview_set_title", { id: this.id, title }));
-  }
-
-  /**
-   * Sets window visibility
-   */
-  setVisible(visible: boolean) {
-    unwrap(sync("webview_set_visible", { id: this.id, visible }));
+  return(seq: string, status: number, result: string) {
+    Plug.core.opSync("webview_return", {
+      rid: this.rid,
+      seq,
+      status,
+      result,
+    });
   }
 }

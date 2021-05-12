@@ -1,357 +1,272 @@
+use std::borrow::Cow;
 use std::cell::RefCell;
-use std::collections::HashMap;
-use std::ffi::CStr;
-use std::ffi::CString;
-use std::os::raw::c_char;
-use std::os::raw::c_int;
-use std::os::raw::c_void;
+use std::rc::Rc;
 
 use deno_core::error::anyhow;
+use deno_core::error::bad_resource_id;
 use deno_core::error::AnyError;
+use deno_core::futures::channel::mpsc::channel;
+use deno_core::futures::channel::mpsc::Receiver;
+use deno_core::futures::channel::mpsc::Sender;
+use deno_core::futures::StreamExt;
+use deno_core::op_async;
+use deno_core::op_sync;
+use deno_core::serde::Deserialize;
+use deno_core::Extension;
+use deno_core::OpState;
+use deno_core::Resource;
+use deno_core::ResourceId;
+use deno_core::ZeroCopyBuf;
 
-use deno_core::plugin_api::Interface;
-use deno_core::plugin_api::Op;
-use deno_core::plugin_api::ZeroCopyBuf;
+use webview_official::SizeHint;
+use webview_official::Webview;
+use webview_official::Window;
 
-use deno_core::serde_json::json;
-use deno_core::serde_json::Value;
+type WebviewEvent = (String, String);
 
-use deno_json_op::json_op;
+struct WebviewResource {
+  inner: RefCell<Webview>,
+  events_rx: RefCell<Receiver<WebviewEvent>>,
+  events_tx: RefCell<Sender<WebviewEvent>>,
+}
 
-use webview_sys::CWebView;
+impl WebviewResource {
+  fn new(debug: bool, window: Option<&mut Window>) -> Self {
+    let (tx, rx) = channel::<(String, String)>(256);
+    WebviewResource {
+      inner: RefCell::new(Webview::create(debug, window)),
+      events_rx: RefCell::new(rx),
+      events_tx: RefCell::new(tx),
+    }
+  }
 
-thread_local! {
-  static INDEX: RefCell<u64> = RefCell::new(0);
-  static WEBVIEW_MAP: RefCell<HashMap<u64, *mut CWebView>> = RefCell::new(HashMap::new());
-  static STACK_MAP: RefCell<HashMap<u64, Vec<String>>> = RefCell::new(HashMap::new());
+  fn bind(&self, name: &str) {
+    let mut webview = self.inner.borrow_mut();
+
+    webview.bind(name, |seq, req| {
+      println!("{} {}", seq, req);
+      let _ = self
+        .events_tx
+        .borrow_mut()
+        .try_send((seq.to_string(), req.to_string()));
+    })
+  }
+
+  async fn next(&self) -> Option<WebviewEvent> {
+    self.events_rx.borrow_mut().next().await
+  }
+}
+
+impl Resource for WebviewResource {
+  fn name(&self) -> Cow<str> {
+    "webview".into()
+  }
+}
+
+#[derive(Deserialize)]
+struct StringArgs(ResourceId, String);
+
+#[derive(Deserialize)]
+struct SizeArgs {
+  rid: ResourceId,
+  width: i32,
+  height: i32,
+  size: i32,
+}
+
+#[derive(Deserialize)]
+struct ReturnArgs {
+  rid: ResourceId,
+  seq: String,
+  status: i32,
+  result: String,
 }
 
 #[no_mangle]
-pub fn deno_plugin_init(interface: &mut dyn Interface) {
-  interface.register_op("webview_free", webview_free);
-  interface.register_op("webview_new", webview_new);
-  interface.register_op("webview_exit", webview_exit);
-  interface.register_op("webview_eval", webview_eval);
-  interface.register_op("webview_loop", webview_loop);
-  interface.register_op("webview_step", webview_step);
-  interface.register_op("webview_set_color", webview_set_color);
-  interface.register_op("webview_set_fullscreen", webview_set_fullscreen);
-  interface.register_op("webview_set_maximized", webview_set_maximized);
-  interface.register_op("webview_set_minimized", webview_set_minimized);
-  interface.register_op("webview_set_title", webview_set_title);
-  interface.register_op("webview_set_visible", webview_set_visible);
+pub fn init() -> Extension {
+  Extension::builder()
+    .ops(vec![
+      ("webview_create", op_sync(webview_create)),
+      ("webview_run", op_sync(webview_run)),
+      ("webview_terminate", op_sync(webview_terminate)),
+      ("webview_set_title", op_sync(webview_set_title)),
+      ("webview_set_size", op_sync(webview_set_size)),
+      ("webview_navigate", op_sync(webview_navigate)),
+      ("webview_init", op_sync(webview_init)),
+      ("webview_eval", op_sync(webview_eval)),
+      ("webview_bind", op_sync(webview_bind)),
+      ("webview_return", op_sync(webview_return)),
+      ("webview_poll_next", op_async(webview_poll_next)),
+    ])
+    .build()
 }
 
-#[json_op]
-fn webview_free(
-  json: Value,
-  _zero_copy: &mut [ZeroCopyBuf],
-) -> Result<Value, AnyError> {
-  let id = json["id"].as_u64().unwrap();
-
-  WEBVIEW_MAP.with(|cell| {
-    let webview_map = cell.borrow();
-
-    if let Some(webview) = webview_map.get(&id) {
-      unsafe {
-        webview_sys::webview_free(*webview);
-      }
-
-      Ok(json!(()))
-    } else {
-      Err(anyhow!("Could not find webview with id: {}", id))
-    }
-  })
+fn webview_create(
+  state: &mut OpState,
+  debug: bool,
+  _zero_copy: Option<ZeroCopyBuf>,
+) -> Result<ResourceId, AnyError> {
+  Ok(state.resource_table.add(WebviewResource::new(debug, None)))
 }
 
-#[json_op]
-fn webview_new(
-  json: Value,
-  _zero_copy: &mut [ZeroCopyBuf],
-) -> Result<Value, AnyError> {
-  let title = CString::new(json["title"].as_str().unwrap()).unwrap();
-  let url = CString::new(json["url"].as_str().unwrap()).unwrap();
-  let width = json["width"].as_i64().unwrap() as c_int;
-  let height = json["height"].as_i64().unwrap() as c_int;
-  let min_width = json["minWidth"].as_i64().unwrap() as c_int;
-  let min_height = json["minHeight"].as_i64().unwrap() as c_int;
-  let resizable = json["resizable"].as_bool().unwrap() as c_int;
-  let debug = json["debug"].as_bool().unwrap() as c_int;
-  let frameless = json["frameless"].as_bool().unwrap() as c_int;
-  let visible = json["visible"].as_bool().unwrap() as c_int;
+fn webview_run(
+  state: &mut OpState,
+  rid: ResourceId,
+  _zero_copy: Option<ZeroCopyBuf>,
+) -> Result<(), AnyError> {
+  let webview = state
+    .resource_table
+    .get::<WebviewResource>(rid)
+    .ok_or_else(bad_resource_id)?;
 
-  let mut id = 0;
-  INDEX.with(|cell| {
-    id = cell.replace_with(|&mut i| i + 1);
-  });
+  webview.inner.borrow_mut().run();
 
-  WEBVIEW_MAP.with(|cell| {
-    cell.borrow_mut().insert(id, unsafe {
-      webview_sys::webview_new(
-        title.as_ptr(),
-        url.as_ptr(),
-        width,
-        height,
-        resizable,
-        debug,
-        frameless,
-        visible,
-        min_width,
-        min_height,
-        Some(ffi_invoke_handler),
-        id as *mut c_void,
-      )
-    });
-  });
-
-  STACK_MAP.with(|cell| {
-    cell.borrow_mut().insert(id, Vec::new());
-  });
-
-  Ok(json!(id))
+  Ok(())
 }
 
-extern "C" fn ffi_invoke_handler(webview: *mut CWebView, arg: *const c_char) {
-  let arg = unsafe { CStr::from_ptr(arg).to_string_lossy().to_string() };
-  let id = unsafe { webview_sys::webview_get_user_data(webview) as u64 };
-  // println!("{}", id);
+fn webview_terminate(
+  state: &mut OpState,
+  rid: ResourceId,
+  _zero_copy: Option<ZeroCopyBuf>,
+) -> Result<(), AnyError> {
+  let webview = state
+    .resource_table
+    .get::<WebviewResource>(rid)
+    .ok_or_else(bad_resource_id)?;
 
-  STACK_MAP.with(|cell| {
-    let mut stack_map = cell.borrow_mut();
+  webview.inner.borrow_mut().terminate();
 
-    // println!("{:?}", stack_map);
-
-    if let Some(stack) = stack_map.get_mut(&id) {
-      stack.push(arg);
-    } else {
-      panic!(
-        "Could not find stack with id {} to push '{}' onto stack",
-        id, arg
-      );
-    }
-  });
+  Ok(())
 }
 
-#[json_op]
-fn webview_loop(
-  json: Value,
-  _zero_copy: &mut [ZeroCopyBuf],
-) -> Result<Value, AnyError> {
-  let id = json["id"].as_u64().unwrap();
-  let block = json["block"].as_bool().unwrap() as c_int;
-
-  WEBVIEW_MAP.with(|cell| {
-    let webview_map = cell.borrow();
-
-    if let Some(webview) = webview_map.get(&id) {
-      let res = unsafe { webview_sys::webview_loop(*webview, block) };
-
-      Ok(json!(res))
-    } else {
-      Err(anyhow!("Could not find webview with id: {}", id))
-    }
-  })
-}
-
-#[json_op]
-fn webview_step(
-  json: Value,
-  _zero_copy: &mut [ZeroCopyBuf],
-) -> Result<Value, AnyError> {
-  let id = json["id"].as_u64().unwrap();
-
-  STACK_MAP.with(|cell| {
-    let mut stack_map = cell.borrow_mut();
-    if let Some(stack) = stack_map.get_mut(&id) {
-      let ret = stack.clone();
-      stack.clear();
-      Ok(json!(ret))
-    } else {
-      Err(anyhow!("Could not find stack with id: {}", id))
-    }
-  })
-}
-
-#[json_op]
-fn webview_exit(
-  json: Value,
-  _zero_copy: &mut [ZeroCopyBuf],
-) -> Result<Value, AnyError> {
-  let id = json["id"].as_u64().unwrap();
-
-  WEBVIEW_MAP.with(|cell| {
-    let webview_map = cell.borrow();
-
-    if let Some(webview) = webview_map.get(&id) {
-      unsafe {
-        webview_sys::webview_exit(*webview);
-      }
-
-      Ok(json!(()))
-    } else {
-      Err(anyhow!("Could not find webview with id: {}", id))
-    }
-  })
-}
-
-#[json_op]
-fn webview_eval(
-  json: Value,
-  _zero_copy: &mut [ZeroCopyBuf],
-) -> Result<Value, AnyError> {
-  let id = json["id"].as_u64().unwrap();
-  let js = CString::new(json["js"].as_str().unwrap()).unwrap();
-
-  WEBVIEW_MAP.with(|cell| {
-    let webview_map = cell.borrow();
-
-    if let Some(webview) = webview_map.get(&id) {
-      let res = unsafe { webview_sys::webview_eval(*webview, js.as_ptr()) };
-
-      Ok(json!(res))
-    } else {
-      Err(anyhow!("Could not find webview with id: {}", id))
-    }
-  })
-}
-
-#[json_op]
 fn webview_set_title(
-  json: Value,
-  _zero_copy: &mut [ZeroCopyBuf],
-) -> Result<Value, AnyError> {
-  let id = json["id"].as_u64().unwrap();
-  let title = CString::new(json["title"].as_str().unwrap()).unwrap();
+  state: &mut OpState,
+  args: StringArgs,
+  _zero_copy: Option<ZeroCopyBuf>,
+) -> Result<(), AnyError> {
+  let webview = state
+    .resource_table
+    .get::<WebviewResource>(args.0)
+    .ok_or_else(bad_resource_id)?;
 
-  WEBVIEW_MAP.with(|cell| {
-    let webview_map = cell.borrow();
+  webview.inner.borrow_mut().set_title(&args.1);
 
-    if let Some(webview) = webview_map.get(&id) {
-      unsafe {
-        webview_sys::webview_set_title(*webview, title.as_ptr());
-      }
-
-      Ok(json!(()))
-    } else {
-      Err(anyhow!("Could not find webview with id: {}", id))
-    }
-  })
+  Ok(())
 }
 
-#[json_op]
-fn webview_set_fullscreen(
-  json: Value,
-  _zero_copy: &mut [ZeroCopyBuf],
-) -> Result<Value, AnyError> {
-  let id = json["id"].as_u64().unwrap();
-  let fullscreen = json["fullscreen"].as_bool().unwrap() as c_int;
+fn webview_set_size(
+  state: &mut OpState,
+  args: SizeArgs,
+  _zero_copy: Option<ZeroCopyBuf>,
+) -> Result<(), AnyError> {
+  let webview = state
+    .resource_table
+    .get::<WebviewResource>(args.rid)
+    .ok_or_else(bad_resource_id)?;
 
-  WEBVIEW_MAP.with(|cell| {
-    let webview_map = cell.borrow();
+  webview.inner.borrow_mut().set_size(
+    args.width,
+    args.height,
+    match args.size {
+      0 => SizeHint::NONE,
+      1 => SizeHint::MIN,
+      2 => SizeHint::MAX,
+      3 => SizeHint::FIXED,
+      _ => return Err(anyhow!("Size hint needs to be in range 0..3")),
+    },
+  );
 
-    if let Some(webview) = webview_map.get(&id) {
-      unsafe {
-        webview_sys::webview_set_fullscreen(*webview, fullscreen);
-      }
-
-      Ok(json!(()))
-    } else {
-      Err(anyhow!("Could not find webview with id: {}", id))
-    }
-  })
+  Ok(())
 }
 
-#[json_op]
-fn webview_set_maximized(
-  json: Value,
-  _zero_copy: &mut [ZeroCopyBuf],
-) -> Result<Value, AnyError> {
-  let id = json["id"].as_u64().unwrap();
-  let maximized = json["maximized"].as_bool().unwrap() as c_int;
+fn webview_navigate(
+  state: &mut OpState,
+  args: StringArgs,
+  _zero_copy: Option<ZeroCopyBuf>,
+) -> Result<(), AnyError> {
+  let webview = state
+    .resource_table
+    .get::<WebviewResource>(args.0)
+    .ok_or_else(bad_resource_id)?;
 
-  WEBVIEW_MAP.with(|cell| {
-    let webview_map = cell.borrow();
+  webview.inner.borrow_mut().navigate(&args.1);
 
-    if let Some(webview) = webview_map.get(&id) {
-      unsafe {
-        webview_sys::webview_set_maximized(*webview, maximized);
-      }
-
-      Ok(json!(()))
-    } else {
-      Err(anyhow!("Could not find webview with id: {}", id))
-    }
-  })
+  Ok(())
 }
 
-#[json_op]
-fn webview_set_minimized(
-  json: Value,
-  _zero_copy: &mut [ZeroCopyBuf],
-) -> Result<Value, AnyError> {
-  let id = json["id"].as_u64().unwrap();
-  let minimized = json["minimized"].as_bool().unwrap() as c_int;
+fn webview_init(
+  state: &mut OpState,
+  args: StringArgs,
+  _zero_copy: Option<ZeroCopyBuf>,
+) -> Result<(), AnyError> {
+  let webview = state
+    .resource_table
+    .get::<WebviewResource>(args.0)
+    .ok_or_else(bad_resource_id)?;
 
-  WEBVIEW_MAP.with(|cell| {
-    let webview_map = cell.borrow();
+  webview.inner.borrow_mut().init(&args.1);
 
-    if let Some(webview) = webview_map.get(&id) {
-      unsafe {
-        webview_sys::webview_set_minimized(*webview, minimized);
-      }
-
-      Ok(json!(()))
-    } else {
-      Err(anyhow!("Could not find webview with id: {}", id))
-    }
-  })
+  Ok(())
 }
 
-#[json_op]
-fn webview_set_visible(
-  json: Value,
-  _zero_copy: &mut [ZeroCopyBuf],
-) -> Result<Value, AnyError> {
-  let id = json["id"].as_u64().unwrap();
-  let visible = json["visible"].as_bool().unwrap() as c_int;
+fn webview_eval(
+  state: &mut OpState,
+  args: StringArgs,
+  _zero_copy: Option<ZeroCopyBuf>,
+) -> Result<(), AnyError> {
+  let webview = state
+    .resource_table
+    .get::<WebviewResource>(args.0)
+    .ok_or_else(bad_resource_id)?;
 
-  WEBVIEW_MAP.with(|cell| {
-    let webview_map = cell.borrow();
+  webview.inner.borrow_mut().eval(&args.1);
 
-    if let Some(webview) = webview_map.get(&id) {
-      unsafe {
-        webview_sys::webview_set_visible(*webview, visible);
-      }
-
-      Ok(json!(()))
-    } else {
-      Err(anyhow!("Could not find webview with id: {}", id))
-    }
-  })
+  Ok(())
 }
 
-#[json_op]
-fn webview_set_color(
-  json: Value,
-  _zero_copy: &mut [ZeroCopyBuf],
-) -> Result<Value, AnyError> {
-  let id = json["id"].as_u64().unwrap();
-  let r = json["r"].as_u64().unwrap() as u8;
-  let g = json["g"].as_u64().unwrap() as u8;
-  let b = json["b"].as_u64().unwrap() as u8;
-  let a = json["a"].as_u64().unwrap() as u8;
+fn webview_bind(
+  state: &mut OpState,
+  args: StringArgs,
+  _zero_copy: Option<ZeroCopyBuf>,
+) -> Result<(), AnyError> {
+  let webview = state
+    .resource_table
+    .get::<WebviewResource>(args.0)
+    .ok_or_else(bad_resource_id)?;
 
-  WEBVIEW_MAP.with(|cell| {
-    let webview_map = cell.borrow();
+  webview.bind(&args.1);
 
-    if let Some(webview) = webview_map.get(&id) {
-      unsafe {
-        webview_sys::webview_set_color(*webview, r, g, b, a);
-      }
+  Ok(())
+}
 
-      Ok(json!(()))
-    } else {
-      Err(anyhow!("Could not find webview with id: {}", id))
-    }
-  })
+fn webview_return(
+  state: &mut OpState,
+  args: ReturnArgs,
+  _zero_copy: Option<ZeroCopyBuf>,
+) -> Result<(), AnyError> {
+  let webview = state
+    .resource_table
+    .get::<WebviewResource>(args.rid)
+    .ok_or_else(bad_resource_id)?;
+
+  webview
+    .inner
+    .borrow_mut()
+    .r#return(&args.seq, args.status, &args.result);
+
+  Ok(())
+}
+
+async fn webview_poll_next(
+  state: Rc<RefCell<OpState>>,
+  rid: ResourceId,
+  _zero_copy: Option<ZeroCopyBuf>,
+) -> Result<Option<(String, String)>, AnyError> {
+  let webview = state
+    .borrow_mut()
+    .resource_table
+    .get::<WebviewResource>(rid)
+    .ok_or_else(bad_resource_id)?;
+
+  Ok(webview.next().await)
 }

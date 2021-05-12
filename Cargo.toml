@@ -1,6 +1,6 @@
 [package]
 name = "webview_deno"
-version = "0.5.6"
+version = "0.6.0-pre.0"
 authors = ["Elias Sjögreen", "Filippo Rossi"]
 edition = "2018"
 
@@ -8,9 +8,6 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-deno_core = "0.77.1"
-deno_json_op = "0.1.1"
-webview-sys = { git = "https://github.com/Boscop/web-view", rev = "1c20b92" }
-
-[features]
-default = ["webview-sys/edge"]
+deno_core = "0.87.0"
+webview_official = "0.2.0"
+serde = "1.0.125"
