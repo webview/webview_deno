@@ -21,18 +21,16 @@ export class Webview {
   }
 
   async run() {
-    const promise = Plug.core.opAsync("webview_run", this.rid);
+    await Plug.core.opAsync("webview_run", this.rid);
 
-    for await (const { name, seq, req } of this.poll()) {
-      try {
-        const res = this.#callbacks.get(name)!(...JSON.parse(req));
-        this.return(seq, 0, JSON.stringify(res));
-      } catch (err) {
-        this.return(seq, 1, err);
-      }
-    }
-
-    await promise;
+    // for await (const { name, seq, req } of this.poll()) {
+    //   try {
+    //     const res = this.#callbacks.get(name)!(...JSON.parse(req));
+    //     this.return(seq, 0, JSON.stringify(res));
+    //   } catch (err) {
+    //     this.return(seq, 1, err);
+    //   }
+    // }
   }
 
   terminate() {

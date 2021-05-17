@@ -18,14 +18,6 @@ if (Plug.os === "windows") {
 
   const local = new URL(WEBVIEW2LOADER, import.meta.url);
   await Deno.copyFile(file.path, local);
-
-  // @ts-ignore TS2304
-  if (typeof window !== "undefined") {
-    // @ts-ignore TS2304
-    window.onunload = async () => {
-      await Deno.remove(local);
-    };
-  }
 }
 
 await Plug.prepare({

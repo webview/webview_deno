@@ -126,13 +126,14 @@ async fn webview_run(
   rid: ResourceId,
   _zero_copy: Option<ZeroCopyBuf>,
 ) -> Result<(), AnyError> {
-  let webview = state
+  let resource = state
     .borrow()
     .resource_table
     .get::<WebviewResource>(rid)
     .ok_or_else(bad_resource_id)?;
+  let mut webview = resource.inner.borrow_mut();
 
-  webview.inner.borrow_mut().run();
+  webview.run();
 
   Ok(())
 }
@@ -142,12 +143,13 @@ fn webview_terminate(
   rid: ResourceId,
   _zero_copy: Option<ZeroCopyBuf>,
 ) -> Result<(), AnyError> {
-  let webview = state
+  let resource = state
     .resource_table
     .get::<WebviewResource>(rid)
     .ok_or_else(bad_resource_id)?;
+  let mut webview = resource.inner.borrow_mut();
 
-  webview.inner.borrow_mut().terminate();
+  webview.terminate();
 
   Ok(())
 }
@@ -157,12 +159,13 @@ fn webview_set_title(
   args: StringArgs,
   _zero_copy: Option<ZeroCopyBuf>,
 ) -> Result<(), AnyError> {
-  let webview = state
+  let resource = state
     .resource_table
     .get::<WebviewResource>(args.rid)
     .ok_or_else(bad_resource_id)?;
+  let mut webview = resource.inner.borrow_mut();
 
-  webview.inner.borrow_mut().set_title(&args.val);
+  webview.set_title(&args.val);
 
   Ok(())
 }
@@ -172,12 +175,13 @@ fn webview_set_size(
   args: SizeArgs,
   _zero_copy: Option<ZeroCopyBuf>,
 ) -> Result<(), AnyError> {
-  let webview = state
+  let resource = state
     .resource_table
     .get::<WebviewResource>(args.rid)
     .ok_or_else(bad_resource_id)?;
+  let mut webview = resource.inner.borrow_mut();
 
-  webview.inner.borrow_mut().set_size(
+  webview.set_size(
     args.width,
     args.height,
     match args.size {
@@ -197,12 +201,13 @@ fn webview_navigate(
   args: StringArgs,
   _zero_copy: Option<ZeroCopyBuf>,
 ) -> Result<(), AnyError> {
-  let webview = state
+  let resource = state
     .resource_table
     .get::<WebviewResource>(args.rid)
     .ok_or_else(bad_resource_id)?;
+  let mut webview = resource.inner.borrow_mut();
 
-  webview.inner.borrow_mut().navigate(&args.val);
+  webview.navigate(&args.val);
 
   Ok(())
 }
@@ -212,12 +217,13 @@ fn webview_init(
   args: StringArgs,
   _zero_copy: Option<ZeroCopyBuf>,
 ) -> Result<(), AnyError> {
-  let webview = state
+  let resource = state
     .resource_table
     .get::<WebviewResource>(args.rid)
     .ok_or_else(bad_resource_id)?;
+  let mut webview = resource.inner.borrow_mut();
 
-  webview.inner.borrow_mut().init(&args.val);
+  webview.init(&args.val);
 
   Ok(())
 }
@@ -227,12 +233,13 @@ fn webview_eval(
   args: StringArgs,
   _zero_copy: Option<ZeroCopyBuf>,
 ) -> Result<(), AnyError> {
-  let webview = state
+  let resource = state
     .resource_table
     .get::<WebviewResource>(args.rid)
     .ok_or_else(bad_resource_id)?;
+  let mut webview = resource.inner.borrow_mut();
 
-  webview.inner.borrow_mut().eval(&args.val);
+  webview.eval(&args.val);
 
   Ok(())
 }
@@ -257,15 +264,13 @@ fn webview_return(
   args: ReturnArgs,
   _zero_copy: Option<ZeroCopyBuf>,
 ) -> Result<(), AnyError> {
-  let webview = state
+  let resource = state
     .resource_table
     .get::<WebviewResource>(args.rid)
     .ok_or_else(bad_resource_id)?;
+  let webview = resource.inner.borrow();
 
-  webview
-    .inner
-    .borrow()
-    .r#return(&args.seq, args.status, &args.result);
+  webview.r#return(&args.seq, args.status, &args.result);
 
   Ok(())
 }

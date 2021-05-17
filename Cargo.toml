@@ -8,6 +8,6 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-deno_core = "0.87.0"
+deno_core = "0.88.0"
 webview_official = "0.2.0"
 serde = "1.0.125"
