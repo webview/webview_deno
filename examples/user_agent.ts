@@ -8,7 +8,7 @@ const html = `
   </html>
 `;
 
-const webview = new Webview(
-  { url: `data:text/html,${encodeURIComponent(html)}` },
-);
+const webview = new Webview();
+webview.navigate(`data:text/html,${encodeURIComponent(html)}`);
+
 await webview.run();

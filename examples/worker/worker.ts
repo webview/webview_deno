@@ -1,5 +1,4 @@
 import { Webview } from "../../mod.ts";
-import { unload } from "../../plugin.ts";
 
 const html = `
   <html>
@@ -9,14 +8,12 @@ const html = `
   </html>
 `;
 
-const webview = new Webview(
-  { url: `data:text/html,${encodeURIComponent(html)}` },
-);
+const webview = new Webview();
+webview.navigate(`data:text/html,${encodeURIComponent(html)}`)
 
 onmessage = (event) => {
   if (event.data === "close") {
-    webview.drop();
-    unload();
+    webview.terminate();
     self.close();
   }
 };

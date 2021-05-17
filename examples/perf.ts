@@ -11,18 +11,7 @@ const html = `
   </html>
 `;
 
-const webview = new Webview(
-  { url: `data:text/html,${encodeURIComponent(html)}` },
-);
+const webview = new Webview();
+webview.navigate(`data:text/html,${encodeURIComponent(html)}`);
 
-await webview.run((event) => {
-  switch (event) {
-    case "test":
-      console.time();
-      webview.eval("test();");
-      break;
-    case "finish":
-      console.timeEnd();
-      break;
-  }
-});
+await webview.run();

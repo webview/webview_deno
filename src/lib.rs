@@ -1,7 +1,3 @@
-use std::borrow::Cow;
-use std::cell::RefCell;
-use std::rc::Rc;
-
 use deno_core::error::anyhow;
 use deno_core::error::bad_resource_id;
 use deno_core::error::AnyError;
@@ -12,48 +8,61 @@ use deno_core::futures::StreamExt;
 use deno_core::op_async;
 use deno_core::op_sync;
 use deno_core::serde::Deserialize;
+use deno_core::serde::Serialize;
 use deno_core::Extension;
 use deno_core::OpState;
 use deno_core::Resource;
 use deno_core::ResourceId;
 use deno_core::ZeroCopyBuf;
 
+use std::borrow::Cow;
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use webview_official::SizeHint;
 use webview_official::Webview;
 use webview_official::Window;
 
-type WebviewEvent = (String, String);
+#[derive(Serialize, Clone)]
+struct WebviewEvent {
+  name: String,
+  seq: String,
+  req: String,
+}
 
 struct WebviewResource {
   inner: RefCell<Webview>,
-  events_rx: RefCell<Receiver<WebviewEvent>>,
-  events_tx: RefCell<Sender<WebviewEvent>>,
+  event_tx: Sender<WebviewEvent>,
+  event_rx: RefCell<Receiver<WebviewEvent>>,
 }
 
 impl WebviewResource {
   fn new(debug: bool, window: Option<&mut Window>) -> Self {
-    let (tx, rx) = channel::<(String, String)>(256);
+    let (tx, rx) = channel::<WebviewEvent>(1);
     WebviewResource {
       inner: RefCell::new(Webview::create(debug, window)),
-      events_rx: RefCell::new(rx),
-      events_tx: RefCell::new(tx),
+      event_tx: tx,
+      event_rx: RefCell::new(rx),
     }
   }
 
   fn bind(&self, name: &str) {
     let mut webview = self.inner.borrow_mut();
+    let mut tx = self.event_tx.clone();
 
-    webview.bind(name, |seq, req| {
-      println!("{} {}", seq, req);
-      let _ = self
-        .events_tx
-        .borrow_mut()
-        .try_send((seq.to_string(), req.to_string()));
-    })
+    webview.bind(name, move |seq, req| {
+      // println!("{} {}", seq, req);
+      tx.try_send(WebviewEvent {
+        name: name.to_string(),
+        seq: seq.to_string(),
+        req: req.to_string(),
+      })
+      .unwrap();
+    });
   }
 
-  async fn next(&self) -> Option<WebviewEvent> {
-    self.events_rx.borrow_mut().next().await
+  async fn next_event(&self) -> Option<WebviewEvent> {
+    self.event_rx.borrow_mut().next().await
   }
 }
 
@@ -63,8 +72,11 @@ impl Resource for WebviewResource {
   }
 }
 
-#[derive(Deserialize)]
-struct StringArgs(ResourceId, String);
+#[derive(Deserialize, Debug)]
+struct StringArgs {
+  rid: ResourceId,
+  val: String,
+}
 
 #[derive(Deserialize)]
 struct SizeArgs {
@@ -87,7 +99,7 @@ pub fn init() -> Extension {
   Extension::builder()
     .ops(vec![
       ("webview_create", op_sync(webview_create)),
-      ("webview_run", op_sync(webview_run)),
+      ("webview_run", op_async(webview_run)),
       ("webview_terminate", op_sync(webview_terminate)),
       ("webview_set_title", op_sync(webview_set_title)),
       ("webview_set_size", op_sync(webview_set_size)),
@@ -109,12 +121,13 @@ fn webview_create(
   Ok(state.resource_table.add(WebviewResource::new(debug, None)))
 }
 
-fn webview_run(
-  state: &mut OpState,
+async fn webview_run(
+  state: Rc<RefCell<OpState>>,
   rid: ResourceId,
   _zero_copy: Option<ZeroCopyBuf>,
 ) -> Result<(), AnyError> {
   let webview = state
+    .borrow()
     .resource_table
     .get::<WebviewResource>(rid)
     .ok_or_else(bad_resource_id)?;
@@ -146,10 +159,10 @@ fn webview_set_title(
 ) -> Result<(), AnyError> {
   let webview = state
     .resource_table
-    .get::<WebviewResource>(args.0)
+    .get::<WebviewResource>(args.rid)
     .ok_or_else(bad_resource_id)?;
 
-  webview.inner.borrow_mut().set_title(&args.1);
+  webview.inner.borrow_mut().set_title(&args.val);
 
   Ok(())
 }
@@ -186,10 +199,10 @@ fn webview_navigate(
 ) -> Result<(), AnyError> {
   let webview = state
     .resource_table
-    .get::<WebviewResource>(args.0)
+    .get::<WebviewResource>(args.rid)
     .ok_or_else(bad_resource_id)?;
 
-  webview.inner.borrow_mut().navigate(&args.1);
+  webview.inner.borrow_mut().navigate(&args.val);
 
   Ok(())
 }
@@ -201,10 +214,10 @@ fn webview_init(
 ) -> Result<(), AnyError> {
   let webview = state
     .resource_table
-    .get::<WebviewResource>(args.0)
+    .get::<WebviewResource>(args.rid)
     .ok_or_else(bad_resource_id)?;
 
-  webview.inner.borrow_mut().init(&args.1);
+  webview.inner.borrow_mut().init(&args.val);
 
   Ok(())
 }
@@ -216,10 +229,10 @@ fn webview_eval(
 ) -> Result<(), AnyError> {
   let webview = state
     .resource_table
-    .get::<WebviewResource>(args.0)
+    .get::<WebviewResource>(args.rid)
     .ok_or_else(bad_resource_id)?;
 
-  webview.inner.borrow_mut().eval(&args.1);
+  webview.inner.borrow_mut().eval(&args.val);
 
   Ok(())
 }
@@ -231,10 +244,10 @@ fn webview_bind(
 ) -> Result<(), AnyError> {
   let webview = state
     .resource_table
-    .get::<WebviewResource>(args.0)
+    .get::<WebviewResource>(args.rid)
     .ok_or_else(bad_resource_id)?;
 
-  webview.bind(&args.1);
+  webview.bind(&args.val);
 
   Ok(())
 }
@@ -251,7 +264,7 @@ fn webview_return(
 
   webview
     .inner
-    .borrow_mut()
+    .borrow()
     .r#return(&args.seq, args.status, &args.result);
 
   Ok(())
@@ -261,12 +274,12 @@ async fn webview_poll_next(
   state: Rc<RefCell<OpState>>,
   rid: ResourceId,
   _zero_copy: Option<ZeroCopyBuf>,
-) -> Result<Option<(String, String)>, AnyError> {
+) -> Result<Option<WebviewEvent>, AnyError> {
   let webview = state
-    .borrow_mut()
+    .borrow()
     .resource_table
     .get::<WebviewResource>(rid)
     .ok_or_else(bad_resource_id)?;
 
-  Ok(webview.next().await)
+  Ok(webview.next_event().await)
 }

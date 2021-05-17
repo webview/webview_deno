@@ -3,19 +3,17 @@ import { Webview } from "../mod.ts";
 const html = `
   <html>
   <body>
-    <button onclick="external.invoke('A')">A</button>
-    <button onclick="external.invoke('B')">B</button>
-    <button onclick="external.invoke('C')">C</button>
+    <button onclick="setTitle('A')">A</button>
+    <button onclick="setTitle('B')">B</button>
+    <button onclick="setTitle('C')">C</button>
   </body>
   </html>
 `;
 
-const webview = new Webview(
-  { url: `data:text/html,${encodeURIComponent(html)}` },
-);
+const webview = new Webview();
+webview.bind("setTitle", (title: string) => {
+  webview.setTitle(title);
+});
+webview.navigate(`data:text/html,${encodeURIComponent(html)}`);
 
-for await (const event of webview.iter()) {
-  webview.setTitle(event);
-}
-
-// await webview.run((event) => webview.setTitle(event));
+await webview.run();

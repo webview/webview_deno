@@ -7,3 +7,6 @@ target/
 
 # plugin cache
 .deno_plugins/
+
+# windows dependency
+WebView2Loader.dll

@@ -14,13 +14,25 @@ export const SizeHint = {
  */
 export class Webview {
   readonly rid: number;
+  #callbacks: Map<string, (...args: unknown[]) => unknown> = new Map();
 
   constructor(debug = false) {
     this.rid = Plug.core.opSync("webview_create", debug);
   }
 
-  run() {
-    Plug.core.opSync("webview_run", this.rid);
+  async run() {
+    const promise = Plug.core.opAsync("webview_run", this.rid);
+
+    for await (const { name, seq, req } of this.poll()) {
+      try {
+        const res = this.#callbacks.get(name)!(...JSON.parse(req));
+        this.return(seq, 0, JSON.stringify(res));
+      } catch (err) {
+        this.return(seq, 1, err);
+      }
+    }
+
+    await promise;
   }
 
   terminate() {
@@ -28,7 +40,7 @@ export class Webview {
   }
 
   setTitle(title: string) {
-    Plug.core.opSync("webview_set_title", [this.rid, title]);
+    Plug.core.opSync("webview_set_title", { rid: this.rid, val: title });
   }
 
   setSize(width: number, height: number, hints: SizeHint) {
@@ -36,29 +48,21 @@ export class Webview {
   }
 
   navigate(url: string) {
-    Plug.core.opSync("webview_navigate", [this.rid, url]);
+    Plug.core.opSync("webview_navigate", { rid: this.rid, val: url });
   }
 
   init(js: string) {
-    Plug.core.opSync("webview_init", [this.rid, js]);
+    Plug.core.opSync("webview_init", { rid: this.rid, val: js });
   }
 
   eval(js: string) {
-    Plug.core.opSync("webview_eval", [this.rid, js]);
+    Plug.core.opSync("webview_eval", { rid: this.rid, val: js });
   }
 
-  bind(name: string, callback: (seq: string, req: string) => void) {
-    Plug.core.opSync("webview_bind", [this.rid, name]);
+  bind<A extends unknown[], R>(name: string, callback: (...args: A) => R) {
+    Plug.core.opSync("webview_bind", { rid: this.rid, val: name });
 
-    Plug.core.opAsync("webview_poll_next", this.rid).then((value) => {
-      if (value !== undefined) {
-        const [seq, req] = value as [string, string];
-
-        callback(seq, req);
-      } else {
-        throw new Error("Poll value is undefined");
-      }
-    });
+    this.#callbacks.set(name, callback as (...args: unknown[]) => unknown);
   }
 
   return(seq: string, status: number, result: string) {
@@ -68,5 +72,18 @@ export class Webview {
       status,
       result,
     });
+  }
+
+  async *poll() {
+    while (true) {
+      const event: undefined | { name: string; seq: string; req: string } =
+        await Plug.core.opAsync("webview_poll_next", this.rid);
+
+      if (event !== undefined) {
+        yield event;
+      } else {
+        break;
+      }
+    }
   }
 }
