@@ -1,0 +1,1 @@
+cd webview/ && g++ webview.cc -fpic -shared -o libwebview.so $(pkg-config --cflags --libs gtk+-3.0 webkit2gtk-4.0)

@@ -10,12 +10,10 @@ const html = `
   </html>
 `;
 
-const webview = new Webview(
-  { url: `data:text/html,${encodeURIComponent(html)}` },
-);
-
+const webview = new Webview();
+webview.navigate(`data:text/html,${encodeURIComponent(html)}`);
 for await (const event of webview.iter()) {
-  webview.setTitle(event);
+  webview.title = event;
 }
 
 // await webview.run((event) => webview.setTitle(event));
