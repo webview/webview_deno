@@ -1,12 +1,12 @@
 import sys from "./ffi.ts";
 
-function encode(value: string): Deno.UnsafePointer {
+function encode(value: string) {
   const encoded = new TextEncoder().encode(value);
   const buffer = new Uint8Array(encoded.byteLength + 1);
   buffer.set(encoded, 0);
 
   buffer[buffer.byteLength - 1] = 0x00;
-  return Deno.UnsafePointer.of(buffer);
+  return buffer;
 }
 
 export type SizeHint = 0 | 1 | 2 | 3;
@@ -19,7 +19,7 @@ export const SizeHint = {
 } as const;
 
 export class Webview {
-  #handle: Deno.UnsafePointer | null;
+  #handle: Deno.UnsafePointer | null = null;
   #url?: string;
 
   get unsafeHandle() {
@@ -32,29 +32,63 @@ export class Webview {
   }
 
   constructor() {
-    this.#handle = sys.symbols.webview_create(0, null) as Deno.UnsafePointer;
+    this.#handle = sys.symbols.deno_webview_create(
+      0,
+      null,
+    ) as Deno.UnsafePointer;
   }
 
   terminate() {
-    sys.symbols.webview_terminate(this.#handle);
-    sys.symbols.webview_destroy(this.#handle);
+    sys.symbols.deno_webview_terminate(this.#handle);
+    sys.symbols.deno_webview_destroy(this.#handle);
     this.#handle = null;
   }
 
   navigate(url: string) {
     this.#url = url;
-    sys.symbols.webview_navigate(this.#handle, encode(url));
   }
 
-  run() {
-    sys.symbols.webview_run(this.#handle);
-  }
-
-  eval(js: string) {
-    sys.symbols.webview_eval(this.#handle, encode(js));
+  async run() {
+    if (this.#url == null) throw new TypeError("URL not initialized");
+    sys.symbols.deno_webview_navigate(this.#handle, encode(this.#url));
+    await sys.symbols.deno_webview_run(this.#handle);
   }
 
   set title(title: string) {
-    sys.symbols.webview_set_title(this.#handle, encode(title));
+    sys.symbols.deno_webview_set_title(this.#handle, encode(title));
+  }
+
+  // TODO(@littledivy): Current design limitations prevent this from working
+  // We need Rust to call into V8 and Deno FFI callbacks *might* solve this.
+  bind(name: string, cb: (seq: string, recv: Deno.UnsafePointer) => void) {
+    sys.symbols.deno_webview_bind(this.#handle, encode(name));
+    sys.symbols.deno_webview_get_recv().then((recv) => {
+      const ptr = new Deno.UnsafePointerView(recv as Deno.UnsafePointer);
+      const lengthBe = new Uint8Array(4);
+      const view = new DataView(lengthBe.buffer);
+      ptr.copyInto(lengthBe, 0);
+      const buf = new Uint8Array(view.getUint32(0));
+      ptr.copyInto(buf, 4);
+
+      const seq = new TextDecoder().decode(buf);
+      cb(seq, recv);
+    });
+  }
+
+  return(seq: string, status: number, result: string) {
+    sys.symbols.deno_webview_return(
+      this.#handle,
+      encode(seq),
+      status,
+      encode(result),
+    );
+  }
+
+  eval(source: string) {
+    sys.symbols.deno_webview_eval(this.#handle, encode(source));
+  }
+
+  init(source: string) {
+    sys.symbols.deno_webview_init(this.#handle, encode(source));
   }
 }
