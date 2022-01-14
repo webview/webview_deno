@@ -11,5 +11,4 @@ const html = `
 const webview = new Webview();
 
 webview.navigate(`data:text/html,${encodeURIComponent(html)}`);
-webview.eval("alert(1 + 2)");
 webview.run();

@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "deno.ns", "deno.unstable"],
+    "jsxFactory": "h"
+  }
+}

@@ -1,12 +1,10 @@
 use once_cell::sync::Lazy;
 use std::ffi::CStr;
-use std::ffi::CString;
 use std::os::raw::c_char;
 use std::os::raw::c_int;
 use std::os::raw::c_void;
 use std::sync::Mutex;
 use webview_official_sys::webview_t;
-use webview_official_sys::BindFn;
 use webview_official_sys::DispatchFn;
 
 static RECV: Lazy<Mutex<(String, String)>> =
@@ -15,6 +13,9 @@ static RECV: Lazy<Mutex<(String, String)>> =
 macro_rules! export {
     ($rename: ident, fn $name:ident($( $arg:ident : $type:ty ),*) -> $ret:ty) => {
         #[no_mangle]
+        #[doc = "# Safety"]
+        #[doc = ""]
+        #[doc = "This function is unsafe for obvious reasons."]
         pub unsafe extern "C" fn $rename($( $arg : $type),*) -> $ret {
             webview_official_sys::$name($( $arg ),*)
         }
@@ -38,8 +39,12 @@ export!(deno_webview_init, fn webview_init(w: webview_t, js: *const c_char));
 export!(deno_webview_eval, fn webview_eval(w: webview_t, js: *const c_char));
 export!(deno_webview_return, fn webview_return(w: webview_t, seq: *const c_char, status: c_int, result: *const c_char));
 
+/// # Safety
+///
+/// webview pointer must be non NULL. It must be obtained using
+/// `webview_create`.
 #[no_mangle]
-pub extern "C" fn deno_webview_bind(w: webview_t, name: *const c_char) {
+pub unsafe extern "C" fn deno_webview_bind(w: webview_t, name: *const c_char) {
   extern "C" fn callback(
     seq: *const c_char,
     req: *const c_char,
@@ -61,14 +66,12 @@ pub extern "C" fn deno_webview_bind(w: webview_t, name: *const c_char) {
     recv.1 = req.to_string();
   }
 
-  unsafe {
-    webview_official_sys::webview_bind(
-      w,
-      name,
-      Some(callback),
-      std::ptr::null_mut(),
-    )
-  }
+  webview_official_sys::webview_bind(
+    w,
+    name,
+    Some(callback),
+    std::ptr::null_mut(),
+  )
 }
 
 #[no_mangle]

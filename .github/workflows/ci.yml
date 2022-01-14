@@ -54,12 +54,6 @@ jobs:
           path: target
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Remove Some Cache
-        if: matrix.os == 'windows-latest'
-        run: |
-          rm target/release/gn_root -Recurse -ErrorAction Ignore
-          rm target/debug/gn_root -Recurse -ErrorAction Ignore
-
       - name: Install webkit2gtk
         if: matrix.os == 'ubuntu-latest'
         run: |

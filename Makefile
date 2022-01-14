@@ -2,7 +2,12 @@ build:
 	cargo build
 
 example:
-	DEV=true deno run -A --unstable examples/user_agent.ts
+	DEV=true deno run \
+		-A \
+		--unstable \
+		--no-check \
+		--config examples/ssr/tsconfig.json \
+		examples/ssr/ssr.jsx
 
 fmt:
 	cargo fmt
