@@ -32,7 +32,7 @@ dependencies = [
 
 [[package]]
 name = "webview_deno"
-version = "0.6.0-pre.0"
+version = "0.7.0-pre.0"
 dependencies = [
  "once_cell",
  "webview-official-sys",

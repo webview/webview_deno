@@ -1,6 +1,6 @@
 import { CachePolicy, prepare } from "../deps.ts";
 
-const VERSION = "0.7.0";
+const VERSION = "0.7.0-pre.0";
 const POLICY = Deno.env.get("PLUGIN_URL") === undefined
   ? CachePolicy.STORE
   : CachePolicy.NONE;
@@ -10,6 +10,7 @@ const PLUGIN_URL = Deno.env.get("PLUGIN_URL") ??
 const url = Deno.env.get("DEV")
   ? (new URL("../target/debug", import.meta.url)).toString()
   : PLUGIN_URL;
+
 const lib = await prepare({
   name: "webview_deno",
   url: url,
