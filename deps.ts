@@ -1,1 +1,1 @@
-export { CachePolicy, prepare } from "https://deno.land/x/plug@0.4.1/plug.ts";
+export { CachePolicy, prepare, download } from "https://deno.land/x/plug@0.5.1/plug.ts";

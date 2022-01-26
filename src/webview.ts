@@ -1,12 +1,9 @@
 import sys from "./ffi.ts";
 
-function encode(value: string) {
-  const encoded = new TextEncoder().encode(value);
-  const buffer = new Uint8Array(encoded.byteLength + 1);
-  buffer.set(encoded, 0);
+const encoder = new TextEncoder();
 
-  buffer[buffer.byteLength - 1] = 0x00;
-  return buffer;
+function encode(value: string) {
+  return encoder.encode(value + "\n");
 }
 
 export type SizeHint = 0 | 1 | 2 | 3;

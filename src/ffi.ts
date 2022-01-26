@@ -1,20 +1,25 @@
-import { CachePolicy, prepare } from "../deps.ts";
+import { CachePolicy, download, prepare } from "../deps.ts";
 
-const VERSION = "0.7.0-pre.0";
-const POLICY = Deno.env.get("PLUGIN_URL") === undefined
+const version = "0.7.0-pre.0";
+const policy = Deno.env.get("PLUGIN_URL") === undefined
   ? CachePolicy.STORE
   : CachePolicy.NONE;
-const PLUGIN_URL = Deno.env.get("PLUGIN_URL") ??
-  `https://github.com/webview/webview_deno/releases/download/${VERSION}/`;
+const url = Deno.env.get("PLUGIN_URL") ??
+  `https://github.com/webview/webview_deno/releases/download/${version}/`;
 
-const url = Deno.env.get("DEV")
-  ? (new URL("../target/debug", import.meta.url)).toString()
-  : PLUGIN_URL;
+if (Deno.build.os === "windows") {
+  const webview2loader = await download(`${url}WebView2Loader.dll`);
+  await Deno.copyFile(webview2loader, "./WebView2Loader.dll");
+  window.onunload = () => {
+    lib.close();
+    Deno.removeSync("./WebView2Loader.dll");
+  };
+}
 
 const lib = await prepare({
   name: "webview_deno",
-  url: url,
-  policy: POLICY,
+  url,
+  policy,
 }, {
   "deno_webview_create": {
     parameters: ["i32", "pointer"],

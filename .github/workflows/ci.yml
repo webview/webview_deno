@@ -77,3 +77,4 @@ jobs:
             target/release/libwebview_deno.dylib
             target/release/libwebview_deno.so
             target/release/webview_deno.dll
+            target/release/Webview2Loader.dll
