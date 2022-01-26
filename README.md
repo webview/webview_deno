@@ -87,14 +87,14 @@ binaries are located. This is usually `file://./target/release`.
 
 ```bash
 $ make build
-$ DEV=true deno run --unstable -A examples/local.ts
+$ PLUGIN_URL=target/debug/
+$ deno run --unstable -A examples/local.ts
 ```
 
 ## Environment variables
 
 - `PLUGIN_URL` - Set a custom library URL. Defaults to the latest release assets
-  on Github.
-- `DEBUG` - Disable cache and enable logs for `plug`. Used for debugging.
+  on Github. Setting this also disables cache for `plug`.
 
 ## Dependencies
 
@@ -112,4 +112,4 @@ messages are done following
 
 ### Licence
 
-Copyright 2020-present, the webview_deno team. All rights reserved. MIT license.
+Copyright 2020-2022, the webview_deno team. All rights reserved. MIT license.
