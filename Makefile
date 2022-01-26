@@ -2,7 +2,7 @@ build:
 	cargo build
 
 example:
-	DEV=true deno run \
+	PLUGIN_URL=target/debug/ deno run \
 		-A \
 		--unstable \
 		--no-check \
@@ -16,5 +16,3 @@ fmt:
 lint:
 	cargo clippy
 	deno lint --ignore=target/
-
-

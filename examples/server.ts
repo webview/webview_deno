@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.120.0/http/mod.ts";
 import { Webview } from "../mod.ts";
 
-const server = serve(() =>
+const _server = serve(() =>
   new Response("<h1>Hello World</h1>", {
     headers: new Headers({
       "content-type": "text/html",
