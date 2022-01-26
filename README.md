@@ -36,13 +36,12 @@ const html = `
   </html>
 `;
 
-const webview = new Webview(
-  { url: `data:text/html,${encodeURIComponent(html)}` },
-);
-await webview.run();
+const webview = new Webview();
+webview.navigate(`data:text/html,${encodeURIComponent(html)}`);
+webview.run();
 ```
 
-you can run this example directly from the web:
+You can run this example directly from the web:
 
 ```bash
 deno run -Ar --unstable https://deno.land/x/webview/examples/local.ts
@@ -65,36 +64,18 @@ You can find the official documentation
 
 ### Prerequisites
 
-For building webview_deno the same
-[prerequisites](https://deno.land/std/manual.md#prerequisites) as for building
-deno is required.
-
-A recommended dependency is [denon](https://github.com/denosaurs/denon) which is
-used for the built in scripts found in the `denon.json` file.
-
-#### Linux dependencies
+#### Linux
 
 - [webkit2gtk](https://webkitgtk.org/) (to install using apt:
   `sudo apt-get install libwebkit2gtk-4.0-dev`)
 
 ### Building
 
-Building webview_deno can take a nontrivial amount of time depending on your
-operating system. After the first build most files will be cached so building
-time will be reduced. Building on Windows requires admin privileges.
-
-For a default build you can use the provided script:
+Building on Windows requires admin privileges.
 
 ```bash
-deno run --unstable -A scripts/build.ts
-```
-
-which internally runs:
-
-optionally you can use **mshtml**:
-
-```bash
-deno run --unstable -A scripts/build.ts mshtml
+make build
+# OR cargo build
 ```
 
 ### Running
@@ -102,34 +83,22 @@ deno run --unstable -A scripts/build.ts mshtml
 To run webview_deno without automatically downloading the binaries from
 [releases](https://github.com/webview/webview_deno/releases) you will need to
 use the environment variable `PLUGIN_URL` and set it to the path where the built
-binaries are located. This is usually `file://./target/release`. The process of
-running and using local binaries can be easier to using the
-[dev script](https://github.com/webview/webview_deno/tree/master/scripts/dev.ts):
+binaries are located. This is usually `file://./target/release`.
 
 ```bash
-deno run --unstable -A scripts/dev.ts examples/local.ts
+$ make build
+$ DEV=true deno run --unstable -A examples/local.ts
 ```
 
 ## Environment variables
 
-- `PLUGIN_URL` - The URL of the plugin Due to MSHTML (internet explorer) no
-  longer being enabled by default, the only way to enable it is to set the
-  `PLUGIN_URL` variable to the path of a binary build built with the
-  `--no-default-features` flag or using
-  `deno --unstable -A scripts/build.ts mshtml`. This is usually
-  `./target/release/` when developing locally.
+- `PLUGIN_URL` - Set a custom library URL. Defaults to the latest release assets
+  on Github.
 - `DEBUG` - Disable cache and enable logs for `plug`. Used for debugging.
 
 ## Dependencies
 
-### Deno
-
 - [plug](https://deno.land/x/plug)
-
-### Rust
-
-- [deno_core](https://crates.io/crates/deno_core)
-- [deno_json_op](https://github.com/denosaurs/deno_json_op)
 - [webview-sys](https://crates.io/crates/webview-sys)
 
 ## Other
@@ -137,7 +106,7 @@ deno run --unstable -A scripts/dev.ts examples/local.ts
 ### Contribution
 
 Pull request, issues and feedback are very welcome. Code style is formatted with
-`denon fmt` (which internally runs `deno fmt` and `cargo fmt`) and commit
+`make fmt` (which internally runs `deno fmt` and `cargo fmt`) and commit
 messages are done following
 [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) spec.
 

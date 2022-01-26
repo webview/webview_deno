@@ -1,13 +1,14 @@
 [package]
 name = "webview_deno"
-version = "0.6.0-pre.0"
+version = "0.7.0-pre.0"
 authors = ["Elias Sjögreen", "Filippo Rossi"]
 edition = "2018"
 
 [lib]
+path = "src/bindings.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-deno_core = "0.87.0"
-webview_official = "0.2.0"
-serde = "1.0.125"
+webview-official-sys = "0.1.2"
+once_cell = "1.9.0"
+

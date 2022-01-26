@@ -1,14 +1,17 @@
-import { serve } from "https://deno.land/std@0.79.0/http/mod.ts";
+import { serve } from "https://deno.land/std@0.120.0/http/mod.ts";
 import { Webview } from "../mod.ts";
 
-const webview = new Webview(
-  { url: `http://localhost:8080` },
-);
-const promise = webview.run();
+const server = serve(() =>
+  new Response("<h1>Hello World</h1>", {
+    headers: new Headers({
+      "content-type": "text/html",
+    }),
+  }), { port: 8080 });
 
-const server = serve({ port: 8080 });
-for await (const req of server) {
-  req.respond({ body: "Hello World" });
-}
+const webview = new Webview();
 
-await promise;
+webview.navigate(`http://localhost:8080`);
+
+// FIXME: Blocks the main thread and
+// no further requests can be served.
+webview.run();

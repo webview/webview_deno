@@ -1,2 +1,1 @@
-import "./plugin.ts";
-export * from "./webview.ts";
+export * from "./src/webview.ts";
