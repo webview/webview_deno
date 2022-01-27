@@ -10,10 +10,16 @@ const url = Deno.env.get("PLUGIN_URL") ??
 if (Deno.build.os === "windows") {
   const webview2loader = await download(`${url}WebView2Loader.dll`);
   await Deno.copyFile(webview2loader, "./WebView2Loader.dll");
-  window.onunload = () => {
-    lib.close();
+
+  // deno-lint-ignore no-window-prefix
+  if (typeof window !== "undefined") window.addEventListener("unload", unload);
+}
+
+export function unload() {
+  lib.close();
+  if (Deno.build.os === "windows") {
     Deno.removeSync("./WebView2Loader.dll");
-  };
+  }
 }
 
 const lib = await prepare({
