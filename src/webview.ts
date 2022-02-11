@@ -30,7 +30,7 @@ export class Webview {
 
   constructor() {
     this.#handle = sys.symbols.deno_webview_create(
-      1,
+      0,
       null,
     ) as Deno.UnsafePointer;
   }
