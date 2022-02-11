@@ -30,7 +30,7 @@ export class Webview {
 
   constructor() {
     this.#handle = sys.symbols.deno_webview_create(
-      0,
+      1,
       null,
     ) as Deno.UnsafePointer;
   }
@@ -45,10 +45,10 @@ export class Webview {
     this.#url = url;
   }
 
-  async run() {
+  run() {
     if (this.#url == null) throw new TypeError("URL not initialized");
     sys.symbols.deno_webview_navigate(this.#handle, encode(this.#url));
-    await sys.symbols.deno_webview_run(this.#handle);
+    sys.symbols.deno_webview_run(this.#handle);
   }
 
   set title(title: string) {
