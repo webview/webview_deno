@@ -7,7 +7,7 @@ example:
 		--unstable \
 		--no-check \
 		--config examples/ssr/tsconfig.json \
-		examples/ssr/ssr.jsx
+		examples/ssr/main.ts
 
 fmt:
 	cargo fmt

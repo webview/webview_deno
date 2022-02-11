@@ -1,4 +1,3 @@
-import { dirname, join } from "https://deno.land/std@0.114.0/path/mod.ts";
 import { serve } from "https://deno.land/std@0.114.0/http/server.ts";
 import { h, ssr, tw } from "https://crux.land/nanossr@0.0.1";
 
@@ -18,12 +17,4 @@ const server = serve((req) => {
 }, { port: 8000 });
 
 console.log("[runner] Listening on http://localhost:8000");
-console.log("[runner] worker started");
-
-setTimeout(() =>
-  new Worker(
-    join(dirname(import.meta.url), "worker.ts"),
-    { type: "module", deno: true },
-  ), 1000);
-
 await server;
