@@ -3,7 +3,7 @@ import sys from "./ffi.ts";
 const encoder = new TextEncoder();
 
 function encode(value: string) {
-  return encoder.encode(value + "\n");
+  return encoder.encode(value + "\0");
 }
 
 export type SizeHint = 0 | 1 | 2 | 3;
@@ -28,11 +28,12 @@ export class Webview {
     return this.#url;
   }
 
-  constructor() {
+  constructor(width: number = 1024, height: number = 768, hint: SizeHint = 0) {
     this.#handle = sys.symbols.deno_webview_create(
       0,
       null,
     ) as Deno.UnsafePointer;
+    sys.symbols.deno_webview_set_size(this.#handle, width, height, hint);
   }
 
   terminate() {
