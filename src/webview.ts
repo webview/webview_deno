@@ -3,8 +3,7 @@ import sys from "./ffi.ts";
 const encoder = new TextEncoder();
 
 function encode(value: string) {
-  const url = Deno.build.os === "darwin" ? value : `${value}\n`;
-  return encoder.encode(url);
+  return encoder.encode(value);
 }
 
 export type SizeHint = 0 | 1 | 2 | 3;
