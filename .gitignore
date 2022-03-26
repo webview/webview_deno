@@ -7,4 +7,4 @@ target/
 
 # plugin cache
 .deno_plugins/
-./WebView2Loader.dll
+WebView2Loader.dll
