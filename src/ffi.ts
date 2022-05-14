@@ -1,6 +1,6 @@
 import { CachePolicy, download, prepare } from "../deps.ts";
 
-const version = "0.7.0-pre.0";
+const version = "0.7.0-pre.2";
 const policy = Deno.env.get("PLUGIN_URL") === undefined
   ? CachePolicy.STORE
   : CachePolicy.NONE;

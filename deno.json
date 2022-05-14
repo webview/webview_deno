@@ -1,3 +1,19 @@
 {
-  
+  "tasks": {
+    "check": "deno task check:deno && deno task check:rust",
+    "check:deno": "deno check --unstable mod.ts",
+    "check:rust": "cargo check --release",
+    "fmt": "deno task fmt:deno && deno task fmt:rust",
+    "fmt:deno": "deno fmt --unstable",
+    "fmt:rust": "cargo fmt",
+    "lint": "deno task lint:deno && deno task lint:rust",
+    "lint:deno": "deno lint --unstable",
+    "lint:rust": "cargo clippy --release -- -D clippy::all -A clippy::missing_safety_doc -A clippy::undocumented_unsafe_blocks",
+    "build": "cargo build --release"
+  },
+  "fmt": {
+    "files": {
+      "exclude": ["target/"]
+    }
+  }
 }
