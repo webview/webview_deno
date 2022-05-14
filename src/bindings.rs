@@ -28,6 +28,7 @@ macro_rules! export {
 // https://github.com/rust-lang/rfcs/issues/2771
 export!(deno_webview_create, fn webview_create(debug: c_int, window: *mut c_void) -> webview_t);
 export!(deno_webview_destroy, fn webview_destroy(w: webview_t));
+export!(deno_webview_step, fn webview_step(w: webview_t, blocking: i32) -> i32);
 export!(deno_webview_run, fn webview_run(w: webview_t));
 export!(deno_webview_terminate, fn webview_terminate(w: webview_t));
 export!(deno_webview_dispatch, fn webview_dispatch(w: webview_t, fn_: Option<DispatchFn>, arg: *mut c_void));

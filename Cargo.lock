@@ -23,8 +23,6 @@ checksum = "d36492546b6af1463394d46f0c834346f31548646f6ba10849802c9c9a27ac33"
 [[package]]
 name = "webview-official-sys"
 version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c4aec5fdf5bc938ba5fe47d23b8e02d6beaee395a91e16f0b2eec984a9a9e1d2"
 dependencies = [
  "cc",
  "pkg-config",

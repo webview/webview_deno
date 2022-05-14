@@ -8,5 +8,7 @@ webview2.navigate("https://google.com/");
 
 // NOTE: Due to design limitations, you can only have one webview
 //       instance **at a time**
-webview1.run();
-webview2.run();
+const p1 = webview1.run();
+const p2 = webview2.run();
+
+await Promise.all([p1, p2]);

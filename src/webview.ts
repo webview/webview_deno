@@ -17,15 +17,9 @@ export const SizeHint = {
 
 export class Webview {
   #handle: Deno.UnsafePointer | null = null;
-  #url?: string;
 
   get unsafeHandle() {
     return this.#handle;
-  }
-
-  get url(): string {
-    if (this.#url == undefined) throw new TypeError("Webview not initialized");
-    return this.#url;
   }
 
   constructor(width: number = 1024, height: number = 768, hint: SizeHint = 0) {
@@ -43,13 +37,28 @@ export class Webview {
   }
 
   navigate(url: string) {
-    this.#url = url;
+    sys.symbols.deno_webview_navigate(this.#handle, encode(url));
   }
 
-  run() {
-    if (this.#url == null) throw new TypeError("URL not initialized");
-    sys.symbols.deno_webview_navigate(this.#handle, encode(this.#url));
-    sys.symbols.deno_webview_run(this.#handle);
+  step(blocking: boolean): boolean {
+    return sys.symbols.deno_webview_step(this.#handle, Number(blocking)) === 0;
+  }
+
+  run(async: false): void;
+  run(async?: true, blocking?: boolean, delta?: number): Promise<void>;
+  run(async = true, blocking = false, delta = undefined): void | Promise<void> {
+    if (!async) {
+      sys.symbols.deno_webview_run(this.#handle);
+    }
+
+    return new Promise((resolve) => {
+      const interval = setInterval(() => {
+        if (!this.step(blocking)) {
+          clearInterval(interval);
+          resolve();
+        }
+      }, delta);
+    });
   }
 
   set title(title: string) {

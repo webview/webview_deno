@@ -11,4 +11,4 @@ const html = `
 const webview = new Webview();
 
 webview.navigate(`data:text/html,${encodeURIComponent(html)}`);
-webview.run();
+await webview.run();

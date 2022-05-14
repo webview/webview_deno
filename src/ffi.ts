@@ -26,7 +26,7 @@ let preloaded = false;
  * Removes old version if it already existed, and only runs once.
  * Should be run on the main thread so that the `unload` gets hooked in properly, otherwise
  * make sure `unload` gets called during the `window.onunload` event (after all windows are closed).
- * 
+ *
  * Does not need to be run on non-windows platforms, but that is subject to change.
  */
 export async function preload() {
@@ -81,6 +81,10 @@ const lib = await prepare({
   "deno_webview_destroy": {
     parameters: ["pointer"],
     result: "void",
+  },
+  "deno_webview_step": {
+    parameters: ["pointer", "i32"],
+    result: "i32",
   },
   "deno_webview_run": {
     parameters: ["pointer"],
