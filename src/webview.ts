@@ -2,9 +2,9 @@ import sys from "./ffi.ts";
 
 const encoder = new TextEncoder();
 
-function encode(value: string) {
-  return encoder.encode(value + "\0");
-}
+const encode = (value: string) => encoder.encode(value + "\0");
+
+const decoder = new TextDecoder();
 
 export type SizeHint = 0 | 1 | 2 | 3;
 
@@ -67,18 +67,24 @@ export class Webview {
 
   // TODO(@littledivy): Current design limitations prevent this from working
   // We need Rust to call into V8 and Deno FFI callbacks *might* solve this.
-  bind(name: string, cb: (seq: string, recv: Deno.UnsafePointer) => void) {
+  bind(name: string, cb: (seq: string, req: string) => void) {
     sys.symbols.deno_webview_bind(this.#handle, encode(name));
     sys.symbols.deno_webview_get_recv().then((recv) => {
-      const ptr = new Deno.UnsafePointerView(recv as Deno.UnsafePointer);
-      const lengthBe = new Uint8Array(4);
-      const view = new DataView(lengthBe.buffer);
-      ptr.copyInto(lengthBe, 0);
-      const buf = new Uint8Array(view.getUint32(0));
-      ptr.copyInto(buf, 4);
+      const recvView = new Deno.UnsafePointerView(recv);
+      const seqLength = recvView.getUint32(0);
+      const reqLength = recvView.getUint32(4 + seqLength);
+      const recvBuf = new Uint8Array(4 + seqLength + 4 + reqLength);
+      recvView.copyInto(recvBuf);
 
-      const seq = new TextDecoder().decode(buf);
-      cb(seq, recv);
+      const seqBuf = recvBuf.slice(0, seqLength);
+      const reqBuf = recvBuf.slice(4 + seqLength, 4 + seqLength + reqLength);
+
+      console.log(seqLength, seqBuf);
+      console.log(reqLength, reqBuf);
+
+      const seq = decoder.decode(seqBuf);
+      const req = decoder.decode(reqBuf);
+      cb(seq, req);
     });
   }
 

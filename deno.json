@@ -8,7 +8,7 @@
     "fmt:rust": "cargo fmt",
     "lint": "deno task lint:deno && deno task lint:rust",
     "lint:deno": "deno lint --unstable",
-    "lint:rust": "cargo clippy --release -- -D clippy::all -A clippy::missing_safety_doc -A clippy::undocumented_unsafe_blocks",
+    "lint:rust": "cargo clippy --release -- -D clippy::all",
     "build": "cargo build --release"
   },
   "fmt": {

@@ -1,14 +1,15 @@
+use crossbeam_channel::unbounded;
+use crossbeam_channel::Receiver;
+use crossbeam_channel::Sender;
 use once_cell::sync::Lazy;
 use std::ffi::CStr;
 use std::os::raw::c_char;
 use std::os::raw::c_int;
 use std::os::raw::c_void;
-use std::sync::Mutex;
 use webview_official_sys::webview_t;
 use webview_official_sys::DispatchFn;
 
-static RECV: Lazy<Mutex<(String, String)>> =
-  Lazy::new(|| Mutex::new(("".to_string(), "".to_string())));
+static CHANNEL: Lazy<(Sender<(String, String)>, Receiver<(String, String)>)> = Lazy::new(|| unbounded());
 
 macro_rules! export {
     ($rename: ident, fn $name:ident($( $arg:ident : $type:ty ),*) -> $ret:ty) => {
@@ -49,41 +50,43 @@ pub unsafe extern "C" fn deno_webview_bind(w: webview_t, name: *const c_char) {
   extern "C" fn callback(
     seq: *const c_char,
     req: *const c_char,
-    _userdata: *mut c_void,
+    w: *mut c_void,
   ) {
     let seq = unsafe {
       CStr::from_ptr(seq)
         .to_str()
         .expect("No null bytes in parameter seq")
-    };
+    }.to_string();
     let req = unsafe {
       CStr::from_ptr(req)
         .to_str()
         .expect("No null bytes in parameter req")
-    };
+    }.to_string();
+    println!("seq req {} {}", seq, req);
 
-    let mut recv = RECV.lock().unwrap();
-    recv.0 = seq.to_string();
-    recv.1 = req.to_string();
+    CHANNEL.0.send((seq, req)).unwrap();
   }
 
   webview_official_sys::webview_bind(
     w,
     name,
     Some(callback),
-    std::ptr::null_mut(),
+    w,
   )
 }
 
 #[no_mangle]
 pub extern "C" fn deno_webview_get_recv() -> *const u8 {
-  let recv = RECV.lock().unwrap();
+  let recv = CHANNEL.1.recv().unwrap();
   let mut recv_buf = Vec::new();
-  recv_buf.extend_from_slice(&u32::to_be_bytes(recv.0.len() as u32));
 
+  recv_buf.extend_from_slice(&u32::to_be_bytes(recv.0.len() as u32));
   recv_buf.extend_from_slice(recv.0.as_bytes());
+
   recv_buf.extend_from_slice(&u32::to_be_bytes(recv.1.len() as u32));
   recv_buf.extend_from_slice(recv.1.as_bytes());
+
+  println!("recv {} {}", recv.0, recv.1);
 
   let ptr = recv_buf.as_ptr();
   std::mem::forget(recv_buf);
