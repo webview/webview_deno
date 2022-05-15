@@ -31,7 +31,8 @@ jobs:
         with:
           command: deno task check
 
-  name: Fmt
+  fmt:
+    name: Fmt
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -58,7 +59,8 @@ jobs:
         with:
           command: deno task fmt
 
-  name: Lint
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
