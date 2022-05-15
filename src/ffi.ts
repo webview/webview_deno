@@ -124,16 +124,24 @@ const lib = await prepare({
   },
   "deno_webview_bind": {
     parameters: ["pointer", "pointer"],
+    result: "pointer",
+  },
+  "deno_webview_channel_recv": {
+    parameters: ["pointer"],
+    result: "pointer",
+    nonblocking: true,
+  },
+  "deno_webview_channel_recv_free": {
+    parameters: ["pointer"],
+    result: "void",
+  },
+  "deno_webview_channel_free": {
+    parameters: ["pointer"],
     result: "void",
   },
   "deno_webview_return": {
     parameters: ["pointer", "pointer", "i32", "pointer"],
     result: "void",
-  },
-  "deno_webview_get_recv": {
-    parameters: [],
-    result: "pointer",
-    nonblocking: true,
   },
 });
 

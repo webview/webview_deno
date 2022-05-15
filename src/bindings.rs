@@ -1,15 +1,16 @@
-use crossbeam_channel::unbounded;
-use crossbeam_channel::Receiver;
-use crossbeam_channel::Sender;
-use once_cell::sync::Lazy;
 use std::ffi::CStr;
 use std::os::raw::c_char;
 use std::os::raw::c_int;
 use std::os::raw::c_void;
+use std::sync::mpsc::channel;
+use std::sync::mpsc::Receiver;
+use std::sync::mpsc::Sender;
 use webview_official_sys::webview_t;
 use webview_official_sys::DispatchFn;
 
-static CHANNEL: Lazy<(Sender<(String, String)>, Receiver<(String, String)>)> = Lazy::new(|| unbounded());
+type WebviewChannelData = (String, String);
+type WebviewChannel =
+  (Sender<WebviewChannelData>, Receiver<WebviewChannelData>);
 
 macro_rules! export {
     ($rename: ident, fn $name:ident($( $arg:ident : $type:ty ),*) -> $ret:ty) => {
@@ -43,52 +44,97 @@ export!(deno_webview_return, fn webview_return(w: webview_t, seq: *const c_char,
 
 /// # Safety
 ///
-/// webview pointer must be non NULL. It must be obtained using
-/// `webview_create`.
+/// Webview pointer must be non NULL. It must be obtained using
+/// `deno_webview_create`.
 #[no_mangle]
-pub unsafe extern "C" fn deno_webview_bind(w: webview_t, name: *const c_char) {
+pub unsafe extern "C" fn deno_webview_bind(
+  w: webview_t,
+  name: *const c_char,
+) -> *mut WebviewChannel {
   extern "C" fn callback(
     seq: *const c_char,
     req: *const c_char,
-    w: *mut c_void,
+    channel_ptr: *mut c_void,
   ) {
+    let channel_ptr = channel_ptr as *mut WebviewChannel;
+    let (sender, _) = unsafe { &*channel_ptr };
+
     let seq = unsafe {
       CStr::from_ptr(seq)
         .to_str()
         .expect("No null bytes in parameter seq")
-    }.to_string();
+    }
+    .to_string();
     let req = unsafe {
       CStr::from_ptr(req)
         .to_str()
         .expect("No null bytes in parameter req")
-    }.to_string();
-    println!("seq req {} {}", seq, req);
+    }
+    .to_string();
 
-    CHANNEL.0.send((seq, req)).unwrap();
+    sender.send((seq, req)).unwrap();
   }
+
+  let channel_ptr = Box::into_raw(Box::new(channel::<WebviewChannelData>()));
 
   webview_official_sys::webview_bind(
     w,
     name,
     Some(callback),
-    w,
-  )
+    channel_ptr as *mut c_void,
+  );
+
+  channel_ptr
 }
 
+/// # Safety
+///
+/// Channel pointer must be non NULL. It must be obtained using
+/// `deno_webview_bind`.
 #[no_mangle]
-pub extern "C" fn deno_webview_get_recv() -> *const u8 {
-  let recv = CHANNEL.1.recv().unwrap();
-  let mut recv_buf = Vec::new();
+pub extern "C" fn deno_webview_channel_recv(
+  channel_ptr: *mut WebviewChannel,
+) -> *const u8 {
+  let channel_ptr = channel_ptr as *mut WebviewChannel;
+  let (_, receiver) = unsafe { &*channel_ptr };
 
-  recv_buf.extend_from_slice(&u32::to_be_bytes(recv.0.len() as u32));
-  recv_buf.extend_from_slice(recv.0.as_bytes());
+  if let Ok(recv) = receiver.recv() {
+    let mut recv_buf = Vec::new();
 
-  recv_buf.extend_from_slice(&u32::to_be_bytes(recv.1.len() as u32));
-  recv_buf.extend_from_slice(recv.1.as_bytes());
+    recv_buf.extend_from_slice(&u32::to_ne_bytes(recv.0.len() as u32));
+    recv_buf.extend_from_slice(recv.0.as_bytes());
+    recv_buf.extend_from_slice(&u32::to_ne_bytes(recv.1.len() as u32));
+    recv_buf.extend_from_slice(recv.1.as_bytes());
 
-  println!("recv {} {}", recv.0, recv.1);
+    let ptr = recv_buf.as_ptr();
+    std::mem::forget(recv_buf);
+    ptr
+  } else {
+    std::ptr::null()
+  }
+}
 
-  let ptr = recv_buf.as_ptr();
-  std::mem::forget(recv_buf);
-  ptr
+/// # Safety
+///
+/// Channel recv pointer must be non NULL. It must be obtained using
+/// `deno_webview_channel_recv` and can no longer be used after being freed by
+/// this function
+#[no_mangle]
+pub unsafe extern "C" fn deno_webview_channel_recv_free(recv_ptr: *mut u8) {
+  let seq_len = *(recv_ptr as *const u32);
+  let req_len = *(recv_ptr.add(4 + seq_len as usize) as *const u32);
+  let recv_len = 4 + seq_len + 4 + req_len;
+  let _ = std::slice::from_raw_parts(recv_ptr, recv_len as usize);
+}
+
+/// # Safety
+///
+/// Channel pointer must be non NULL. It must be obtained using
+/// `deno_webview_bind` and can no longer be used after being freed by this
+/// function.
+#[no_mangle]
+pub unsafe extern "C" fn deno_webview_channel_free(
+  channel_ptr: *mut WebviewChannel,
+) {
+  Box::from_raw(channel_ptr);
 }
