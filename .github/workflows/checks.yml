@@ -16,19 +16,22 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-      
+
+      - name: Install stable deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+    
       - name: Install webkit2gtk
         run: |
           sudo apt-get update
           sudo apt-get install libwebkit2gtk-4.0-dev
 
-      - name: Run cargo check
-        uses: actions-rs/cargo@v1
+      - name: Run check
         with:
-          command: check
+          command: deno task check
 
-  test:
-    name: Test Suite
+  name: Fmt
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -41,18 +44,21 @@ jobs:
           toolchain: stable
           override: true
 
+      - name: Install stable deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+    
       - name: Install webkit2gtk
         run: |
           sudo apt-get update
           sudo apt-get install libwebkit2gtk-4.0-dev
 
-      - name: Run cargo test
-        uses: actions-rs/cargo@v1
+      - name: Run fmt
         with:
-          command: test
+          command: deno task fmt
 
-  lints:
-    name: Lints
+  name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -64,21 +70,17 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-          components: rustfmt, clippy
 
+      - name: Install stable deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+    
       - name: Install webkit2gtk
         run: |
           sudo apt-get update
           sudo apt-get install libwebkit2gtk-4.0-dev
 
-      - name: Run cargo fmt
-        uses: actions-rs/cargo@v1
+      - name: Run lint
         with:
-          command: fmt
-          args: --all -- --check
-
-      - name: Run cargo clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -- -D warnings
+          command: deno task lint
