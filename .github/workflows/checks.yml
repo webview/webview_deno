@@ -1,6 +1,6 @@
 on: [push, pull_request]
 
-name: CI checks
+name: Checks
 
 jobs:
   checks:
@@ -28,13 +28,10 @@ jobs:
           sudo apt-get install libwebkit2gtk-4.0-dev
 
       - name: Run check
-        with:
-          command: deno task check
+        run: deno task check
 
       - name: Run fmt
-        with:
-          command: deno task fmt:check
+        run: deno task fmt:check
 
       - name: Run lint
-        with:
-          command: deno task lint
+        run: deno task lint
