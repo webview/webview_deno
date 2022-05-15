@@ -112,8 +112,9 @@ $ deno task run examples/local.ts
 ### Contribution
 
 Pull request, issues and feedback are very welcome. Code style is formatted with
-`deno task fmt`, linted with `deno task lint` and commit messages are done following
-[Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) spec.
+`deno task fmt`, linted with `deno task lint` and commit messages are done
+following [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
+spec.
 
 ### Licence
 

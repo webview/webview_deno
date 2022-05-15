@@ -3,8 +3,8 @@ on: [push, pull_request]
 name: CI checks
 
 jobs:
-  check:
-    name: Check
+  checks:
+    name: Checks
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -31,57 +31,9 @@ jobs:
         with:
           command: deno task check
 
-  fmt:
-    name: Fmt
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v2
-
-      - name: Install stable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-
-      - name: Install stable deno
-        uses: denoland/setup-deno@v1
-        with:
-          deno-version: v1.x
-    
-      - name: Install webkit2gtk
-        run: |
-          sudo apt-get update
-          sudo apt-get install libwebkit2gtk-4.0-dev
-
       - name: Run fmt
         with:
-          command: deno task fmt
-
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v2
-
-      - name: Install stable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-
-      - name: Install stable deno
-        uses: denoland/setup-deno@v1
-        with:
-          deno-version: v1.x
-    
-      - name: Install webkit2gtk
-        run: |
-          sudo apt-get update
-          sudo apt-get install libwebkit2gtk-4.0-dev
+          command: deno task fmt:check
 
       - name: Run lint
         with:

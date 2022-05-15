@@ -6,6 +6,7 @@
     "fmt": "deno task fmt:deno && deno task fmt:rust",
     "fmt:deno": "deno fmt --unstable",
     "fmt:rust": "cargo fmt",
+    "fmt:check": "deno task fmt:deno --check && deno task fmt:rust --check",
     "lint": "deno task lint:deno && deno task lint:rust",
     "lint:deno": "deno lint --unstable",
     "lint:rust": "cargo clippy --release -- -D clippy::all",
