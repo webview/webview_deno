@@ -13,6 +13,6 @@ const webview = new Webview();
 
 webview.navigate(`http://localhost:8080`);
 
-await webview.run();
+webview.run();
 controller.abort();
 await server;

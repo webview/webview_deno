@@ -39,7 +39,7 @@ const html = `
 const webview = new Webview();
 
 webview.navigate(`data:text/html,${encodeURIComponent(html)}`);
-await webview.run();
+webview.run();
 ```
 
 You can run this example directly from the web:

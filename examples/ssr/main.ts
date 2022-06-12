@@ -3,12 +3,12 @@ import { Webview } from "../../mod.ts";
 
 const worker = new Worker(
   join(dirname(import.meta.url), "worker.tsx"),
-  { type: "module", deno: true },
+  { type: "module" },
 );
 
 const webview = new Webview();
 webview.navigate("http://localhost:8000/");
 
 console.log("[runner] worker started");
-await webview.run();
+webview.run();
 worker.terminate();

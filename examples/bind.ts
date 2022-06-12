@@ -24,4 +24,4 @@ webview.bind("press", (a, b, c) => {
 
 webview.bind("log", (...args) => console.log(...args));
 
-await webview.run();
+webview.run();

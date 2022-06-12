@@ -2,9 +2,12 @@
 .idea
 .vscode
 
-# rust build
-target/
-
 # plugin cache
 .deno_plugins/
 WebView2Loader.dll
+
+# webview build
+script/Microsoft*
+script/nuget.exe
+nuget.exe
+build/

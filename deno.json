@@ -1,22 +1,16 @@
 {
   "tasks": {
-    "check": "deno task check:deno && deno task check:rust",
-    "check:deno": "deno check --unstable mod.ts",
-    "check:rust": "cargo check --release",
-    "fmt": "deno task fmt:deno && deno task fmt:rust",
-    "fmt:deno": "deno fmt --unstable",
-    "fmt:rust": "cargo fmt",
+    "check": "deno check --unstable mod.ts",
+    "fmt": "deno fmt --unstable",
     "fmt:check": "deno task fmt:deno --check && deno task fmt:rust --check",
-    "lint": "deno task lint:deno && deno task lint:rust",
-    "lint:deno": "deno lint --unstable",
-    "lint:rust": "cargo clippy --release -- -D clippy::all",
-    "build": "cargo build --release",
-    "run": "deno task build && export PLUGIN_URL=\"target/release/\" && deno run -A --unstable"
+    "lint": "deno lint --unstable",
+    "build": "deno run -A --unstable script/build.ts",
+    "run": "deno task build && export PLUGIN_URL=\"build/\" && deno run -A --unstable"
   },
   "fmt": {
     "files": {
       "exclude": [
-        "target/"
+        "webview/"
       ]
     }
   }

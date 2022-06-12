@@ -1,10 +1,8 @@
 import sys from "./ffi.ts";
 
 const encoder = new TextEncoder();
-
 const encode = (value: string) => encoder.encode(value + "\0");
 
-const decoder = new TextDecoder();
 
 /** Window size hints */
 export type SizeHint = 0 | 1 | 2 | 3;
@@ -26,7 +24,8 @@ export const SizeHint = {
  */
 export class Webview {
   #handle: Deno.UnsafePointer | null = null;
-  #channels: Deno.UnsafePointer[] = [];
+  #callbacks: Map<string, { close: () => void }> = new Map();
+  #dispatches: { close: () => void }[] = [];
 
   /**
    * An unsafe pointer to the webview
@@ -41,59 +40,51 @@ export class Webview {
   set size(
     { width, height, hint }: { width: number; height: number; hint: SizeHint },
   ) {
-    sys.symbols.deno_webview_set_size(this.#handle, width, height, hint);
+    sys.symbols.webview_set_size(this.#handle, width, height, hint);
   }
 
   /**
    * Sets the native window title
    */
   set title(title: string) {
-    sys.symbols.deno_webview_set_title(this.#handle, encode(title));
+    sys.symbols.webview_set_title(this.#handle, encode(title));
   }
 
-  /**
-   * Creates a new webview instance
+  /** **UNSTABLE**: Unsafe and new API, beware!
    *
-   * @param debug Enables or disables developer tools
+   * Creates a new webview instance from a webview handle.
+   *
+   * @param handle A previously created webview instances handle
    */
-  constructor(debug = false) {
-    this.#handle = sys.symbols.deno_webview_create(
-      Number(debug),
-      null,
-    ) as Deno.UnsafePointer;
-  }
-
-  async #channelRecv(
-    channel: Deno.UnsafePointer,
-  ): Promise<[string, string] | null> {
-    const recv = await sys.symbols.deno_webview_channel_recv(channel);
-    if (recv.value === 0n) {
-      return null;
-    }
-
-    const recvView = new Deno.UnsafePointerView(recv);
-    const seqLength = recvView.getUint32(0);
-    const reqLength = recvView.getUint32(4 + seqLength);
-    const recvBuf = new Uint8Array(4 + seqLength + 4 + reqLength);
-    recvView.copyInto(recvBuf);
-    sys.symbols.deno_webview_channel_recv_free(recv);
-
-    const seqBuf = recvBuf.slice(4, 4 + seqLength);
-    const reqBuf = recvBuf.slice(8 + seqLength, 4 + seqLength + 4 + reqLength);
-    const seq = decoder.decode(seqBuf);
-    const req = decoder.decode(reqBuf);
-    return [seq, req];
+  constructor(handle: Deno.UnsafePointer);
+  /**
+   * Creates a new webview instance.
+   *
+   * @param debug Defaults to false, when true developer tools are enabled
+   * for supported platforms
+   */
+  constructor(debug?: boolean);
+  constructor(debugOrHandle: boolean | Deno.UnsafePointer = false) {
+    this.#handle = debugOrHandle instanceof Deno.UnsafePointer
+      ? debugOrHandle
+      : sys.symbols.webview_create(
+        Number(debugOrHandle),
+        null,
+      ) as Deno.UnsafePointer;
   }
 
   /**
    * Destroys the webview and closes the window along with freeing internal resources
    */
-  terminate() {
-    for (const channel of this.#channels) {
-      sys.symbols.deno_webview_channel_free(channel);
+  destroy() {
+    for (const callback of Object.keys(this.#callbacks)) {
+      this.unbind(callback);
     }
-    sys.symbols.deno_webview_terminate(this.#handle);
-    sys.symbols.deno_webview_destroy(this.#handle);
+    for (const dispatch of this.#dispatches) {
+      dispatch.close();
+    }
+    sys.symbols.webview_terminate(this.#handle);
+    sys.symbols.webview_destroy(this.#handle);
     this.#handle = null;
   }
 
@@ -103,54 +94,18 @@ export class Webview {
    * properly, webview will re-encode it for you.
    */
   navigate(url: URL | string) {
-    sys.symbols.deno_webview_navigate(
+    sys.symbols.webview_navigate(
       this.#handle,
       encode(url instanceof URL ? url.toString() : url),
     );
   }
 
   /**
-   * Takes a single step in the webview event loop
-   *
-   * @param blocking Wheter or not to wait for an event, by default this is `false`
-   * @returns `true` if the step was successful, otherwise `false`
+   * Runs the main event loop until it's terminated. After this function exits the webview is automatically destroyed
    */
-  step(blocking: boolean): boolean {
-    return sys.symbols.deno_webview_step(this.#handle, Number(blocking)) === 0;
-  }
-
-  /**
-   * Runs the webview asynchronously. This is the recommended way of running a
-   * webview as it does not block the JavaScript event loop and allows for
-   * using {@link Webview.bind} to bind functions from deno to the webview
-   * JavaScript environment.
-   *
-   * @param blocking Wheter or not to wait for an event, by default this is `false`
-   * @param delta How often in milliseconds to take a step in the event loop, by default this is `0`
-   */
-  run(async?: true, blocking?: boolean, delta?: number): Promise<void>;
-  /**
-   * Runs the webview synchronously.
-   *
-   * Caution: running it this way will break {@link Webview.bind} and all other
-   * associated methods along with blocking the JavaScript event loop. It is
-   * therefor not recommended.
-   */
-  run(async: false): void;
-  run(async = true, blocking = false, delta = undefined): void | Promise<void> {
-    if (!async) {
-      sys.symbols.deno_webview_run(this.#handle);
-    }
-
-    return new Promise((resolve) => {
-      const interval = setInterval(() => {
-        if (!this.step(blocking)) {
-          this.terminate();
-          clearInterval(interval);
-          resolve();
-        }
-      }, delta);
-    });
+  run(): void {
+    sys.symbols.webview_run(this.#handle);
+    this.destroy();
   }
 
   /**
@@ -161,21 +116,40 @@ export class Webview {
    * the arguments passed from the JavaScript function call.
    *
    * @param name The name of the bound function
-   * @param cb A callback which takes two strings as parameters: `seq` and `req`
+   * @param callback A callback which takes two strings as parameters: `seq` and `req` and the passed {@link arg} pointer
+   * @param arg A pointer which is going to be passed to the callback once called
    */
-  bindRaw(name: string, cb: (seq: string, req: string) => void) {
-    const channel = sys.symbols.deno_webview_bind(this.#handle, encode(name));
-    this.#channels.push(channel);
-
-    const iter = async () => {
-      const recv = await this.#channelRecv(channel);
-      if (recv !== null) {
-        cb(...recv);
-        await iter();
-      }
-    };
-
-    iter();
+  bindRaw(
+    name: string,
+    callback: (
+      seq: string,
+      req: string,
+      arg: Deno.UnsafePointer | null,
+    ) => void,
+    arg: Deno.UnsafePointer | null = null,
+  ) {
+    const callbackResource = Deno.registerCallback(
+      {
+        parameters: ["pointer", "pointer", "pointer"],
+        result: "void",
+      },
+      (
+        seqPtr: Deno.UnsafePointer,
+        reqPtr: Deno.UnsafePointer,
+        arg: Deno.UnsafePointer | null,
+      ) => {
+        const seq = new Deno.UnsafePointerView(seqPtr).getCString();
+        const req = new Deno.UnsafePointerView(reqPtr).getCString();
+        callback(seq, req, arg);
+      },
+    );
+    this.#callbacks.set(name, callbackResource);
+    sys.symbols.webview_bind(
+      this.#handle,
+      encode(name),
+      callbackResource,
+      arg,
+    );
   }
 
   /**
@@ -186,25 +160,26 @@ export class Webview {
    * return value to the webview.
    *
    * @param name The name of the bound function
-   * @param cb A callback which is passed the arguments as called from the
+   * @param callback A callback which is passed the arguments as called from the
    * webview JavaScript environment and optionally returns a value to the
    * webview JavaScript caller
    */
-  // deno-lint-ignore no-explicit-any
-  bind(name: string, cb: (...args: any) => any) {
+  bind(
+    name: string,
+    // deno-lint-ignore no-explicit-any
+    callback: (...args: any) => any,
+  ) {
     this.bindRaw(name, (seq, req) => {
       const args = JSON.parse(req);
-
       let result;
       let success: boolean;
       try {
-        result = cb(...args);
+        result = callback(...args);
         success = true;
       } catch (err) {
         result = err;
         success = false;
       }
-
       if (result instanceof Promise) {
         result.then((result) =>
           this.return(seq, success ? 0 : 1, JSON.stringify(result))
@@ -216,6 +191,18 @@ export class Webview {
   }
 
   /**
+   * Unbinds a previously bound function freeing its resource and removing it from
+   * the webview JavaScript context.
+   *
+   * @param name The name of the bound function
+   */
+  unbind(name: string) {
+    sys.symbols.webview_unbind(this.#handle, encode(name));
+    this.#callbacks.get(name)?.close();
+    this.#callbacks.delete(name);
+  }
+
+  /**
    * Returns a value to the webview JavaScript environment.
    *
    * @param seq The request pointer as provided by the {@link Webview.bindRaw} callback
@@ -223,7 +210,7 @@ export class Webview {
    * @param result The stringified JSON response
    */
   return(seq: string, status: number, result: string) {
-    sys.symbols.deno_webview_return(
+    sys.symbols.webview_return(
       this.#handle,
       encode(seq),
       status,
@@ -237,7 +224,7 @@ export class Webview {
    * receive notifications about the results of the evaluation.
    */
   eval(source: string) {
-    sys.symbols.deno_webview_eval(this.#handle, encode(source));
+    sys.symbols.webview_eval(this.#handle, encode(source));
   }
 
   /**
@@ -246,6 +233,6 @@ export class Webview {
    * executed. It is guaranteed that code is executed before window.onload.
    */
   init(source: string) {
-    sys.symbols.deno_webview_init(this.#handle, encode(source));
+    sys.symbols.webview_init(this.#handle, encode(source));
   }
 }

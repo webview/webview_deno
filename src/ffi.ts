@@ -21,6 +21,7 @@ async function checkForWebView2Loader(): Promise<boolean> {
 
 // make sure we don't preload twice
 let preloaded = false;
+
 /**
  * Loads the `./WebView2Loader.dll` for running on Windows.
  * Removes old version if it already existed, and only runs once.
@@ -70,76 +71,67 @@ if (Deno.build.os === "windows") {
 }
 
 const lib = await prepare({
-  name: "webview_deno",
+  name: "webview",
   url,
   policy,
 }, {
-  "deno_webview_create": {
+  "webview_create": {
     parameters: ["i32", "pointer"],
     result: "pointer",
   },
-  "deno_webview_destroy": {
+  "webview_destroy": {
     parameters: ["pointer"],
     result: "void",
   },
-  "deno_webview_step": {
-    parameters: ["pointer", "i32"],
-    result: "i32",
-  },
-  "deno_webview_run": {
+  "webview_run": {
     parameters: ["pointer"],
     result: "void",
   },
-  "deno_webview_terminate": {
+  "webview_terminate": {
     parameters: ["pointer"],
     result: "void",
   },
-  "deno_webview_dispatch": {
-    parameters: ["pointer", "pointer", "pointer"],
-    result: "void",
-  },
-  "deno_webview_set_title": {
-    parameters: ["pointer", "pointer"],
-    result: "void",
-  },
-  "deno_webview_get_window": {
+  // "webview_dispatch": {
+  //   parameters: ["pointer", { function: { parameters: ["pointer", "pointer"], result: "void" } }, "pointer"],
+  //   result: "void",
+  // },
+  "webview_get_window": {
     parameters: ["pointer"],
     result: "pointer",
   },
-  "deno_webview_set_size": {
+  "webview_set_title": {
+    parameters: ["pointer", "pointer"],
+    result: "void",
+  },
+  "webview_set_size": {
     parameters: ["pointer", "i32", "i32", "i32"],
     result: "void",
   },
-  "deno_webview_navigate": {
+  "webview_navigate": {
     parameters: ["pointer", "pointer"],
     result: "void",
   },
-  "deno_webview_eval": {
+  "webview_set_html": {
     parameters: ["pointer", "pointer"],
     result: "void",
   },
-  "deno_webview_init": {
+  "webview_init": {
     parameters: ["pointer", "pointer"],
     result: "void",
   },
-  "deno_webview_bind": {
+  "webview_eval": {
     parameters: ["pointer", "pointer"],
-    result: "pointer",
-  },
-  "deno_webview_channel_recv": {
-    parameters: ["pointer"],
-    result: "pointer",
-    nonblocking: true,
-  },
-  "deno_webview_channel_recv_free": {
-    parameters: ["pointer"],
     result: "void",
   },
-  "deno_webview_channel_free": {
-    parameters: ["pointer"],
+  "webview_bind": {
+    parameters: ["pointer", "pointer", { function: { parameters: ["pointer", "pointer", "pointer"], result: "void" } }, "pointer"],
     result: "void",
   },
-  "deno_webview_return": {
+  "webview_unbind": {
+    parameters: ["pointer", "pointer"],
+    result: "void",
+  },
+  "webview_return": {
     parameters: ["pointer", "pointer", "i32", "pointer"],
     result: "void",
   },
