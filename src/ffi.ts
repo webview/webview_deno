@@ -124,7 +124,12 @@ const lib = await prepare({
     result: "void",
   },
   "webview_bind": {
-    parameters: ["pointer", "pointer", { function: { parameters: ["pointer", "pointer", "pointer"], result: "void" } }, "pointer"],
+    parameters: ["pointer", "pointer", {
+      function: {
+        parameters: ["pointer", "pointer", "pointer"],
+        result: "void",
+      },
+    }, "pointer"],
     result: "void",
   },
   "webview_unbind": {

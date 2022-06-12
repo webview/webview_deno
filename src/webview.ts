@@ -3,7 +3,6 @@ import sys from "./ffi.ts";
 const encoder = new TextEncoder();
 const encode = (value: string) => encoder.encode(value + "\0");
 
-
 /** Window size hints */
 export type SizeHint = 0 | 1 | 2 | 3;
 
