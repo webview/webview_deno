@@ -22,7 +22,11 @@ type ExitType = typeof ExitType[keyof typeof ExitType];
 async function spawn<T extends Deno.SpawnOptions>(
   cmd: string,
   { opts, exit }: { opts?: T; exit?: ExitType } = { exit: ExitType.Never },
-): Promise<boolean> {
+): Promise<{
+  status: Deno.ChildStatus;
+  stdout: string;
+  stderr: string;
+}> {
   if (opts !== undefined) {
     opts.stdout = "piped";
     opts.stderr = "piped";
@@ -47,7 +51,11 @@ async function spawn<T extends Deno.SpawnOptions>(
     Deno.exit(status.code);
   }
 
-  return status.success;
+  return {
+    status,
+    stdout: decoder.decode(stdout!),
+    stderr: decoder.decode(stderr!),
+  };
 }
 
 await ensureDir("build");
@@ -90,6 +98,16 @@ switch (Deno.build.os) {
   }
 
   case "linux": {
+    const { stdout } = await spawn("pkg-config", {
+      opts: {
+        args: [
+          "--cflags",
+          "--libs",
+          "gtk+-3.0",
+          "webkit2gtk-4.0",
+        ],
+      },
+    });
     await spawn("c++", {
       opts: {
         exit: ExitType.Fail,
@@ -101,7 +119,7 @@ switch (Deno.build.os) {
           "-Wall",
           "-Wextra",
           "-pedantic",
-          "$(pkg-config --cflags --libs gtk+-3.0 webkit2gtk-4.0)",
+          stdout,
           "-fpic",
           "-o",
           "build/webview.o",
