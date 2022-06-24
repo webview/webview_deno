@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - ".github/workflows/**"
+      - "script/build.*"
       - "src/ffi.ts"
       - "webview/**"
 
