@@ -1,6 +1,6 @@
-on: [push, pull_request]
-
 name: Checks
+
+on: [push, pull_request]
 
 jobs:
   checks:
@@ -21,11 +21,6 @@ jobs:
         uses: denoland/setup-deno@v1
         with:
           deno-version: v1.x
-    
-      - name: Install webkit2gtk
-        run: |
-          sudo apt-get update
-          sudo apt-get install libwebkit2gtk-4.0-dev
 
       - name: Run check
         run: deno task check

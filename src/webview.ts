@@ -4,7 +4,7 @@ const encoder = new TextEncoder();
 const encode = (value: string) => encoder.encode(value + "\0");
 
 /** Window size hints */
-export type SizeHint = 0 | 1 | 2 | 3;
+export type SizeHint = typeof SizeHint[keyof typeof SizeHint];
 
 /** Window size hints */
 export const SizeHint = {
@@ -18,13 +18,23 @@ export const SizeHint = {
   FIXED: 3,
 } as const;
 
+/** Window size */
+export interface Size {
+  /** The width of the window */
+  width: number;
+  /** The height of the window */
+  height: number;
+  /** The window size hint */
+  hint: SizeHint;
+}
+
 /**
  * An instance of a webview window
  */
 export class Webview {
-  #handle: Deno.UnsafePointer | null = null;
-  #callbacks: Map<string, { close: () => void }> = new Map();
-  #dispatches: { close: () => void }[] = [];
+  #handle: bigint | null = null;
+  #callbacks: Map<string, Deno.UnsafeCallback> = new Map();
+  #dispatches: Deno.UnsafeCallback[] = [];
 
   /**
    * An unsafe pointer to the webview
@@ -37,8 +47,10 @@ export class Webview {
    * Sets the native window size
    */
   set size(
-    { width, height, hint }: { width: number; height: number; hint: SizeHint },
+    { width, height, hint }: Size,
   ) {
+    console.log(width, height, hint);
+
     sys.symbols.webview_set_size(this.#handle, width, height, hint);
   }
 
@@ -49,27 +61,32 @@ export class Webview {
     sys.symbols.webview_set_title(this.#handle, encode(title));
   }
 
-  /** **UNSTABLE**: Unsafe and new API, beware!
+  /** **UNSTABLE**: Highly unsafe API, beware!
    *
    * Creates a new webview instance from a webview handle.
    *
    * @param handle A previously created webview instances handle
    */
-  constructor(handle: Deno.UnsafePointer);
+  constructor(handle: bigint);
   /**
    * Creates a new webview instance.
    *
    * @param debug Defaults to false, when true developer tools are enabled
    * for supported platforms
+   * @param size The window size
    */
-  constructor(debug?: boolean);
-  constructor(debugOrHandle: boolean | Deno.UnsafePointer = false) {
-    this.#handle = debugOrHandle instanceof Deno.UnsafePointer
+  constructor(
+    debug?: boolean,
+    size?: Size,
+  );
+  constructor(debugOrHandle: boolean | bigint = false) {
+    this.#handle = typeof debugOrHandle === "bigint"
       ? debugOrHandle
       : sys.symbols.webview_create(
         Number(debugOrHandle),
         null,
-      ) as Deno.UnsafePointer;
+      );
+    this.size = { width: 1024, height: 768, hint: SizeHint.NONE };
   }
 
   /**
@@ -123,19 +140,19 @@ export class Webview {
     callback: (
       seq: string,
       req: string,
-      arg: Deno.UnsafePointer | null,
+      arg: bigint | null,
     ) => void,
-    arg: Deno.UnsafePointer | null = null,
+    arg: bigint | null = null,
   ) {
-    const callbackResource = Deno.registerCallback(
+    const callbackResource = new Deno.UnsafeCallback(
       {
         parameters: ["pointer", "pointer", "pointer"],
         result: "void",
       },
       (
-        seqPtr: Deno.UnsafePointer,
-        reqPtr: Deno.UnsafePointer,
-        arg: Deno.UnsafePointer | null,
+        seqPtr: bigint,
+        reqPtr: bigint,
+        arg: bigint | null,
       ) => {
         const seq = new Deno.UnsafePointerView(seqPtr).getCString();
         const req = new Deno.UnsafePointerView(reqPtr).getCString();
@@ -146,7 +163,7 @@ export class Webview {
     sys.symbols.webview_bind(
       this.#handle,
       encode(name),
-      callbackResource,
+      callbackResource.pointer,
       arg,
     );
   }

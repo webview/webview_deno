@@ -87,7 +87,7 @@ binaries are located. This is usually `file://./target/release`.
 
 ```bash
 $ deno task build
-$ PLUGIN_URL=target/debug/
+$ PLUGIN_URL=./build/
 $ deno run --unstable -A examples/local.ts
 ```
 
@@ -105,7 +105,7 @@ $ deno task run examples/local.ts
 ## Dependencies
 
 - [plug](https://deno.land/x/plug)
-- [webview-sys](https://crates.io/crates/webview-sys)
+- [webview](https://github.com/webview/webview)
 
 ## Other
 
