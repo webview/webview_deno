@@ -12,12 +12,12 @@
 [webview](https://github.com/zserge/webview) using the
 [webview_rust](https://github.com/Boscop/web-view) library.
 
-Webview is a tiny cross-platform library to render **web-based GUIs for desktop
+Webview is a tiny cross-platform library to make **web-based GUIs for desktop
 applications**.
 
 ---
 
-> ⚠️ This project is still in an development. Expect breaking changes.
+> ⚠️ This project is still in development. Expect breaking changes.
 
 ---
 
@@ -37,6 +37,7 @@ const html = `
 `;
 
 const webview = new Webview();
+
 webview.navigate(`data:text/html,${encodeURIComponent(html)}`);
 webview.run();
 ```
@@ -74,8 +75,7 @@ You can find the official documentation
 Building on Windows requires admin privileges.
 
 ```bash
-make build
-# OR cargo build
+$ deno task build
 ```
 
 ### Running
@@ -86,9 +86,15 @@ use the environment variable `PLUGIN_URL` and set it to the path where the built
 binaries are located. This is usually `file://./target/release`.
 
 ```bash
-$ make build
-$ PLUGIN_URL=target/debug/
+$ deno task build
+$ PLUGIN_URL=./build/
 $ deno run --unstable -A examples/local.ts
+```
+
+or
+
+```bash
+$ deno task run examples/local.ts
 ```
 
 ## Environment variables
@@ -99,16 +105,16 @@ $ deno run --unstable -A examples/local.ts
 ## Dependencies
 
 - [plug](https://deno.land/x/plug)
-- [webview-sys](https://crates.io/crates/webview-sys)
+- [webview](https://github.com/webview/webview)
 
 ## Other
 
 ### Contribution
 
 Pull request, issues and feedback are very welcome. Code style is formatted with
-`make fmt` (which internally runs `deno fmt` and `cargo fmt`) and commit
-messages are done following
-[Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) spec.
+`deno task fmt`, linted with `deno task lint` and commit messages are done
+following [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
+spec.
 
 ### Licence
 

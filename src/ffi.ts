@@ -1,10 +1,10 @@
-import { CachePolicy, download, prepare } from "../deps.ts";
+import { CachePolicy, download, join, prepare } from "../deps.ts";
 
-const version = "0.7.0-pre.0";
+const version = "0.7.0-pre.3";
 const policy = Deno.env.get("PLUGIN_URL") === undefined
   ? CachePolicy.STORE
   : CachePolicy.NONE;
-const url = Deno.env.get("PLUGIN_URL") ??
+let url = Deno.env.get("PLUGIN_URL") ??
   `https://github.com/webview/webview_deno/releases/download/${version}/`;
 
 /**
@@ -21,12 +21,13 @@ async function checkForWebView2Loader(): Promise<boolean> {
 
 // make sure we don't preload twice
 let preloaded = false;
+
 /**
  * Loads the `./WebView2Loader.dll` for running on Windows.
  * Removes old version if it already existed, and only runs once.
  * Should be run on the main thread so that the `unload` gets hooked in properly, otherwise
  * make sure `unload` gets called during the `window.onunload` event (after all windows are closed).
- * 
+ *
  * Does not need to be run on non-windows platforms, but that is subject to change.
  */
 export async function preload() {
@@ -69,68 +70,79 @@ if (Deno.build.os === "windows") {
   }
 }
 
-const lib = await prepare({
-  name: "webview_deno",
-  url,
-  policy,
-}, {
-  "deno_webview_create": {
-    parameters: ["i32", "pointer"],
-    result: "pointer",
+// Make sure to load the right dylib for the arch when on darwin
+if (Deno.build.os === "darwin" && !url.endsWith("dylib")) {
+  url = join(url, `libwebview.${Deno.build.arch}.dylib`);
+}
+
+const lib = await prepare(
+  {
+    name: "webview",
+    url,
+    policy,
   },
-  "deno_webview_destroy": {
-    parameters: ["pointer"],
-    result: "void",
-  },
-  "deno_webview_run": {
-    parameters: ["pointer"],
-    result: "void",
-  },
-  "deno_webview_terminate": {
-    parameters: ["pointer"],
-    result: "void",
-  },
-  "deno_webview_dispatch": {
-    parameters: ["pointer", "pointer", "pointer"],
-    result: "void",
-  },
-  "deno_webview_set_title": {
-    parameters: ["pointer", "pointer"],
-    result: "void",
-  },
-  "deno_webview_get_window": {
-    parameters: ["pointer"],
-    result: "pointer",
-  },
-  "deno_webview_set_size": {
-    parameters: ["pointer", "i32", "i32", "i32"],
-    result: "void",
-  },
-  "deno_webview_navigate": {
-    parameters: ["pointer", "pointer"],
-    result: "void",
-  },
-  "deno_webview_eval": {
-    parameters: ["pointer", "pointer"],
-    result: "void",
-  },
-  "deno_webview_init": {
-    parameters: ["pointer", "pointer"],
-    result: "void",
-  },
-  "deno_webview_bind": {
-    parameters: ["pointer", "pointer"],
-    result: "void",
-  },
-  "deno_webview_return": {
-    parameters: ["pointer", "pointer", "i32", "pointer"],
-    result: "void",
-  },
-  "deno_webview_get_recv": {
-    parameters: [],
-    result: "pointer",
-    nonblocking: true,
-  },
-});
+  {
+    "webview_create": {
+      parameters: ["i32", "pointer"],
+      result: "pointer",
+    },
+    "webview_destroy": {
+      parameters: ["pointer"],
+      result: "void",
+    },
+    "webview_run": {
+      parameters: ["pointer"],
+      result: "void",
+    },
+    "webview_terminate": {
+      parameters: ["pointer"],
+      result: "void",
+    },
+    // "webview_dispatch": {
+    //   parameters: ["pointer", { function: { parameters: ["pointer", "pointer"], result: "void" } }, "pointer"],
+    //   result: "void",
+    // },
+    "webview_get_window": {
+      parameters: ["pointer"],
+      result: "pointer",
+    },
+    "webview_set_title": {
+      parameters: ["pointer", "pointer"],
+      result: "void",
+    },
+    "webview_set_size": {
+      parameters: ["pointer", "i32", "i32", "i32"],
+      result: "void",
+    },
+    "webview_navigate": {
+      parameters: ["pointer", "pointer"],
+      result: "void",
+    },
+    "webview_set_html": {
+      parameters: ["pointer", "pointer"],
+      result: "void",
+    },
+    "webview_init": {
+      parameters: ["pointer", "pointer"],
+      result: "void",
+    },
+    "webview_eval": {
+      parameters: ["pointer", "pointer"],
+      result: "void",
+    },
+    "webview_bind": {
+      parameters: ["pointer", "pointer", "function", "pointer"],
+      result: "void",
+    },
+    "webview_unbind": {
+      parameters: ["pointer", "pointer"],
+      result: "void",
+    },
+    "webview_return": {
+      parameters: ["pointer", "pointer", "i32", "pointer"],
+      result: "void",
+    },
+  } as const,
+);
 
 export default lib;
