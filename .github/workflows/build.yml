@@ -52,14 +52,14 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: linux-dynamic-library
-            build/libwebview.so
+          path: build/libwebview.so
 
       - name: Upload Artifacts (Darwin)
         if: matrix.os == 'macos-latest'
         uses: actions/upload-artifact@v1
         with:
           name: darwin-dynamic-library
-            build/libwebview.x86_64.dylib
+          path: build/libwebview.x86_64.dylib
 
 #      - name: Release Plugin
 #        uses: softprops/action-gh-release@master
