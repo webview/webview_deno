@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        os: [macOS-latest, windows-latest, ubuntu-latest]
+        os: [macos-latest, windows-latest, ubuntu-latest]
 
     steps:
       - name: Clone repository
@@ -28,7 +28,7 @@ jobs:
           deno-version: v1.x
 
       - name: install webkit2gtk (Linux)
-        if: matrix.platform == "ubuntu-latest"
+        if: matrix.os == "ubuntu-latest"
         run: |
           sudo apt-get update
           sudo apt-get install -y webkit2gtk-4.0
@@ -36,27 +36,26 @@ jobs:
       - name: Build dynamic library
         run: deno task build
 
-
       - name: Upload Artifacts (Windows)
-        if: matrix.platform == "windows-latest"
+        if: matrix.os == "windows-latest"
         uses: actions/upload-artifact@v1
-        with: 
+        with:
           name: windows-dynamic-library
           path: |
             build/webview.dll
             build/Webview2Loader.dll
-  
+
       - name: Upload Artifacts (Linux)
-        if: matrix.platform == "ubuntu-latest"
+        if: matrix.os == "ubuntu-latest"
         uses: actions/upload-artifact@v1
-        with: 
+        with:
           name: linux-dynamic-library
             build/libwebview.so
-        
+
       - name: Upload Artifacts (Darwin)
-        if: matrix.platform == "macos-latest"
+        if: matrix.os == "macos-latest"
         uses: actions/upload-artifact@v1
-        with: 
+        with:
           name: darwin-dynamic-library
             build/libwebview.x86_64.dylib
 
