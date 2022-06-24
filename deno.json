@@ -2,7 +2,7 @@
   "tasks": {
     "check": "deno check --unstable mod.ts",
     "fmt": "deno fmt --unstable",
-    "fmt:check": "deno task fmt:deno --check && deno task fmt:rust --check",
+    "fmt:check": "deno fmt --unstable --check",
     "lint": "deno lint --unstable",
     "build": "deno run -A --unstable script/build.ts",
     "run": "deno task build && export PLUGIN_URL=\"./build/\" && deno run -A --unstable"
