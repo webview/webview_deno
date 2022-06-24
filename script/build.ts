@@ -36,6 +36,8 @@ async function spawn<T extends Deno.SpawnOptions>(
 
   if (status.success) {
     console.log(`Successfully ran "${cmd} ${(opts?.args ?? []).join(" ")}"`);
+    console.log(`stdout:\n${indent(decoder.decode(stdout!))}`);
+    console.log(`stderr:\n${indent(decoder.decode(stderr!))}`);
   } else {
     console.log(`Failed run "${cmd}"`);
     console.log(`stdout:\n${indent(decoder.decode(stdout!))}`);
