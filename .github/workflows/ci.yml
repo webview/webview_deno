@@ -14,20 +14,22 @@ jobs:
         build:
         - id: macos
           os: macOS-latest
-          args: '--release'
-          target: ''
+          target: 'x86_64-apple-darwin'
         - id: macos-arm64
           os: macOS-latest
           target: 'aarch64-apple-darwin'
-          args: '--release --target=aarch64-apple-darwin'
         - id: windows
           os: windows-latest
-          args: '--release'
-          target: ''
+          target: 'x86_64-pc-windows-msvc'
+        - id: windows-arm
+          os: windows-latest
+          target: 'aarch64-pc-windows-msvc'
         - id: linux
           os: ubuntu-latest
-          args: '--release'
-          target: ''
+          target: 'x86_64-unknown-linux-gnu'
+        - id: linux-arm
+          os: ubuntu-latest
+          target: 'aarch64-unknown-linux-gnu'
 
     env:
       GH_ACTIONS: true
@@ -73,10 +75,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install libwebkit2gtk-4.0-dev
 
-      - name: arm targets
-        if: matrix.build.id == 'macos-arm64'
-        run: rustup target add aarch64-apple-darwin
-
       - name: Run cargo build
         uses: actions-rs/cargo@v1
         with:
@@ -87,11 +85,11 @@ jobs:
         with:
           name: ${{ matrix.build.id }}
           path: |
-            target/release/libwebview_deno.dylib
-            target/aarch64-apple-darwin/release/libwebview_deno.dylib
-            target/release/libwebview_deno.so
-            target/release/webview_deno.dll
-            target/release/Webview2Loader.dll
+            target/**/libwebview_deno.dylib
+            target/**/libwebview_deno.dylib
+            target/**/libwebview_deno.so
+            target/**/webview_deno.dll
+            target/**/Webview2Loader.dll
 
       - name: Release Plugin
         uses: softprops/action-gh-release@master
