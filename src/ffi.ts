@@ -1,17 +1,17 @@
 import { CachePolicy, download, prepare } from "../deps.ts";
 
-const version = "0.7.0-pre.0";
+const version = "0.7.0-dev.0";
 const policy = Deno.env.get("PLUGIN_URL") === undefined
   ? CachePolicy.STORE
   : CachePolicy.NONE;
 
 const url = Deno.env.get("PLUGIN_URL") ??
-  `https://github.com/webview/webview_deno/releases/download/${version}/`;
+  `https://github.com/Snider/webview_deno/releases/download/${version}/`;
 
 const urls = {
-  darwin: `${url}/libwebview_deno.${Deno.build.arch}.dylib`,
-  windows: `${url}/webview_deno.${Deno.build.arch}.dll`,
-  linux: `${url}/libwebview_deno.${Deno.build.arch}.so`,
+  darwin: `${url}libwebview_deno.${Deno.build.arch}.dylib`,
+  windows: `${url}webview_deno.${Deno.build.arch}.dll`,
+  linux: `${url}libwebview_deno.${Deno.build.arch}.so`,
 };
 /**
  * Checks for the existence of `./WebView2Loader.dll` for running on Windows
