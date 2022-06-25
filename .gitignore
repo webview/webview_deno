@@ -11,3 +11,6 @@ script/Microsoft*
 script/nuget.exe
 nuget.exe
 build/
+
+# MacOS
+.DS_Store
