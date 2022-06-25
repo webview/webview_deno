@@ -6,7 +6,8 @@
     "lint": "deno lint --unstable",
     "test:doc": "deno test -A --unstable --doc",
     "build": "deno run -A --unstable script/build.ts",
-    "run": "deno task build && export PLUGIN_URL=\"./build/\" && deno run -A --unstable"
+    "run": "deno task build && export PLUGIN_URL=\"./build/\" && deno run -A --unstable",
+    "run:fast": "export PLUGIN_URL=\"./build/\" && deno run -A --unstable"
   },
   "fmt": {
     "files": {
