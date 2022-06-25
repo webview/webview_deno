@@ -170,7 +170,10 @@ export class Webview {
         Number(debugOrHandle),
         null,
       );
-    this.size = { width: 1024, height: 768, hint: SizeHint.NONE };
+
+    if (size !== undefined) {
+      this.size = size;
+    }
   }
 
   /**
