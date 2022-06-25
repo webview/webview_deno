@@ -69,6 +69,7 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
+          name: ${{ matrix.build }}
           path: |
             target/release/libwebview_deno.dylib
             target/release/libwebview_deno.so
