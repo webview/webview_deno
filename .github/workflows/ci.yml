@@ -77,21 +77,21 @@ jobs:
 
       - name: Package macOS
         if:  matrix.build.id == 'macos'
-        run: mv ${{ github.workspace }}/target/${{ matrix.build.target }}/release/libwebview_deno.dylib libwebview_deno.x86_64.dylib
+        run: mv target/${{ matrix.build.target }}/release/libwebview_deno.dylib libwebview_deno.x86_64.dylib
 
       - name: Package macOS-arm
         if:  matrix.build.id == 'macos-arm64'
-        run: mv ${{ github.workspace }}/target/${{ matrix.build.target }}/release/libwebview_deno.dylib libwebview_deno.aarch64.dylib
+        run: mv target/${{ matrix.build.target }}/release/libwebview_deno.dylib libwebview_deno.aarch64.dylib
 
       - name: Package Windows
         if:  matrix.build.id == 'windows'
         run: |
-          mv ${{ github.workspace }}/target/${{ matrix.build.target }}/release/webview_deno.dll webview_deno.x86_64.dll
-          mv ${{ github.workspace }}/target/${{ matrix.build.target }}/release/Webview2Loader.dll Webview2Loader.dll
+          mv target/${{ matrix.build.target }}/release/webview_deno.dll webview_deno.x86_64.dll
+          mv target/${{ matrix.build.target }}/release/Webview2Loader.dll Webview2Loader.dll
 
       - name: Package Linux
         if:  matrix.build.id == 'linux'
-        run: mv ${{ github.workspace }}/target/${{ matrix.build.target }}/release/webview_deno.so webview_deno.x86_64.so
+        run: mv target/${{ matrix.build.target }}/release/libwebview_deno.so libwebview_deno.x86_64.so
 
       - uses: actions/upload-artifact@v3
         with:
