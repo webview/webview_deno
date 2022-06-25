@@ -75,15 +75,33 @@ jobs:
           command: build
           args: --release --target=${{ matrix.build.target }}
 
+      - name: Package macOS
+        if:  matrix.build.id == 'macos'
+        run: mv target/${{ matrix.build.target }}/release/libwebview_deno.dylib libwebview_deno.x86_64.dylib
+
+      - name: Package macOS-arm
+        if:  matrix.build.id == 'macos-arm64'
+        run: mv target/${{ matrix.build.target }}/release/libwebview_deno.dylib libwebview_deno.aarch64.dylib
+
+      - name: Package Windows
+        if:  matrix.build.id == 'windows'
+        run: |
+          mv target/${{ matrix.build.target }}/release/webview_deno.dll webview_deno.x86_64.dll
+          mv target/${{ matrix.build.target }}/release/Webview2Loader.dll Webview2Loader.dll
+
+      - name: Package Linux
+        if:  matrix.build.id == 'linux'
+        run: mv target/${{ matrix.build.target }}/release/webview_deno.so webview_deno.x86_64.so
+
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.build.id }}
           path: |
-            target/${{ matrix.build.target }}/release/libwebview_deno.dylib
-            target/${{ matrix.build.target }}/release/libwebview_deno.dylib
-            target/${{ matrix.build.target }}/release/libwebview_deno.so
-            target/${{ matrix.build.target }}/release/webview_deno.dll
-            target/${{ matrix.build.target }}/release/Webview2Loader.dll
+            libwebview_deno.x86_64.dylib
+            libwebview_deno.aarch64.dylib
+            libwebview_deno.x86_64.so
+            webview_deno.x86_64.dll
+            Webview2Loader.dll
 
       - name: Release Plugin
         uses: softprops/action-gh-release@master
@@ -94,7 +112,8 @@ jobs:
           tag_name: "webview_deno release"
           draft: true
           files: |
-            target/release/libwebview_deno.dylib
-            target/release/libwebview_deno.so
-            target/release/webview_deno.dll
-            target/release/Webview2Loader.dll
+            libwebview_deno.x86_64.dylib
+            libwebview_deno.aarch64.dylib
+            libwebview_deno.x86_64.so
+            webview_deno.x86_64.dll
+            Webview2Loader.dll
