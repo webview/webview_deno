@@ -43,6 +43,7 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
+          default: true
           target: ${{ matrix.build.target }}
 
       - name: Log versions
