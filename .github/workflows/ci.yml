@@ -6,12 +6,18 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.kind }} ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.kind }} ${{ matrix.build.os }}
+    runs-on: ${{ matrix.build.os }}
     timeout-minutes: 60
     strategy:
       matrix:
-        os: [macOS-latest, windows-latest, ubuntu-latest]
+        build:
+        - id: macos
+          os: macOS-latest
+        - id: windows
+          os: windows-latest
+        - id: linux
+          os: ubuntu-latest
 
     env:
       GH_ACTIONS: true
@@ -50,7 +56,7 @@ jobs:
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install webkit2gtk
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.build.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install libwebkit2gtk-4.0-dev
@@ -61,8 +67,17 @@ jobs:
           command: build
           args: --release
 
+      - uses: actions/upload-artifact@v3
+        with:
+          path: |
+            target/release/libwebview_deno.dylib
+            target/release/libwebview_deno.so
+            target/release/webview_deno.dll
+            target/release/Webview2Loader.dll
+
       - name: Release Plugin
         uses: softprops/action-gh-release@master
+        if: startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
