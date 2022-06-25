@@ -115,25 +115,14 @@ switch (Deno.build.os) {
         exit: ExitType.Fail,
         args: [
           "webview/webview.cc",
-          "-c",
           "-DWEBVIEW_GTK",
+          "-shared",
           "-std=c++11",
           "-Wall",
           "-Wextra",
           "-pedantic",
           "-fpic",
-          ...stdout.split(" "),
-          "-o",
-          "build/webview.o",
-        ],
-      },
-    });
-    await spawn("c++", {
-      opts: {
-        exit: ExitType.Fail,
-        args: [
-          "build/webview.o",
-          "-shared",
+          ...stdout.trim().split(" "),
           "-o",
           "build/libwebview.so",
         ],
