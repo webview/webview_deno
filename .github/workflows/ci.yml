@@ -19,7 +19,7 @@ jobs:
         - id: macos-arm64
           os: macOS-latest
           target: 'aarch64-apple-darwin'
-          args: '--target=aarch64-apple-darwin'
+          args: '--release --target=aarch64-apple-darwin'
         - id: windows
           os: windows-latest
           args: '--release'
