@@ -109,8 +109,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: "webview_deno release"
-          draft: true
           files: |
             libwebview_deno.x86_64.dylib
             libwebview_deno.aarch64.dylib
