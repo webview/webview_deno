@@ -55,17 +55,17 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.cargo/registry
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ matrix.build.id }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
       - name: Cache cargo index
         uses: actions/cache@v1
         with:
           path: ~/.cargo/git
-          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ matrix.build.id }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
       - name: Cache cargo build
         uses: actions/cache@v1
         with:
           path: target
-          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ matrix.build.id }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install webkit2gtk
         if: matrix.build.os == 'ubuntu-latest'
@@ -88,7 +88,7 @@ jobs:
           name: ${{ matrix.build.id }}
           path: |
             target/release/libwebview_deno.dylib
-            target/aarch64-apple-darwin/libwebview_deno.dylib
+            target/aarch64-apple-darwin/release/libwebview_deno.dylib
             target/release/libwebview_deno.so
             target/release/webview_deno.dll
             target/release/Webview2Loader.dll
