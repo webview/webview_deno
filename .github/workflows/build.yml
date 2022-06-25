@@ -42,7 +42,11 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          path: build/
+          name: build
+          path: |
+            build/*.dll
+            build/*.dylib
+            build/*.so
 
 #      - name: Release Plugin
 #        uses: softprops/action-gh-release@master
