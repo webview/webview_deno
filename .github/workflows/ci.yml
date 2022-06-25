@@ -79,17 +79,17 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: ${{ matrix.build.args }}
+          args: --release --target=${{ matrix.build.target }}
 
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.build.id }}
           path: |
-            target/**/libwebview_deno.dylib
-            target/**/libwebview_deno.dylib
-            target/**/libwebview_deno.so
-            target/**/webview_deno.dll
-            target/**/Webview2Loader.dll
+            target/${{ matrix.build.target }}/release/libwebview_deno.dylib
+            target/${{ matrix.build.target }}/release/libwebview_deno.dylib
+            target/${{ matrix.build.target }}/release/libwebview_deno.so
+            target/${{ matrix.build.target }}/release/webview_deno.dll
+            target/${{ matrix.build.target }}/release/Webview2Loader.dll
 
       - name: Release Plugin
         uses: softprops/action-gh-release@master
