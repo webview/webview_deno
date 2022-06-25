@@ -103,10 +103,10 @@ $ deno task run examples/local.ts
 ```
 
 or if you have the webview library already built and didn't make any changes to
-it, you can skip the building step with
+it, you can skip the building step with:
 
 ```bash
-$ deno task fast-run examples/local.ts
+$ deno task run:fast examples/local.ts
 ```
 
 ## Environment variables
