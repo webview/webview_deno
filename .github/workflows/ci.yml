@@ -15,15 +15,19 @@ jobs:
         - id: macos
           os: macOS-latest
           args: '--release'
+          target: ''
         - id: macos-arm64
           os: macOS-latest
-          args: '--release --target=aarch64-apple-darwin'
+          target: 'aarch64-apple-darwin'
+          args: '--target=aarch64-apple-darwin'
         - id: windows
           os: windows-latest
           args: '--release'
+          target: ''
         - id: linux
           os: ubuntu-latest
           args: '--release'
+          target: ''
 
     env:
       GH_ACTIONS: true
@@ -39,6 +43,7 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
+          target: ${{ matrix.build.target }}
 
       - name: Log versions
         run: |
@@ -68,11 +73,8 @@ jobs:
           sudo apt-get install libwebkit2gtk-4.0-dev
 
       - name: arm targets
-        if: matrix.build.os == 'macOS-latest'
-        run: |
-          rustup target add aarch64-apple-darwin
-          export SDKROOT=$(xcrun -sdk macosx11.1 --show-sdk-path)
-          export MACOSX_DEPLOYMENT_TARGET=$(xcrun -sdk macosx11.1 --show-sdk-platform-version)
+        if: matrix.build.id == 'macos-arm64'
+        run: rustup target add aarch64-apple-darwin
 
       - name: Run cargo build
         uses: actions-rs/cargo@v1
