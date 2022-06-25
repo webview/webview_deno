@@ -40,7 +40,7 @@ jobs:
         run: deno task build
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           path: build/
 
