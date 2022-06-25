@@ -21,15 +21,9 @@ jobs:
         - id: windows
           os: windows-latest
           target: 'x86_64-pc-windows-msvc'
-        - id: windows-arm
-          os: windows-latest
-          target: 'aarch64-pc-windows-msvc'
         - id: linux
           os: ubuntu-latest
           target: 'x86_64-unknown-linux-gnu'
-        - id: linux-arm
-          os: ubuntu-latest
-          target: 'aarch64-unknown-linux-gnu'
 
     env:
       GH_ACTIONS: true
