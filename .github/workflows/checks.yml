@@ -25,6 +25,9 @@ jobs:
       - name: Run check
         run: deno task check
 
+      - name: Run test:doc
+        run: deno task test:doc
+
       - name: Run fmt
         run: deno task fmt:check
 

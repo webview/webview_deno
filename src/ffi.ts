@@ -8,7 +8,7 @@ let url = Deno.env.get("PLUGIN_URL") ??
   `https://github.com/webview/webview_deno/releases/download/${version}/`;
 
 /**
- * Checks for the existence of `./WebView2Loader.dll` for running on Windows
+ * Checks for the existence of `./WebView2Loader.dll` for running on Windows.
  *
  * @returns true if it exists, false if it doesn't
  */
@@ -23,10 +23,11 @@ async function checkForWebView2Loader(): Promise<boolean> {
 let preloaded = false;
 
 /**
- * Loads the `./WebView2Loader.dll` for running on Windows.
- * Removes old version if it already existed, and only runs once.
- * Should be run on the main thread so that the `unload` gets hooked in properly, otherwise
- * make sure `unload` gets called during the `window.onunload` event (after all windows are closed).
+ * Loads the `./WebView2Loader.dll` for running on Windows. Removes old version
+ * if it already existed, and only runs once. Should be run on the main thread
+ * so that the `unload` gets hooked in properly, otherwise make sure `unload`
+ * gets called during the `window.onunload` event (after all windows are
+ * closed).
  *
  * Does not need to be run on non-windows platforms, but that is subject to change.
  */
@@ -48,9 +49,10 @@ export async function preload() {
 }
 
 /**
- * Unload the library. Should only be run once all windows are closed.
- * If `preload` was called in the main thread, this will automatically be called
- * during the `window.onunload` event; otherwise, you may have to call this manually.
+ * Unload the library and destroy all webview instances. Should only be run
+ * once all windows are closed. If `preload` was called in the main thread,
+ * this will automatically be called during the `window.onunload` event;
+ * otherwise, you may have to call this manually.
  */
 export function unload() {
   lib.close();
