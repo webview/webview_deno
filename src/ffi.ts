@@ -1,7 +1,7 @@
 import { CachePolicy, download, join, prepare } from "../deps.ts";
 import { Webview } from "./webview.ts";
 
-const version = "0.7.2";
+const version = "0.7.3";
 const policy = Deno.env.get("PLUGIN_URL") === undefined
   ? CachePolicy.STORE
   : CachePolicy.NONE;
