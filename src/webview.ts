@@ -29,14 +29,46 @@ export interface Size {
 }
 
 /**
- * An instance of a webview window
+ * An instance of a webview window.
+ *
+ * ## Examples
+ *
+ * ### Local
+ *
+ * ```ts
+ * import { Webview } from "../mod.ts";
+ *
+ * const html = `
+ *   <html>
+ *   <body>
+ *     <h1>Hello from deno v${Deno.version.deno}</h1>
+ *   </body>
+ *   </html>
+ * `;
+ *
+ * const webview = new Webview();
+ *
+ * webview.navigate(`data:text/html,${encodeURIComponent(html)}`);
+ * webview.run();
+ * ```
+ *
+ * ### Remote
+ *
+ * ```ts
+ * import { Webview } from "../mod.ts";
+ *
+ * const webview = new Webview();
+ * webview.navigate("https://deno.land/");
+ * webview.run();
+ * ```
  */
 export class Webview {
   #handle: bigint | null = null;
   #callbacks: Map<string, Deno.UnsafeCallback> = new Map();
   #dispatches: Deno.UnsafeCallback[] = [];
 
-  /**
+  /** **UNSTABLE**: Highly unsafe API, beware!
+   *
    * An unsafe pointer to the webview
    */
   get unsafeHandle() {
@@ -45,17 +77,47 @@ export class Webview {
 
   /**
    * Sets the native window size
+   *
+   * ## Example
+   *
+   * ```ts
+   * import { Webview, SizeHint } from "../mod.ts";
+   *
+   * const webview = new Webview();
+   * webview.navigate("https://deno.land/");
+   *
+   * // Change from the default size to a small fixed window
+   * webview.size = {
+   *   width: 200,
+   *   height: 200,
+   *   hint: SizeHint.FIXED
+   * };
+   *
+   * webview.run();
+   * ```
    */
   set size(
     { width, height, hint }: Size,
   ) {
-    console.log(width, height, hint);
-
     sys.symbols.webview_set_size(this.#handle, width, height, hint);
   }
 
   /**
    * Sets the native window title
+   *
+   * ## Example
+   *
+   * ```ts
+   * import { Webview } from "../mod.ts";
+   *
+   * const webview = new Webview();
+   * webview.navigate("https://deno.land/");
+   *
+   * // Set the window title to "Hello world!"
+   * webview.title = "Hello world!";
+   *
+   * webview.run();
+   * ```
    */
   set title(title: string) {
     sys.symbols.webview_set_title(this.#handle, encode(title));
@@ -73,13 +135,35 @@ export class Webview {
    *
    * @param debug Defaults to false, when true developer tools are enabled
    * for supported platforms
-   * @param size The window size
+   * @param size The window size, default to 1024x768 with no size hint. Set
+   * this to undefined if you do not want to automatically resize the window.
+   * This may cause issues for MacOS where the window is invisible until
+   * resized.
+   *
+   * ## Example
+   *
+   * ```ts
+   * import { Webview, SizeHint } from "../mod.ts";
+   *
+   * // Create a new webview and change from the default size to a small fixed window
+   * const webview = new Webview(true, {
+   *   width: 200,
+   *   height: 200,
+   *   hint: SizeHint.FIXED
+   * });
+   *
+   * webview.navigate("https://deno.land/");
+   * webview.run();
+   * ```
    */
   constructor(
     debug?: boolean,
     size?: Size,
   );
-  constructor(debugOrHandle: boolean | bigint = false) {
+  constructor(
+    debugOrHandle: boolean | bigint = false,
+    size: Size | undefined = { width: 1024, height: 768, hint: SizeHint.NONE },
+  ) {
     this.#handle = typeof debugOrHandle === "bigint"
       ? debugOrHandle
       : sys.symbols.webview_create(
@@ -90,7 +174,8 @@ export class Webview {
   }
 
   /**
-   * Destroys the webview and closes the window along with freeing internal resources
+   * Destroys the webview and closes the window along with freeing all internal
+   * resources.
    */
   destroy() {
     for (const callback of Object.keys(this.#callbacks)) {
@@ -117,7 +202,8 @@ export class Webview {
   }
 
   /**
-   * Runs the main event loop until it's terminated. After this function exits the webview is automatically destroyed
+   * Runs the main event loop until it's terminated. After this function exits
+   * the webview is automatically destroyed.
    */
   run(): void {
     sys.symbols.webview_run(this.#handle);
@@ -132,7 +218,8 @@ export class Webview {
    * the arguments passed from the JavaScript function call.
    *
    * @param name The name of the bound function
-   * @param callback A callback which takes two strings as parameters: `seq` and `req` and the passed {@link arg} pointer
+   * @param callback A callback which takes two strings as parameters: `seq`
+   * and `req` and the passed {@link arg} pointer
    * @param arg A pointer which is going to be passed to the callback once called
    */
   bindRaw(
@@ -179,6 +266,41 @@ export class Webview {
    * @param callback A callback which is passed the arguments as called from the
    * webview JavaScript environment and optionally returns a value to the
    * webview JavaScript caller
+   *
+   * ## Example
+   * ```ts
+   * import { Webview } from "../mod.ts";
+   *
+   * const html = `
+   *   <html>
+   *   <body>
+   *     <h1>Hello from deno v${Deno.version.deno}</h1>
+   *     <button onclick="press('I was pressed!', 123, new Date()).then(log);">
+   *       Press me!
+   *     </button>
+   *   </body>
+   *   </html>
+   * `;
+   *
+   * const webview = new Webview();
+   *
+   * webview.navigate(`data:text/html,${encodeURIComponent(html)}`);
+   *
+   * let counter = 0;
+   * // Create and bind `press` to the webview javascript instance.
+   * // This functions in addition to logging its parameters also returns
+   * // a value from deno land to webview land.
+   * webview.bind("press", (a, b, c) => {
+   *   console.log(a, b, c);
+   *
+   *   return { times: counter++ };
+   * });
+   *
+   * // Bind the `log` function in the webview to the parent instances `console.log`
+   * webview.bind("log", (...args) => console.log(...args));
+   *
+   * webview.run();
+   * ```
    */
   bind(
     name: string,
@@ -207,8 +329,8 @@ export class Webview {
   }
 
   /**
-   * Unbinds a previously bound function freeing its resource and removing it from
-   * the webview JavaScript context.
+   * Unbinds a previously bound function freeing its resource and removing it
+   * from the webview JavaScript context.
    *
    * @param name The name of the bound function
    */
@@ -221,8 +343,10 @@ export class Webview {
   /**
    * Returns a value to the webview JavaScript environment.
    *
-   * @param seq The request pointer as provided by the {@link Webview.bindRaw} callback
-   * @param status If status is zero the result is expected to be a valid JSON result value otherwise the result is an error JSON object
+   * @param seq The request pointer as provided by the {@link Webview.bindRaw}
+   * callback
+   * @param status If status is zero the result is expected to be a valid JSON
+   * result value otherwise the result is an error JSON object
    * @param result The stringified JSON response
    */
   return(seq: string, status: number, result: string) {
@@ -235,9 +359,10 @@ export class Webview {
   }
 
   /**
-   * Evaluates arbitrary JavaScript code. Evaluation happens asynchronously, also
-   * the result of the expression is ignored. Use {@link Webview.bind bindings} if you want to
-   * receive notifications about the results of the evaluation.
+   * Evaluates arbitrary JavaScript code. Evaluation happens asynchronously,
+   * also the result of the expression is ignored. Use
+   * {@link Webview.bind bindings} if you want to receive notifications about
+   * the results of the evaluation.
    */
   eval(source: string) {
     sys.symbols.webview_eval(this.#handle, encode(source));
