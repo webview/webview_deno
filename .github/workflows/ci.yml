@@ -2,7 +2,12 @@ name: CI release
 
 on:
   push:
-
+    branches:
+      - main
+    paths:
+      - "Cargo.toml"
+      - "src/**"
+      - ".github/workflows/**"
 
 jobs:
   build:
