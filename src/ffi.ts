@@ -4,9 +4,15 @@ const version = "0.7.0-pre.0";
 const policy = Deno.env.get("PLUGIN_URL") === undefined
   ? CachePolicy.STORE
   : CachePolicy.NONE;
+
 const url = Deno.env.get("PLUGIN_URL") ??
   `https://github.com/webview/webview_deno/releases/download/${version}/`;
 
+const urls = {
+  darwin: `${url}/libwebview_deno.${Deno.build.arch}.dylib`,
+  windows: `${url}/webview_deno.${Deno.build.arch}.dll`,
+  linux: `${url}/libwebview_deno.${Deno.build.arch}.so`,
+};
 /**
  * Checks for the existence of `./WebView2Loader.dll` for running on Windows
  *
@@ -26,7 +32,7 @@ let preloaded = false;
  * Removes old version if it already existed, and only runs once.
  * Should be run on the main thread so that the `unload` gets hooked in properly, otherwise
  * make sure `unload` gets called during the `window.onunload` event (after all windows are closed).
- * 
+ *
  * Does not need to be run on non-windows platforms, but that is subject to change.
  */
 export async function preload() {
@@ -71,7 +77,7 @@ if (Deno.build.os === "windows") {
 
 const lib = await prepare({
   name: "webview_deno",
-  url,
+  urls,
   policy,
 }, {
   "deno_webview_create": {
