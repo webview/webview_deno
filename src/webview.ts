@@ -29,14 +29,46 @@ export interface Size {
 }
 
 /**
- * An instance of a webview window
+ * An instance of a webview window.
+ * 
+ * ## Examples
+ * 
+ * ### Local
+ * 
+ * ```ts
+ * import { Webview } from "../mod.ts";
+ * 
+ * const html = `
+ *   <html>
+ *   <body>
+ *     <h1>Hello from deno v${Deno.version.deno}</h1>
+ *   </body>
+ *   </html>
+ * `;
+ * 
+ * const webview = new Webview();
+ * 
+ * webview.navigate(`data:text/html,${encodeURIComponent(html)}`);
+ * webview.run();
+ * ```
+ * 
+ * ### Remote
+ * 
+ * ```ts
+ * import { Webview } from "../mod.ts";
+ * 
+ * const webview = new Webview();
+ * webview.navigate("https://deno.land/");
+ * webview.run();
+ * ```
  */
 export class Webview {
   #handle: bigint | null = null;
   #callbacks: Map<string, Deno.UnsafeCallback> = new Map();
   #dispatches: Deno.UnsafeCallback[] = [];
 
-  /**
+  /** **UNSTABLE**: Highly unsafe API, beware!
+   * 
    * An unsafe pointer to the webview
    */
   get unsafeHandle() {
@@ -45,6 +77,24 @@ export class Webview {
 
   /**
    * Sets the native window size
+   * 
+   * ## Example
+   * 
+   * ```ts
+   * import { Webview, SizeHint } from "../mod.ts";
+   * 
+   * const webview = new Webview();
+   * webview.navigate("https://deno.land/");
+   * 
+   * // Change from the default size to a small fixed window
+   * webview.size = {
+   *   width: 200,
+   *   height: 200,
+   *   hint: SizeHint.Fixed
+   * };
+   * 
+   * webview.run();
+   * ```
    */
   set size(
     { width, height, hint }: Size,
@@ -56,6 +106,20 @@ export class Webview {
 
   /**
    * Sets the native window title
+   * 
+   * ## Example
+   * 
+   * ```ts
+   * import { Webview } from "../mod.ts";
+   * 
+   * const webview = new Webview();
+   * webview.navigate("https://deno.land/");
+   * 
+   * // Set the window title to "Hello world!"
+   * webview.title = "Hello world!";
+   * 
+   * webview.run();
+   * ```
    */
   set title(title: string) {
     sys.symbols.webview_set_title(this.#handle, encode(title));
