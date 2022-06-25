@@ -1,4 +1,4 @@
-import sys from "./ffi.ts";
+import sys, { instances } from "./ffi.ts";
 
 const encoder = new TextEncoder();
 const encode = (value: string) => encoder.encode(value + "\0");
@@ -174,6 +174,9 @@ export class Webview {
     if (size !== undefined) {
       this.size = size;
     }
+
+    // Push this instance to the global instances list to automatically destroy
+    instances.push(this);
   }
 
   /**

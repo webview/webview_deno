@@ -1,4 +1,5 @@
 import { CachePolicy, download, join, prepare } from "../deps.ts";
+import { Webview } from "./webview.ts";
 
 const version = "0.7.2";
 const policy = Deno.env.get("PLUGIN_URL") === undefined
@@ -21,6 +22,12 @@ async function checkForWebView2Loader(): Promise<boolean> {
 
 // make sure we don't preload twice
 let preloaded = false;
+
+/**
+ * All active webview instances. This is internally used for automatically
+ * destroying all instances once {@link unload} is called.
+ */
+export const instances: Webview[] = [];
 
 /**
  * Loads the `./WebView2Loader.dll` for running on Windows. Removes old version
@@ -55,6 +62,9 @@ export async function preload() {
  * otherwise, you may have to call this manually.
  */
 export function unload() {
+  for (const instance of instances) {
+    instance.destroy();
+  }
   lib.close();
   if (Deno.build.os === "windows") {
     Deno.removeSync("./WebView2Loader.dll");
