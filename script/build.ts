@@ -1,16 +1,7 @@
 import { ensureDir } from "https://deno.land/std@0.145.0/fs/ensure_dir.ts";
 
 const decoder = new TextDecoder();
-
-const archMap: { [k in typeof Deno.build.arch]: string } = {
-  "x86_64": "x86_64",
-  "aarch64": "arm64",
-} as const;
-
-function indent(source: string, spaces = 2): string {
-  return source.split("\n").map((line) => `${" ".repeat(spaces)}${line}\n`)
-    .join("");
-}
+const architectures = [["x86_64", "x86_64"], ["aarch64", "arm64"]] as const;
 
 const ExitType = {
   Exit: "exit",
@@ -19,9 +10,22 @@ const ExitType = {
 } as const;
 type ExitType = typeof ExitType[keyof typeof ExitType];
 
+const LogType = {
+  Success: "success",
+  Always: "always",
+  Fail: "fail",
+  Never: "never",
+} as const;
+type LogType = typeof LogType[keyof typeof LogType];
+
+function indent(source: string, spaces = 2): string {
+  return source.split("\n").map((line) => `${" ".repeat(spaces)}${line}\n`)
+    .join("");
+}
+
 async function spawn<T extends Deno.SpawnOptions>(
   cmd: string,
-  { opts, exit }: { opts?: T; exit?: ExitType } = { exit: ExitType.Never },
+  { opts, exit, log }: { opts?: T; exit?: ExitType; log?: LogType } = {},
 ): Promise<{
   status: Deno.ChildStatus;
   stdout: string;
@@ -32,31 +36,55 @@ async function spawn<T extends Deno.SpawnOptions>(
     opts.stderr = "piped";
   }
 
-  const { status, stdout, stderr } = await Deno.spawn(cmd, opts);
+  exit ??= ExitType.Never;
+  log ??= LogType.Always;
 
-  if (status.success) {
-    console.log(`Successfully ran "${cmd} ${(opts?.args ?? []).join(" ")}"`);
-    console.log(`stdout:\n${indent(decoder.decode(stdout!))}`);
-    console.log(`stderr:\n${indent(decoder.decode(stderr!))}`);
+  const result = await Deno.spawn(cmd, opts);
+
+  const stdout = decoder.decode(result.stdout!);
+  const stderr = decoder.decode(result.stderr!);
+
+  if (result.status.success) {
+    if (log !== "never") {
+      console.log(`Successfully ran "${cmd} ${(opts?.args ?? []).join(" ")}"`);
+    }
+
+    if (log === "success" || log === "always") {
+      if (stdout.length !== 0) {
+        console.log(`stdout:\n${indent(stdout)}`);
+      }
+      if (stderr.length !== 0) {
+        console.log(`stderr:\n${indent(stderr)}`);
+      }
+    }
   } else {
-    console.log(`Failed run "${cmd}"`);
-    console.log(`stdout:\n${indent(decoder.decode(stdout!))}`);
-    console.log(`stderr:\n${indent(decoder.decode(stderr!))}`);
-    console.log(`status: ${status.code}`);
+    if (log !== "never") {
+      console.log(`Failed run "${cmd}"`);
+    }
+
+    if (log === "fail" || log === "always") {
+      if (stdout.length !== 0) {
+        console.log(`stdout:\n${indent(stdout)}`);
+      }
+      if (stderr.length !== 0) {
+        console.log(`stderr:\n${indent(stderr)}`);
+      }
+      console.log(`status: ${result.status.code}`);
+    }
 
     if (exit === ExitType.Fail) {
-      Deno.exit(status.code);
+      Deno.exit(result.status.code);
     }
   }
 
   if (exit === ExitType.Exit) {
-    Deno.exit(status.code);
+    Deno.exit(result.status.code);
   }
 
   return {
-    status,
-    stdout: decoder.decode(stdout!),
-    stderr: decoder.decode(stderr!),
+    status: result.status,
+    stdout,
+    stderr,
   };
 }
 
@@ -71,30 +99,29 @@ switch (Deno.build.os) {
   }
 
   case "darwin": {
-    await spawn("c++", {
-      opts: {
-        exit: ExitType.Fail,
-        args: [
-          "webview/webview.cc",
-          "-dynamiclib",
-          "-fpic",
-          "-DWEBVIEW_COCOA",
-          "-std=c++11",
-          "-Wall",
-          "-Wextra",
-          "-pedantic",
-          "-framework",
-          "WebKit",
-          "-arch",
-          archMap[Deno.build.arch],
-          "-o",
-          `build/libwebview.${Deno.build.arch}.dylib`,
-        ],
-        env: {
-          "CFLAGS": "",
+    for (const [denoArch, gccArch] of architectures) {
+      await spawn("c++", {
+        opts: {
+          exit: ExitType.Fail,
+          args: [
+            "webview/webview.cc",
+            "-dynamiclib",
+            "-fpic",
+            "-DWEBVIEW_COCOA",
+            "-std=c++11",
+            "-Wall",
+            "-Wextra",
+            "-pedantic",
+            "-framework",
+            "WebKit",
+            "-arch",
+            gccArch,
+            "-o",
+            `build/libwebview.${denoArch}.dylib`,
+          ],
         },
-      },
-    });
+      });
+    }
     Deno.exit(0);
     break;
   }
