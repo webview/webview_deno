@@ -67,12 +67,23 @@ export class Webview {
   #callbacks: Map<string, Deno.UnsafeCallback> = new Map();
   #dispatches: Deno.UnsafeCallback[] = [];
 
-  /** **UNSTABLE**: Highly unsafe API, beware!
+  /** **UNSAFE**: Highly unsafe API, beware!
    *
    * An unsafe pointer to the webview
    */
   get unsafeHandle() {
     return this.#handle;
+  }
+
+  /** **UNSAFE**: Highly unsafe API, beware!
+   *
+   * An unsafe pointer to the webviews platform specific native window handle.
+   * When using GTK backend the pointer is `GtkWindow` pointer, when using Cocoa
+   * backend the pointer is `NSWindow` pointer, when using Win32 backend the
+   * pointer is `HWND` pointer.
+   */
+  get unsafeWindowHandle() {
+    return sys.symbols.webview_get_window(this.#handle);
   }
 
   /**
@@ -123,7 +134,7 @@ export class Webview {
     sys.symbols.webview_set_title(this.#handle, encode(title));
   }
 
-  /** **UNSTABLE**: Highly unsafe API, beware!
+  /** **UNSAFE**: Highly unsafe API, beware!
    *
    * Creates a new webview instance from a webview handle.
    *
@@ -132,13 +143,6 @@ export class Webview {
   constructor(handle: bigint);
   /**
    * Creates a new webview instance.
-   *
-   * @param debug Defaults to false, when true developer tools are enabled
-   * for supported platforms
-   * @param size The window size, default to 1024x768 with no size hint. Set
-   * this to undefined if you do not want to automatically resize the window.
-   * This may cause issues for MacOS where the window is invisible until
-   * resized.
    *
    * ## Example
    *
@@ -155,20 +159,35 @@ export class Webview {
    * webview.navigate("https://deno.land/");
    * webview.run();
    * ```
+   *
+   * @param debug Defaults to false, when true developer tools are enabled
+   * for supported platforms
+   * @param size The window size, default to 1024x768 with no size hint. Set
+   * this to undefined if you do not want to automatically resize the window.
+   * This may cause issues for MacOS where the window is invisible until
+   * resized.
+   * @param window **UNSAFE**: Highly unsafe API, beware! An unsafe pointer to
+   * the platforms specific native window handle. If null or undefined a new
+   * window is created. If it's non-null - then child WebView is embedded into
+   * the given parent window. Otherwise a new window is created. Depending on
+   * the platform, a `GtkWindow`, `NSWindow` or `HWND` pointer can be passed
+   * here.
    */
   constructor(
     debug?: boolean,
     size?: Size,
+    window?: bigint | null,
   );
   constructor(
     debugOrHandle: boolean | bigint = false,
     size: Size | undefined = { width: 1024, height: 768, hint: SizeHint.NONE },
+    window: bigint | null = null,
   ) {
     this.#handle = typeof debugOrHandle === "bigint"
       ? debugOrHandle
       : sys.symbols.webview_create(
         Number(debugOrHandle),
-        null,
+        window,
       );
 
     if (size !== undefined) {
