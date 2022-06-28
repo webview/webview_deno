@@ -12,7 +12,7 @@ const encoder = new TextEncoder();
 
 /**
  * Encodes a string to a null terminated string
- * 
+ *
  * @param value The intput string
  * @returns A null terminated `Uint8Array` of the input string
  */
