@@ -1,7 +1,4 @@
-import sys, { instances } from "./ffi.ts";
-
-const encoder = new TextEncoder();
-const encode = (value: string) => encoder.encode(value + "\0");
+import { encodeCString, instances, lib } from "./ffi.ts";
 
 /** Window size hints */
 export type SizeHint = typeof SizeHint[keyof typeof SizeHint];
@@ -64,8 +61,13 @@ export interface Size {
  */
 export class Webview {
   #handle: bigint | null = null;
-  #callbacks: Map<string, Deno.UnsafeCallback> = new Map();
-  #dispatches: Deno.UnsafeCallback[] = [];
+  #callbacks: Map<
+    string,
+    Deno.UnsafeCallback<{
+      parameters: "pointer"[];
+      result: "void";
+    }>
+  > = new Map();
 
   /** **UNSAFE**: Highly unsafe API, beware!
    *
@@ -83,7 +85,7 @@ export class Webview {
    * pointer is `HWND` pointer.
    */
   get unsafeWindowHandle() {
-    return sys.symbols.webview_get_window(this.#handle);
+    return lib.symbols.webview_get_window(this.#handle);
   }
 
   /**
@@ -110,7 +112,7 @@ export class Webview {
   set size(
     { width, height, hint }: Size,
   ) {
-    sys.symbols.webview_set_size(this.#handle, width, height, hint);
+    lib.symbols.webview_set_size(this.#handle, width, height, hint);
   }
 
   /**
@@ -131,7 +133,7 @@ export class Webview {
    * ```
    */
   set title(title: string) {
-    sys.symbols.webview_set_title(this.#handle, encode(title));
+    lib.symbols.webview_set_title(this.#handle, encodeCString(title));
   }
 
   /** **UNSAFE**: Highly unsafe API, beware!
@@ -185,7 +187,7 @@ export class Webview {
   ) {
     this.#handle = typeof debugOrHandle === "bigint"
       ? debugOrHandle
-      : sys.symbols.webview_create(
+      : lib.symbols.webview_create(
         Number(debugOrHandle),
         window,
       );
@@ -206,23 +208,20 @@ export class Webview {
     for (const callback of Object.keys(this.#callbacks)) {
       this.unbind(callback);
     }
-    for (const dispatch of this.#dispatches) {
-      dispatch.close();
-    }
-    sys.symbols.webview_terminate(this.#handle);
-    sys.symbols.webview_destroy(this.#handle);
+    lib.symbols.webview_terminate(this.#handle);
+    lib.symbols.webview_destroy(this.#handle);
     this.#handle = null;
   }
 
   /**
    * Navigates webview to the given URL. URL may be a data URI, i.e.
-   * `"data:text/html,<html>...</html>"`. It is often ok not to url-encode it
-   * properly, webview will re-encode it for you.
+   * `"data:text/html,<html>...</html>"`. It is often ok not to url-encodeCString it
+   * properly, webview will re-encodeCString it for you.
    */
   navigate(url: URL | string) {
-    sys.symbols.webview_navigate(
+    lib.symbols.webview_navigate(
       this.#handle,
-      encode(url instanceof URL ? url.toString() : url),
+      encodeCString(url instanceof URL ? url.toString() : url),
     );
   }
 
@@ -231,7 +230,7 @@ export class Webview {
    * the webview is automatically destroyed.
    */
   run(): void {
-    sys.symbols.webview_run(this.#handle);
+    lib.symbols.webview_run(this.#handle);
     this.destroy();
   }
 
@@ -272,9 +271,9 @@ export class Webview {
       },
     );
     this.#callbacks.set(name, callbackResource);
-    sys.symbols.webview_bind(
+    lib.symbols.webview_bind(
       this.#handle,
-      encode(name),
+      encodeCString(name),
       callbackResource.pointer,
       arg,
     );
@@ -360,7 +359,7 @@ export class Webview {
    * @param name The name of the bound function
    */
   unbind(name: string) {
-    sys.symbols.webview_unbind(this.#handle, encode(name));
+    lib.symbols.webview_unbind(this.#handle, encodeCString(name));
     this.#callbacks.get(name)?.close();
     this.#callbacks.delete(name);
   }
@@ -375,11 +374,11 @@ export class Webview {
    * @param result The stringified JSON response
    */
   return(seq: string, status: number, result: string) {
-    sys.symbols.webview_return(
+    lib.symbols.webview_return(
       this.#handle,
-      encode(seq),
+      encodeCString(seq),
       status,
-      encode(result),
+      encodeCString(result),
     );
   }
 
@@ -390,7 +389,7 @@ export class Webview {
    * the results of the evaluation.
    */
   eval(source: string) {
-    sys.symbols.webview_eval(this.#handle, encode(source));
+    lib.symbols.webview_eval(this.#handle, encodeCString(source));
   }
 
   /**
@@ -399,6 +398,6 @@ export class Webview {
    * executed. It is guaranteed that code is executed before window.onload.
    */
   init(source: string) {
-    sys.symbols.webview_init(this.#handle, encode(source));
+    lib.symbols.webview_init(this.#handle, encodeCString(source));
   }
 }

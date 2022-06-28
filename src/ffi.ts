@@ -8,6 +8,18 @@ const policy = Deno.env.get("PLUGIN_URL") === undefined
 let url = Deno.env.get("PLUGIN_URL") ??
   `https://github.com/webview/webview_deno/releases/download/${version}/`;
 
+const encoder = new TextEncoder();
+
+/**
+ * Encodes a string to a null terminated string
+ * 
+ * @param value The intput string
+ * @returns A null terminated `Uint8Array` of the input string
+ */
+export function encodeCString(value: string) {
+  return encoder.encode(value + "\0");
+}
+
 /**
  * Checks for the existence of `./WebView2Loader.dll` for running on Windows.
  *
@@ -87,7 +99,7 @@ if (Deno.build.os === "darwin" && !url.endsWith("dylib")) {
   url = join(url, `libwebview.${Deno.build.arch}.dylib`);
 }
 
-const lib = await prepare(
+export const lib = await prepare(
   {
     name: "webview",
     url,
@@ -156,5 +168,3 @@ const lib = await prepare(
     },
   } as const,
 );
-
-export default lib;
