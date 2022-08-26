@@ -131,7 +131,7 @@ export const lib = await prepare(
       result: "pointer",
     },
     "webview_set_title": {
-      parameters: ["pointer", "pointer"],
+      parameters: ["pointer", "buffer"],
       result: "void",
     },
     "webview_set_size": {
@@ -139,7 +139,7 @@ export const lib = await prepare(
       result: "void",
     },
     "webview_navigate": {
-      parameters: ["pointer", "pointer"],
+      parameters: ["pointer", "buffer"],
       result: "void",
     },
     "webview_set_html": {
@@ -147,23 +147,23 @@ export const lib = await prepare(
       result: "void",
     },
     "webview_init": {
-      parameters: ["pointer", "pointer"],
+      parameters: ["pointer", "buffer"],
       result: "void",
     },
     "webview_eval": {
-      parameters: ["pointer", "pointer"],
+      parameters: ["pointer", "buffer"],
       result: "void",
     },
     "webview_bind": {
-      parameters: ["pointer", "pointer", "function", "pointer"],
+      parameters: ["pointer", "buffer", "function", "pointer"],
       result: "void",
     },
     "webview_unbind": {
-      parameters: ["pointer", "pointer"],
+      parameters: ["pointer", "buffer"],
       result: "void",
     },
     "webview_return": {
-      parameters: ["pointer", "pointer", "i32", "pointer"],
+      parameters: ["pointer", "buffer", "i32", "buffer"],
       result: "void",
     },
   } as const,

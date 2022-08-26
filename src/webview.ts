@@ -60,7 +60,7 @@ export interface Size {
  * ```
  */
 export class Webview {
-  #handle: bigint | null = null;
+  #handle: Deno.PointerValue | null = null;
   #callbacks: Map<
     string,
     Deno.UnsafeCallback<{
@@ -142,7 +142,7 @@ export class Webview {
    *
    * @param handle A previously created webview instances handle
    */
-  constructor(handle: bigint);
+  constructor(handle: Deno.PointerValue);
   /**
    * Creates a new webview instance.
    *
@@ -178,19 +178,20 @@ export class Webview {
   constructor(
     debug?: boolean,
     size?: Size,
-    window?: bigint | null,
+    window?: Deno.PointerValue | null,
   );
   constructor(
-    debugOrHandle: boolean | bigint = false,
+    debugOrHandle: boolean | Deno.PointerValue = false,
     size: Size | undefined = { width: 1024, height: 768, hint: SizeHint.NONE },
-    window: bigint | null = null,
+    window: Deno.PointerValue | null = null,
   ) {
-    this.#handle = typeof debugOrHandle === "bigint"
-      ? debugOrHandle
-      : lib.symbols.webview_create(
-        Number(debugOrHandle),
-        window,
-      );
+    this.#handle =
+      typeof debugOrHandle === "bigint" || typeof debugOrHandle === "number"
+        ? debugOrHandle
+        : lib.symbols.webview_create(
+          Number(debugOrHandle),
+          window,
+        );
 
     if (size !== undefined) {
       this.size = size;
@@ -251,9 +252,9 @@ export class Webview {
     callback: (
       seq: string,
       req: string,
-      arg: bigint | null,
+      arg: Deno.PointerValue | null,
     ) => void,
-    arg: bigint | null = null,
+    arg: Deno.PointerValue | null = null,
   ) {
     const callbackResource = new Deno.UnsafeCallback(
       {
@@ -261,12 +262,12 @@ export class Webview {
         result: "void",
       },
       (
-        seqPtr: bigint,
-        reqPtr: bigint,
-        arg: bigint | null,
+        seqPtr: Deno.PointerValue,
+        reqPtr: Deno.PointerValue,
+        arg: Deno.PointerValue | null,
       ) => {
-        const seq = new Deno.UnsafePointerView(seqPtr).getCString();
-        const req = new Deno.UnsafePointerView(reqPtr).getCString();
+        const seq = new Deno.UnsafePointerView(BigInt(seqPtr)).getCString();
+        const req = new Deno.UnsafePointerView(BigInt(reqPtr)).getCString();
         callback(seq, req, arg);
       },
     );
