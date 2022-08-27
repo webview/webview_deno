@@ -44,7 +44,7 @@ async function spawn<T extends Deno.SpawnOptions>(
   const stdout = decoder.decode(result.stdout!);
   const stderr = decoder.decode(result.stderr!);
 
-  if (result.status.success) {
+  if (result.success) {
     if (log !== "never") {
       console.log(`Successfully ran "${cmd} ${(opts?.args ?? []).join(" ")}"`);
     }
@@ -69,20 +69,20 @@ async function spawn<T extends Deno.SpawnOptions>(
       if (stderr.length !== 0) {
         console.log(`stderr:\n${indent(stderr)}`);
       }
-      console.log(`status: ${result.status.code}`);
+      console.log(`status: ${result.code}`);
     }
 
     if (exit === ExitType.Fail) {
-      Deno.exit(result.status.code);
+      Deno.exit(result.code);
     }
   }
 
   if (exit === ExitType.Exit) {
-    Deno.exit(result.status.code);
+    Deno.exit(result.code);
   }
 
   return {
-    status: result.status,
+    status: result,
     stdout,
     stderr,
   };
