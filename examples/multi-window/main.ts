@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.139.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.153.0/http/server.ts";
 import { preload } from "../../mod.ts";
 await preload();
 
