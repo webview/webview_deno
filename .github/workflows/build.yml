@@ -9,6 +9,8 @@ on:
       - "script/build.*"
       - "src/ffi.ts"
       - "webview/**"
+      - ".gitmodules"
+      - "deno.json"
 
 jobs:
   build:
