@@ -1,6 +1,1 @@
-export {
-  CachePolicy,
-  download,
-  prepare,
-} from "https://deno.land/x/plug@0.5.2/plug.ts";
-export { join } from "https://deno.land/std@0.153.0/path/mod.ts";
+export { dlopen, download } from "https://deno.land/x/plug@1.0.0-rc.2/mod.ts";

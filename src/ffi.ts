@@ -1,11 +1,9 @@
-import { CachePolicy, download, join, prepare } from "../deps.ts";
+import { dlopen, download } from "../deps.ts";
 import { Webview } from "./webview.ts";
 
 const version = "0.7.3";
-const policy = Deno.env.get("PLUGIN_URL") === undefined
-  ? CachePolicy.STORE
-  : CachePolicy.NONE;
-let url = Deno.env.get("PLUGIN_URL") ??
+const cache = Deno.env.get("PLUGIN_URL") === undefined ? "use" : "reloadAll";
+const url = Deno.env.get("PLUGIN_URL") ??
   `https://github.com/webview/webview_deno/releases/download/${version}/`;
 
 const encoder = new TextEncoder();
@@ -58,7 +56,10 @@ export async function preload() {
       await Deno.remove("./WebView2Loader.dll");
     }
 
-    const webview2loader = await download(`${url}WebView2Loader.dll`);
+    const webview2loader = await download({
+      url: `${url}/WebView2Loader.dll`,
+      cache,
+    });
     await Deno.copyFile(webview2loader, "./WebView2Loader.dll");
 
     self.addEventListener("unload", unload);
@@ -94,16 +95,14 @@ if (Deno.build.os === "windows") {
   }
 }
 
-// Make sure to load the right dylib for the arch when on darwin
-if (Deno.build.os === "darwin" && !url.endsWith("dylib")) {
-  url = join(url, `libwebview.${Deno.build.arch}.dylib`);
-}
-
-export const lib = await prepare(
+export const lib = await dlopen(
   {
     name: "webview",
     url,
-    policy,
+    cache,
+    suffixes: {
+      darwin: `.${Deno.build.arch}`,
+    },
   },
   {
     "webview_create": {
