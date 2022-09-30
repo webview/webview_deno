@@ -4,7 +4,7 @@
 /// <reference lib="dom.asynciterable" />
 /// <reference lib="deno.ns" />
 
-import { serve } from "https://deno.land/std@0.153.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.157.0/http/server.ts";
 import { h, ssr, tw } from "https://crux.land/nanossr@0.0.1";
 
 const Hello = (props: { name: string }) => (
