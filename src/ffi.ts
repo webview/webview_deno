@@ -156,6 +156,7 @@ export const lib = await dlopen(
     "webview_bind": {
       parameters: ["pointer", "buffer", "function", "pointer"],
       result: "void",
+      callback: true
     },
     "webview_unbind": {
       parameters: ["pointer", "buffer"],

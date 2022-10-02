@@ -253,7 +253,7 @@ export class Webview {
       seq: string,
       req: string,
       arg: Deno.PointerValue | null,
-    ) => void,
+    ) => void | Promise<void>,
     arg: Deno.PointerValue | null = null,
   ) {
     const callbackResource = new Deno.UnsafeCallback(
@@ -261,14 +261,14 @@ export class Webview {
         parameters: ["pointer", "pointer", "pointer"],
         result: "void",
       },
-      (
+      async (
         seqPtr: Deno.PointerValue,
         reqPtr: Deno.PointerValue,
         arg: Deno.PointerValue | null,
       ) => {
         const seq = new Deno.UnsafePointerView(BigInt(seqPtr)).getCString();
         const req = new Deno.UnsafePointerView(BigInt(reqPtr)).getCString();
-        callback(seq, req, arg);
+        await callback(seq, req, arg);
       },
     );
     this.#callbacks.set(name, callbackResource);
