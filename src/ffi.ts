@@ -1,4 +1,4 @@
-import { dlopen, download } from "../deps.ts";
+import { dlopen } from "../deps.ts";
 import { Webview } from "./webview.ts";
 
 const version = "0.7.3";
@@ -64,17 +64,6 @@ export function unload() {
       if (e instanceof Deno.errors.NotFound) return;
       throw e;
     });
-  }
-}
-
-// Automatically run the preload if we're on windows and on the main thread.
-if (Deno.build.os === "windows") {
-  if ((self as never)["window"]) {
-    await preload();
-  } else if (!await checkForWebView2Loader()) {
-    throw new Error(
-      "WebView2Loader.dll does not exist! Make sure to run preload() from the main thread.",
-    );
   }
 }
 
