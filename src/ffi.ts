@@ -23,8 +23,8 @@ export function encodeCString(value: string) {
  *
  * @returns true if it exists, false if it doesn't
  */
-async function checkForWebView2Loader(): Promise<boolean> {
-  return await Deno.stat("./WebView2Loader.dll").then(
+function checkForWebView2Loader(): Promise<boolean> {
+  return Deno.stat("./WebView2Loader.dll").then(
     () => true,
     (e) => e instanceof Deno.errors.NotFound ? false : true,
   );
