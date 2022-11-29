@@ -40,8 +40,23 @@ if (Deno.build.os === 'windows') {
   const webview2loader = (await fetch(dataUrl)).body;
 
   //Overwrite local dll with the version specified in "url"
-  const fsFile = await Deno.open('./WebView2Loader.dll', { create: true, write: true });
-  await webview2loader?.pipeTo(fsFile.writable); //fsFile is closed by the stream
+  try {
+    const fsFile = await Deno.open('./WebView2Loader.dll', { create: true, write: true })
+    await webview2loader?.pipeTo(fsFile.writable); //fsFile is closed by the stream
+  } catch (e) {
+    const entries = await (async () => {
+      const array: Deno.DirEntry[] = []
+      for await (const entry of Deno.readDir('.')) array.push(entry)
+      return array
+    })()
+    //Check if error is only caused by process lock
+    if (!entries.some(entry => entry.name === 'WebView2Loader.dll')) throw e
+    /**
+     * WebView2Loader.dll is already used
+     * Do not crash to allow multiple execution at the same root
+     * WebView2Loader.dll is correctly reùoved in unload()
+     */
+  }
 
   self.addEventListener("unload", unload);
 }
