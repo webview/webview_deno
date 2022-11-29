@@ -33,7 +33,7 @@ export const instances: Webview[] = [];
  *
  * Does not need to be run on non-windows platforms, but that is subject to change.
  */
-if (Deno.build.os === 'windows') {
+if (Deno.build.os === "windows") {
   //Download and cache `./WebView2Loader.dll`
   const { default: dll } = await import(`https://ejm.sh/${url}/WebView2Loader.dll?.json`, { assert: { type: 'json' } }) as { default: { b64: string } };
   const dataUrl = `data:application/octet-stream;base64,${dll.b64}`;
@@ -41,20 +41,20 @@ if (Deno.build.os === 'windows') {
 
   //Overwrite local dll with the version specified in "url"
   try {
-    const fsFile = await Deno.open('./WebView2Loader.dll', { create: true, write: true })
+    const fsFile = await Deno.open("./WebView2Loader.dll", { create: true, write: true });
     await webview2loader?.pipeTo(fsFile.writable); //fsFile is closed by the stream
   } catch (e) {
     const entries = await (async () => {
-      const array: Deno.DirEntry[] = []
-      for await (const entry of Deno.readDir('.')) array.push(entry)
-      return array
-    })()
+      const array: Deno.DirEntry[] = [];
+      for await (const entry of Deno.readDir(".")) array.push(entry);
+      return array;
+    })();
     //Check if error is only caused by process lock
-    if (!entries.some(entry => entry.name === 'WebView2Loader.dll')) throw e
+    if (!entries.some(entry => entry.name === "WebView2Loader.dll")) throw e;
     /**
      * WebView2Loader.dll is already used
      * Do not crash to allow multiple execution at the same root
-     * WebView2Loader.dll is correctly reùoved in unload()
+     * WebView2Loader.dll is correctly resolved in unload()
      */
   }
 
