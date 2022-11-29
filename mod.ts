@@ -1,2 +1,2 @@
 export * from "./src/webview.ts";
-export { preload, unload } from "./src/ffi.ts";
+export { unload } from "./src/ffi.ts";
