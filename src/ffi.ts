@@ -48,24 +48,18 @@ export const instances: Webview[] = [];
  *
  * Does not need to be run on non-windows platforms, but that is subject to change.
  */
-export async function preload() {
-  if (preloaded) return;
+if (Deno.build.os === 'windows') {
+  //Download and cache `./WebView2Loader.dll`
+  const { default: dll } = await import(`https://ejm.sh/${url}/WebView2Loader.dll?.json`, { assert: { type: 'json' } }) as { default: { b64: string } };
+  const dataUrl = `data:application/octet-stream;base64,${dll.b64}`;
+  const webview2loader = (await fetch(dataUrl)).body;
 
-  if (Deno.build.os === "windows") {
-    if (await checkForWebView2Loader()) {
-      await Deno.remove("./WebView2Loader.dll");
-    }
+  //Overwrite local dll with the version specified in "url"
+  const fsFile = await Deno.open('./WebView2Loader.dll', { create: true, write: true });
+  await webview2loader?.pipeTo(fsFile.writable);
+  fsFile.close();
 
-    const webview2loader = await download({
-      url: `${url}/WebView2Loader.dll`,
-      cache,
-    });
-    await Deno.copyFile(webview2loader, "./WebView2Loader.dll");
-
-    self.addEventListener("unload", unload);
-  }
-
-  preloaded = true;
+  self.addEventListener("unload", unload);
 }
 
 /**
