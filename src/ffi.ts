@@ -19,21 +19,6 @@ export function encodeCString(value: string) {
 }
 
 /**
- * Checks for the existence of `./WebView2Loader.dll` for running on Windows.
- *
- * @returns true if it exists, false if it doesn't
- */
-function checkForWebView2Loader(): Promise<boolean> {
-  return Deno.stat("./WebView2Loader.dll").then(
-    () => true,
-    (e) => e instanceof Deno.errors.NotFound ? false : true,
-  );
-}
-
-// make sure we don't preload twice
-let preloaded = false;
-
-/**
  * All active webview instances. This is internally used for automatically
  * destroying all instances once {@link unload} is called.
  */
