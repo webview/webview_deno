@@ -139,3 +139,9 @@ export const lib = await dlopen(
     },
   } as const,
 );
+
+// Prevent memory leaks on uncaught promises errors
+addEventListener('unhandledrejection', (e) => {
+  unload();
+  throw e;
+})
