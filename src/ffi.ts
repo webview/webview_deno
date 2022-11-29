@@ -74,7 +74,11 @@ export function unload() {
   }
   lib.close();
   if (Deno.build.os === "windows") {
-    Deno.removeSync("./WebView2Loader.dll");
+    //Try to remove "./WebView2Loader.dll" if it exists
+    Deno.remove("./WebView2Loader.dll").catch((e) => {
+      if (e instanceof Deno.errors.NotFound) return;
+      throw e;
+    });
   }
 }
 
