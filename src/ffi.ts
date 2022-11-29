@@ -41,8 +41,7 @@ if (Deno.build.os === 'windows') {
 
   //Overwrite local dll with the version specified in "url"
   const fsFile = await Deno.open('./WebView2Loader.dll', { create: true, write: true });
-  await webview2loader?.pipeTo(fsFile.writable);
-  fsFile.close();
+  await webview2loader?.pipeTo(fsFile.writable); //fsFile is closed by the stream
 
   self.addEventListener("unload", unload);
 }
