@@ -267,8 +267,12 @@ export class Webview {
         reqPtr: Deno.PointerValue,
         arg: Deno.PointerValue | null,
       ) => {
-        const seq = seqPtr ? new Deno.UnsafePointerView(seqPtr).getCString() : '-1';
-        const req = reqPtr ? new Deno.UnsafePointerView(reqPtr).getCString() : '[]';
+        const seq = seqPtr
+          ? new Deno.UnsafePointerView(seqPtr).getCString()
+          : "-1";
+        const req = reqPtr
+          ? new Deno.UnsafePointerView(reqPtr).getCString()
+          : "[]";
         callback(seq, req, arg);
       },
     );
