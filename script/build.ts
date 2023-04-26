@@ -39,6 +39,8 @@ async function spawn<T extends Deno.SpawnOptions>(
   exit ??= ExitType.Never;
   log ??= LogType.Always;
 
+  console.log(`Running "${cmd} ${(opts?.args ?? []).join(" ")}"`);
+
   const result = await Deno.spawn(cmd, opts);
 
   const stdout = decoder.decode(result.stdout!);
