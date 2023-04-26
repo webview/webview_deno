@@ -1,3 +1,4 @@
+/// <reference lib="deno.unstable" />
 import { encodeCString, instances, lib } from "./ffi.ts";
 
 /** Window size hints */
@@ -266,8 +267,12 @@ export class Webview {
         reqPtr: Deno.PointerValue,
         arg: Deno.PointerValue | null,
       ) => {
-        const seq = new Deno.UnsafePointerView(BigInt(seqPtr)).getCString();
-        const req = new Deno.UnsafePointerView(BigInt(reqPtr)).getCString();
+        const seq = seqPtr
+          ? new Deno.UnsafePointerView(seqPtr).getCString()
+          : "";
+        const req = reqPtr
+          ? new Deno.UnsafePointerView(reqPtr).getCString()
+          : "";
         callback(seq, req, arg);
       },
     );
