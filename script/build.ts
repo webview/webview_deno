@@ -23,11 +23,11 @@ function indent(source: string, spaces = 2): string {
     .join("");
 }
 
-async function spawn<T extends Deno.SpawnOptions>(
+async function command<T extends Deno.CommandOptions>(
   cmd: string,
   { opts, exit, log }: { opts?: T; exit?: ExitType; log?: LogType } = {},
 ): Promise<{
-  status: Deno.ChildStatus;
+  code: number;
   stdout: string;
   stderr: string;
 }> {
@@ -39,22 +39,23 @@ async function spawn<T extends Deno.SpawnOptions>(
   exit ??= ExitType.Never;
   log ??= LogType.Always;
 
-  const result = await Deno.spawn(cmd, opts);
+  const command = new Deno.Command(cmd, opts);
+  const { code, stdout, stderr } = await command.output();
 
-  const stdout = decoder.decode(result.stdout!);
-  const stderr = decoder.decode(result.stderr!);
+  const stdoutStr = decoder.decode(stdout);
+  const stderrStr = decoder.decode(stderr);
 
-  if (result.success) {
+  if (code === 0) {
     if (log !== "never") {
       console.log(`Successfully ran "${cmd} ${(opts?.args ?? []).join(" ")}"`);
     }
 
     if (log === "success" || log === "always") {
-      if (stdout.length !== 0) {
-        console.log(`stdout:\n${indent(stdout)}`);
+      if (stdoutStr.length !== 0) {
+        console.log(`stdout:\n${indent(stdoutStr)}`);
       }
-      if (stderr.length !== 0) {
-        console.log(`stderr:\n${indent(stderr)}`);
+      if (stderrStr.length !== 0) {
+        console.log(`stderr:\n${indent(stderrStr)}`);
       }
     }
   } else {
@@ -63,28 +64,28 @@ async function spawn<T extends Deno.SpawnOptions>(
     }
 
     if (log === "fail" || log === "always") {
-      if (stdout.length !== 0) {
-        console.log(`stdout:\n${indent(stdout)}`);
+      if (stdoutStr.length !== 0) {
+        console.log(`stdout:\n${indent(stdoutStr)}`);
       }
-      if (stderr.length !== 0) {
-        console.log(`stderr:\n${indent(stderr)}`);
+      if (stderrStr.length !== 0) {
+        console.log(`stderr:\n${indent(stderrStr)}`);
       }
-      console.log(`status: ${result.code}`);
+      console.log(`code: ${code}`);
     }
 
     if (exit === ExitType.Fail) {
-      Deno.exit(result.code);
+      Deno.exit(code);
     }
   }
 
   if (exit === ExitType.Exit) {
-    Deno.exit(result.code);
+    Deno.exit(code);
   }
 
   return {
-    status: result,
-    stdout,
-    stderr,
+    code,
+    stdout: stdoutStr,
+    stderr: stderrStr,
   };
 }
 
@@ -92,7 +93,7 @@ await ensureDir("build");
 
 switch (Deno.build.os) {
   case "windows": {
-    await spawn("script/build.bat", {
+    await command("script/build.bat", {
       exit: ExitType.Exit,
     });
     break;
@@ -100,7 +101,7 @@ switch (Deno.build.os) {
 
   case "darwin": {
     for (const [denoArch, gccArch] of architectures) {
-      await spawn("c++", {
+      await command("c++", {
         opts: {
           exit: ExitType.Fail,
           args: [
@@ -127,7 +128,7 @@ switch (Deno.build.os) {
   }
 
   case "linux": {
-    const { stdout } = await spawn("pkg-config", {
+    const { stdout } = await command("pkg-config", {
       opts: {
         args: [
           "--cflags",
@@ -137,7 +138,7 @@ switch (Deno.build.os) {
         ],
       },
     });
-    await spawn("c++", {
+    await command("c++", {
       opts: {
         exit: ExitType.Fail,
         args: [
