@@ -23,11 +23,11 @@ function indent(source: string, spaces = 2): string {
     .join("");
 }
 
-async function spawn<T extends Deno.SpawnOptions>(
+async function spawn<T extends Deno.CommandOptions>(
   cmd: string,
   { opts, exit, log }: { opts?: T; exit?: ExitType; log?: LogType } = {},
 ): Promise<{
-  status: Deno.ChildStatus;
+  status: Deno.CommandStatus;
   stdout: string;
   stderr: string;
 }> {
@@ -39,7 +39,7 @@ async function spawn<T extends Deno.SpawnOptions>(
   exit ??= ExitType.Never;
   log ??= LogType.Always;
 
-  const result = await Deno.spawn(cmd, opts);
+  const result = await new Deno.Command(cmd, opts).output();
 
   const stdout = decoder.decode(result.stdout!);
   const stderr = decoder.decode(result.stderr!);
