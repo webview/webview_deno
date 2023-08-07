@@ -228,6 +228,16 @@ export class Webview {
   }
 
   /**
+   * Sets the current HTML of the webview to the given `html` string.
+   */
+  setHTML(html: string) {
+    lib.symbols.webview_set_html(
+      this.#handle,
+      encodeCString(html),
+    );
+  }
+
+  /**
    * Runs the main event loop until it's terminated. After this function exits
    * the webview is automatically destroyed.
    */
