@@ -1,7 +1,7 @@
-import { dlopen, download } from "../deps.ts";
+import { dlopen } from "../deps.ts";
 import { Webview } from "./webview.ts";
 
-const version = "0.7.3";
+const version = "0.7.4";
 const cache = Deno.env.get("PLUGIN_URL") === undefined ? "use" : "reloadAll";
 const url = Deno.env.get("PLUGIN_URL") ??
   `https://github.com/webview/webview_deno/releases/download/${version}/`;
@@ -19,21 +19,6 @@ export function encodeCString(value: string) {
 }
 
 /**
- * Checks for the existence of `./WebView2Loader.dll` for running on Windows.
- *
- * @returns true if it exists, false if it doesn't
- */
-async function checkForWebView2Loader(): Promise<boolean> {
-  return await Deno.stat("./WebView2Loader.dll").then(
-    () => true,
-    (e) => e instanceof Deno.errors.NotFound ? false : true,
-  );
-}
-
-// make sure we don't preload twice
-let preloaded = false;
-
-/**
  * All active webview instances. This is internally used for automatically
  * destroying all instances once {@link unload} is called.
  */
@@ -48,24 +33,32 @@ export const instances: Webview[] = [];
  *
  * Does not need to be run on non-windows platforms, but that is subject to change.
  */
-export async function preload() {
-  if (preloaded) return;
+if (Deno.build.os === "windows") {
+  //Download and cache `./WebView2Loader.dll`
+  const { default: dll } = await import(`https://ejm.sh/${url}/WebView2Loader.dll?.json`, { assert: { type: 'json' } }) as { default: { b64: string } };
+  const dataUrl = `data:application/octet-stream;base64,${dll.b64}`;
+  const webview2loader = (await fetch(dataUrl)).body;
 
-  if (Deno.build.os === "windows") {
-    if (await checkForWebView2Loader()) {
-      await Deno.remove("./WebView2Loader.dll");
-    }
-
-    const webview2loader = await download({
-      url: `${url}/WebView2Loader.dll`,
-      cache,
-    });
-    await Deno.copyFile(webview2loader, "./WebView2Loader.dll");
-
-    self.addEventListener("unload", unload);
+  //Overwrite local dll with the version specified in "url"
+  try {
+    const fsFile = await Deno.open("./WebView2Loader.dll", { create: true, write: true });
+    await webview2loader?.pipeTo(fsFile.writable); //fsFile is closed by the stream
+  } catch (e) {
+    const entries = await (async () => {
+      const array: Deno.DirEntry[] = [];
+      for await (const entry of Deno.readDir(".")) array.push(entry);
+      return array;
+    })();
+    //Check if error is only caused by process lock
+    if (!entries.some(entry => entry.name === "WebView2Loader.dll")) throw e;
+    /**
+     * WebView2Loader.dll is already used
+     * Do not crash to allow multiple execution at the same root
+     * WebView2Loader.dll is correctly resolved in unload()
+     */
   }
 
-  preloaded = true;
+  self.addEventListener("unload", unload);
 }
 
 /**
@@ -80,18 +73,11 @@ export function unload() {
   }
   lib.close();
   if (Deno.build.os === "windows") {
-    Deno.removeSync("./WebView2Loader.dll");
-  }
-}
-
-// Automatically run the preload if we're on windows and on the main thread.
-if (Deno.build.os === "windows") {
-  if ((self as never)["window"]) {
-    await preload();
-  } else if (!await checkForWebView2Loader()) {
-    throw new Error(
-      "WebView2Loader.dll does not exist! Make sure to run preload() from the main thread.",
-    );
+    //Try to remove "./WebView2Loader.dll" if it exists
+    Deno.remove("./WebView2Loader.dll").catch((e) => {
+      if (e instanceof Deno.errors.NotFound) return;
+      throw e;
+    });
   }
 }
 
@@ -167,3 +153,9 @@ export const lib = await dlopen(
     },
   } as const,
 );
+
+// Prevent memory leaks on uncaught promises errors
+addEventListener('unhandledrejection', (e) => {
+  unload();
+  throw e;
+})
