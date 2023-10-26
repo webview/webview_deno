@@ -1,4 +1,4 @@
-import { dirname, join } from "https://deno.land/std@0.157.0/path/mod.ts";
+import { dirname, join } from "https://deno.land/std@0.197.0/path/mod.ts";
 import { Webview } from "../../mod.ts";
 
 const worker = new Worker(

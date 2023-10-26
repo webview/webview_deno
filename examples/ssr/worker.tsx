@@ -4,7 +4,6 @@
 /// <reference lib="dom.asynciterable" />
 /// <reference lib="deno.ns" />
 
-import { serve } from "https://deno.land/std@0.157.0/http/server.ts";
 import { h, ssr, tw } from "https://crux.land/nanossr@0.0.1";
 
 const Hello = (props: { name: string }) => (
@@ -15,12 +14,11 @@ const Hello = (props: { name: string }) => (
   </div>
 );
 
-const server = serve((req) => {
+Deno.serve({ port: 8000 }, (req) => {
   console.log(req);
   const url = new URL(req.url);
   const name = url.searchParams.get("name") ?? "world";
   return ssr(() => <Hello name={name} />);
-}, { port: 8000 });
+});
 
 console.log("[runner] Listening on http://localhost:8000");
-await server;

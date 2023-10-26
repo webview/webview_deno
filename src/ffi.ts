@@ -142,7 +142,7 @@ export const lib = await dlopen(
       result: "void",
     },
     "webview_set_html": {
-      parameters: ["pointer", "pointer"],
+      parameters: ["pointer", "buffer"],
       result: "void",
     },
     "webview_init": {

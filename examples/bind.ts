@@ -13,7 +13,7 @@ const html = `
 
 const webview = new Webview();
 
-webview.navigate(`data:text/html,${encodeURIComponent(html)}`);
+webview.setHTML(html);
 
 let counter = 0;
 webview.bind("press", (a, b, c) => {
