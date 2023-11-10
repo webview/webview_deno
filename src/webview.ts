@@ -137,6 +137,32 @@ export class Webview {
     lib.symbols.webview_set_title(this.#handle, encodeCString(title));
   }
 
+  /**
+   * Sets the html contents of the window
+   *
+   * ## Example
+   *
+   * ```ts
+   * import { Webview } from "../mod.ts";
+   *
+   * const webview = new Webview();
+   *
+   * // Set the window html content to "<html><body>Hello World</body></html>"
+   * webview.html = `
+   *   <html>
+   *   <body>
+   *     <h1>Hello from deno v${Deno.version.deno}</h1>
+   *   </body>
+   *   </html>
+   * `;
+   *
+   * webview.run();
+   * ```
+   */
+  set html(html: string) {
+    lib.symbols.webview_set_html(this.#handle, encodeCString(html));
+  }
+
   /** **UNSAFE**: Highly unsafe API, beware!
    *
    * Creates a new webview instance from a webview handle.
