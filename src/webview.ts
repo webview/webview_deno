@@ -45,8 +45,9 @@ export interface Size {
  * `;
  *
  * const webview = new Webview();
+ * 
+ * webview.html = html;
  *
- * webview.navigate(`data:text/html,${encodeURIComponent(html)}`);
  * webview.run();
  * ```
  *
@@ -340,7 +341,7 @@ export class Webview {
    *
    * const webview = new Webview();
    *
-   * webview.navigate(`data:text/html,${encodeURIComponent(html)}`);
+   * webview.html = html;
    *
    * let counter = 0;
    * // Create and bind `press` to the webview javascript instance.
