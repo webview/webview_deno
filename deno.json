@@ -8,7 +8,7 @@
     "fmt": "deno fmt",
     "fmt:check": "deno fmt --check",
     "lint": "deno lint",
-    "test:doc": "deno test -A --unstable-ffi --doc",
+    "test:doc": "deno test -A --unstable-ffi --doc --import-map test_import_map.json",
     "build": "deno run -A script/build.ts",
     "run": "deno task build && export PLUGIN_URL=\"./build/\" && deno run -A --unstable-ffi",
     "run:fast": "export PLUGIN_URL=\"./build/\" && deno run -A --unstable-ffi"
