@@ -25,8 +25,8 @@ applications**.
 ## Installation
 
 Webview is published to [jsr.io](https://jsr.io/@webview/webview) and
-[deno.land](https://deno.land/x/webview). The recommended way to use it is to use
-JSR:
+[deno.land](https://deno.land/x/webview). The recommended way to use it is to
+use JSR:
 
 ```bash
 deno add @webview/webview

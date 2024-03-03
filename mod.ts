@@ -1,11 +1,11 @@
 /**
  * Webview is a tiny cross-platform library to make web-based GUIs for desktop
  * applications.
- * 
+ *
  * @example
  * ```
  * import { Webview } from "@webview/webview";
- * 
+ *
  * const html = `
  *   <html>
  *   <body>
@@ -13,13 +13,13 @@
  *   </body>
  *   </html>
  * `;
- * 
+ *
  * const webview = new Webview();
- * 
+ *
  * webview.navigate(`data:text/html,${encodeURIComponent(html)}`);
  * webview.run();
  * ```
- * 
+ *
  * @module
  */
 
