@@ -61,7 +61,7 @@ export interface Size {
  * ```
  */
 export class Webview {
-  #handle: Deno.PointerValue | null = null;
+  #handle: Deno.PointerValue = null;
   #callbacks: Map<
     string,
     Deno.UnsafeCallback<{
@@ -74,7 +74,7 @@ export class Webview {
    *
    * An unsafe pointer to the webview
    */
-  get unsafeHandle() {
+  get unsafeHandle(): Deno.PointerValue {
     return this.#handle;
   }
 
@@ -85,7 +85,7 @@ export class Webview {
    * backend the pointer is `NSWindow` pointer, when using Win32 backend the
    * pointer is `HWND` pointer.
    */
-  get unsafeWindowHandle() {
+  get unsafeWindowHandle(): Deno.PointerValue {
     return lib.symbols.webview_get_window(this.#handle);
   }
 
