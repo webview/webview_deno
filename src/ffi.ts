@@ -1,7 +1,9 @@
+import { version } from "../deno.json" with { type: "json" };
+
 import { dlopen, download } from "@denosaurs/plug";
 import { Webview } from "./webview.ts";
 
-const version = "0.7.3";
+
 const cache = Deno.env.get("PLUGIN_URL") === undefined ? "use" : "reloadAll";
 const url = Deno.env.get("PLUGIN_URL") ??
   `https://github.com/webview/webview_deno/releases/download/${version}/`;
