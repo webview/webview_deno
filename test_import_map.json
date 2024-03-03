@@ -1,5 +1,6 @@
 {
   "imports": {
-    "@webview/webview": "./mod.ts"
+    "@webview/webview": "./mod.ts",
+    "@denosaurs/plug": "jsr:@denosaurs/plug@^1.0.5"
   }
 }
