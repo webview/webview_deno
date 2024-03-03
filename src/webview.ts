@@ -1,4 +1,3 @@
-/// <reference lib="deno.unstable" />
 import { encodeCString, instances, lib } from "./ffi.ts";
 
 /** Window size hints */
