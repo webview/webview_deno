@@ -1,4 +1,4 @@
-import { ensureDir } from "https://deno.land/std@0.197.0/fs/ensure_dir.ts";
+import { ensureDir } from "jsr:@std/fs@0.218/ensure_dir";
 
 const decoder = new TextDecoder();
 const architectures = [["x86_64", "x86_64"], ["aarch64", "arm64"]] as const;

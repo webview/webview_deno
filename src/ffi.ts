@@ -1,4 +1,4 @@
-import { dlopen, download } from "../deps.ts";
+import { dlopen, download } from "@denosaurs/plug";
 import { Webview } from "./webview.ts";
 
 const version = "0.7.3";
