@@ -44,8 +44,9 @@ export interface Size {
  * `;
  *
  * const webview = new Webview();
+ * 
+ * webview.html = html;
  *
- * webview.navigate(`data:text/html,${encodeURIComponent(html)}`);
  * webview.run();
  * ```
  *
@@ -134,6 +135,32 @@ export class Webview {
    */
   set title(title: string) {
     lib.symbols.webview_set_title(this.#handle, encodeCString(title));
+  }
+
+  /**
+   * Sets the html contents of the window
+   *
+   * ## Example
+   *
+   * ```ts
+   * import { Webview } from "../mod.ts";
+   *
+   * const webview = new Webview();
+   *
+   * // Set the window html content to "<html><body>Hello World</body></html>"
+   * webview.html = `
+   *   <html>
+   *   <body>
+   *     <h1>Hello from deno v${Deno.version.deno}</h1>
+   *   </body>
+   *   </html>
+   * `;
+   *
+   * webview.run();
+   * ```
+   */
+  set html(html: string) {
+    lib.symbols.webview_set_html(this.#handle, encodeCString(html));
   }
 
   /** **UNSAFE**: Highly unsafe API, beware!
@@ -313,7 +340,7 @@ export class Webview {
    *
    * const webview = new Webview();
    *
-   * webview.navigate(`data:text/html,${encodeURIComponent(html)}`);
+   * webview.html = html;
    *
    * let counter = 0;
    * // Create and bind `press` to the webview javascript instance.
