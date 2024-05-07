@@ -74,7 +74,7 @@ you can find other examples in the [`examples/`](examples) directory.
 ## Documentation
 
 You can find the official documentation
-[here](https://doc.deno.land/https/deno.land/x/webview/mod.ts).
+[here](https://jsr.io/@webview/webview/doc).
 
 ## Development
 
@@ -132,7 +132,7 @@ $ deno task run:fast examples/local.ts
 
 ## Dependencies
 
-- [plug](https://deno.land/x/plug)
+- [plug](https://jsr.io/@denosaurs/plug)
 - [webview](https://github.com/webview/webview)
 
 ## Other
