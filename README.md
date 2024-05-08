@@ -4,6 +4,7 @@
 [![issues](https://img.shields.io/github/issues/webview/webview_deno?logo=github)](https://github.com/webview/webview_deno/issues)
 [![ci](https://img.shields.io/github/workflow/status/webview/webview_deno/ci?logo=github)](https://github.com/webview/webview_deno/actions)
 [![downloads](https://img.shields.io/github/downloads/webview/webview_deno/total?logo=github)](https://github.com/webview/webview_deno/releases/latest/)
+[![JSR](https://jsr.io/badges/@webview/webview)](https://jsr.io/@webview/webview)
 [![deno version](https://img.shields.io/badge/deno-^1.18.0-informational?logo=deno)](https://github.com/denoland/deno)
 [![deno doc](https://img.shields.io/badge/deno-doc-informational?logo=deno)](https://doc.deno.land/https/deno.land/x/webview/mod.ts)
 [![license](https://img.shields.io/github/license/webview/webview_deno?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAEFCu8CAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAHKADAAQAAAABAAAAHAAAAABHddaYAAAC5UlEQVRIDd2WPWtVQRCGby5pVASLiGghQSxyG8Ui2KWwCfkH9olY2JneQkiR0oCIxH/gB+qVFDYBIWBAbAIRSbCRpLXwIxLiPT7vnNm9e87ZxJtUwYH3zO47Mzv7Mbv3tlo5KYriGtgAJ81OY1ENdG/YI4boFEOI911BXgY/pdtwGuAtXpvmB1tAXHDnUolE5urkPOQo6MqA3pXWmJJL4Bb4rQ7yEYfxsjnIF29NJIoNC6e5fxOL/qN+9KCz7AaLpN8zI415N2i2EptpGrkRIjGeAuvR6IY1hSFLFUOug9Ms2M7ZxIUNytm1mnME186sdI2BOCwAyQMg54ugzSmKmwbPwSbolKH+hbAtQdsOoF+BsF3anUVwBdiOWRidFZDKTTrKEAJTm3GVrGkHzw/uPZbyx7DNNLfB7KGmRsCcr+/gjaiPSpAOTyX9qG4L/XBDdWXDDf1M+wtQ5fwCOtcb4Dto6VpLmzByB6gqdHbTItGSJdAGqibJQhmRfCF7IN4beSF2G9CqnGXQrxofXU+EykllNeoczRgYytDKMubDIRK0g5MF8rE69cGu0u9nlUcqaUZ41W0qK2nGcSzr4D2wV9U9wxp1rnpxn8agXAOHMQ9cy9kbHM7ngY4gFb03TxrO/yfBUifTtXt78jCrjY/jgEFnMn45LuNWUtknuu7NSm7D3QEn3HbatV1Q2jvgIRf1sfODKQaeymxZoMLlTqsq1LF+HvaTqQOzEzUCfni0/eNIA+DfuE3KEtbsegckGmMktTXacnBHPVe687ugkpT+axCkkhBSyRSjWI2xf1KMMVmYiQdWksK9BEFiQoiYLIlvJA3/zeTzCejP0RbB6YPbhZuB+0pR3KcdX0LaJtju0ZgBL8Bd+sbz2QIaU2OfBX3BaQLsgZysQtrk0M8Sh1A0w3DyyYnGnAiZ4gqZ/TvI2A8OGd1YIbF7+F3P+B6dYpYdsJNZgrjO0UdOIhmom0nwL0pnfnzkL1803jAoKhvyAAAAAElFTkSuQmCC)](https://github.com/webview/webview_deno/blob/master/LICENSE)
@@ -74,7 +75,7 @@ you can find other examples in the [`examples/`](examples) directory.
 ## Documentation
 
 You can find the official documentation
-[here](https://doc.deno.land/https/deno.land/x/webview/mod.ts).
+[here](https://jsr.io/@webview/webview/doc).
 
 ## Development
 
@@ -132,7 +133,7 @@ $ deno task run:fast examples/local.ts
 
 ## Dependencies
 
-- [plug](https://deno.land/x/plug)
+- [plug](https://jsr.io/@denosaurs/plug)
 - [webview](https://github.com/webview/webview)
 
 ## Other
