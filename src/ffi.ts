@@ -88,7 +88,7 @@ export function unload() {
 
 // Automatically run the preload if we're on windows and on the main thread.
 if (Deno.build.os === "windows") {
-  if ((self as never)["window"]) {
+  if ((self as never)["Window"]) {
     await preload();
   } else if (!await checkForWebView2Loader()) {
     throw new Error(
