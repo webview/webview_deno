@@ -64,7 +64,7 @@ export class Webview {
   #callbacks: Map<
     string,
     Deno.UnsafeCallback<{
-      parameters: "pointer"[];
+      parameters: readonly "pointer"[];
       result: "void";
     }>
   > = new Map();
