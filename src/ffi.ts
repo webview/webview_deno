@@ -1,7 +1,7 @@
 import manifest from "../deno.json" with { type: "json" };
 
 import { dlopen, download } from "@denosaurs/plug";
-import { Webview } from "./webview.ts";
+import type { Webview } from "./webview.ts";
 
 const version = manifest.version;
 const cache = Deno.env.get("PLUGIN_URL") === undefined ? "use" : "reloadAll";

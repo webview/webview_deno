@@ -5,6 +5,7 @@
 /// <reference lib="deno.ns" />
 
 import { serve } from "https://deno.land/std@0.157.0/http/server.ts";
+// deno-lint-ignore verbatim-module-syntax
 import { h, ssr, tw } from "https://crux.land/nanossr@0.0.1";
 
 const Hello = (props: { name: string }) => (
