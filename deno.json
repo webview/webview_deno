@@ -1,6 +1,6 @@
 {
   "name": "@webview/webview",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "exports": "./mod.ts",
   "lock": false,
   "tasks": {
@@ -17,5 +17,5 @@
   "fmt": {
     "exclude": ["webview/"]
   },
-  "imports": { "@denosaurs/plug": "jsr:@denosaurs/plug@^1.0.5" }
+  "imports": { "@denosaurs/plug": "jsr:@denosaurs/plug@^1.0.6" }
 }
