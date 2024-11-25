@@ -88,12 +88,14 @@ export function unload() {
 
 // Automatically run the preload if we're on windows and on the main thread.
 if (Deno.build.os === "windows") {
-  if (self === globalThis) {
-    await preload();
-  } else if (!await checkForWebView2Loader()) {
-    throw new Error(
-      "WebView2Loader.dll does not exist! Make sure to run preload() from the main thread.",
-    );
+  if (!await checkForWebView2Loader()) {
+    if (self === globalThis) {
+      await preload();
+    } else {
+      throw new Error(
+        "WebView2Loader.dll does not exist! Make sure to run preload() from the main thread.",
+      );
+    }
   }
 }
 
