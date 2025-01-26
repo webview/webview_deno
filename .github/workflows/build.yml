@@ -40,13 +40,13 @@ jobs:
           deno-version: v2.x
 
       - name: install webkit2gtk (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt-get update
           sudo apt-get install -y webkitgtk-6.0 libwebkitgtk-6.0-dev cmake ninja-build clang pkg-config libgtk-4-dev
 
       - name: Install ninja (macOS)
-        if: matrix.os == 'macos-latest'
+        if: startsWith(matrix.os, 'macos')
         run: |
           brew install ninja
           brew install llvm
