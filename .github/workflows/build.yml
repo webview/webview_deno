@@ -44,6 +44,7 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: |
           brew install ninja
+          brew install clang-format
 
       - name: Install ninja (Windows)
         if: matrix.os == 'windows-latest'
