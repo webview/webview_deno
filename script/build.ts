@@ -21,14 +21,17 @@ switch (platform) {
   case "darwin":
     $.cd("webview");
     await $`cmake -G "Ninja Multi-Config" -B build -S . \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DWEBVIEW_BUILD_TESTS=OFF \
-          -DWEBVIEW_BUILD_EXAMPLES=OFF \
-          -DWEBVIEW_USE_CLANG_TOOLS=OFF \
-          -DWEBVIEW_ENABLE_CHECKS=OFF \
-          -DWEBVIEW_USE_CLANG_TIDY=OFF \
-          -DWEBVIEW_BUILD_DOCS=OFF \
-          -DWEBVIEW_USE_CLANG_FORMAT=OFF`;
+            -DCMAKE_BUILD_TYPE=Release \
+            -DWEBVIEW_BUILD_TESTS=OFF \
+            -DWEBVIEW_BUILD_EXAMPLES=OFF \
+            -DWEBVIEW_USE_CLANG_TOOLS=OFF \
+            -DWEBVIEW_ENABLE_CHECKS=OFF \
+            -DWEBVIEW_USE_CLANG_TIDY=OFF \
+            -DWEBVIEW_BUILD_DOCS=OFF \
+            -DWEBVIEW_USE_CLANG_FORMAT=OFF \
+            -DWEBVIEW_CLANG_FORMAT_EXE=${Deno.env.get(
+      "WEBVIEW_CLANG_FORMAT_EXE",
+    )!}`;
     await $`cmake --build build --config Release`;
     await $`cp build/core/Release/libwebview.dylib ../build/libwebview.${Deno.build.arch}.dylib`;
     await $`strip -x -S ../build/libwebview.${Deno.build.arch}.dylib`;
