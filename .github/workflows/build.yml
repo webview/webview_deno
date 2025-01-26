@@ -4,14 +4,13 @@ on:
   push:
     branches:
       - main
-      - update_webview
-    # paths:
-    #   - ".github/workflows/**"
-    #   - "script/build.*"
-    #   - "src/ffi.ts"
-    #   - "webview/**"
-    #   - ".gitmodules"
-    #   - "deno.json"
+    paths:
+      - ".github/workflows/**"
+      - "script/build.*"
+      - "src/ffi.ts"
+      - "webview/**"
+      - ".gitmodules"
+      - "deno.json"
 
 jobs:
   build:
@@ -70,17 +69,17 @@ jobs:
             build/*.dylib
             build/*.so
 
-      - name: Release Plugin
-        uses: softprops/action-gh-release@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: "webview_deno release"
-          draft: true
-          files: |
-            build/libwebview.x86_64.dylib
-            build/libwebview.aarch64.dylib
-            build/libwebview.x86_64.so
-            build/libwebview.aarch64.so
-            build/webview.dll
-            build/Webview2Loader.dll
+      # - name: Release Plugin
+      #   uses: softprops/action-gh-release@master
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: "webview_deno release"
+      #     draft: true
+      #     files: |
+      #       build/libwebview.x86_64.dylib
+      #       build/libwebview.aarch64.dylib
+      #       build/libwebview.x86_64.so
+      #       build/libwebview.aarch64.so
+      #       build/webview.dll
+      #       build/Webview2Loader.dll
