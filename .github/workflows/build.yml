@@ -45,6 +45,13 @@ jobs:
         run: |
           brew install ninja
           brew install clang-format
+          brew install llvm
+          echo "/usr/local/opt/llvm/bin" >> $GITHUB_PATH
+
+      - name: Install ninja (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install ninja
 
       - name: Build dynamic library
         run: deno task build
