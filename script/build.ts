@@ -7,7 +7,7 @@ $.setPrintCommand(true);
 await $.path("./build").ensureDir();
 switch (platform) {
   case "win32":
-    await $`scripts/build.bat`;
+    await $`script/build.bat`;
     await $`cp webview/build/core/Release/webview.dll build/libwebview.dll`;
     break;
   case "linux":
