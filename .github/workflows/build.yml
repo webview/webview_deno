@@ -69,15 +69,16 @@ jobs:
             build/*.dylib
             build/*.so
 
-#      - name: Release Plugin
-#        uses: softprops/action-gh-release@master
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          tag_name: "webview_deno release"
-#          draft: true
-#          files: |
-#            build/libwebview.x86_64.dylib
-#            build/libwebview.so
-#            build/webview.dll
-#            build/Webview2Loader.dll
+      # - name: Release Plugin
+      #   uses: softprops/action-gh-release@master
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: "webview_deno release"
+      #     draft: true
+      #     files: |
+      #       build/libwebview.x86_64.dylib
+      #       build/libwebview.x86_64.dylib
+      #       build/libwebview.so
+      #       build/webview.dll
+      #       build/Webview2Loader.dll
