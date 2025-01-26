@@ -4,13 +4,14 @@ on:
   push:
     branches:
       - main
-    paths:
-      - ".github/workflows/**"
-      - "script/build.*"
-      - "src/ffi.ts"
-      - "webview/**"
-      - ".gitmodules"
-      - "deno.json"
+      - update_webview
+    # paths:
+    #   - ".github/workflows/**"
+    #   - "script/build.*"
+    #   - "src/ffi.ts"
+    #   - "webview/**"
+    #   - ".gitmodules"
+    #   - "deno.json"
 
 jobs:
   build:
