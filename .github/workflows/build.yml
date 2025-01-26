@@ -19,9 +19,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:
+      fail-fast: false
       matrix:
-        # os: [macos-latest, windows-latest, ubuntu-latest]
-        os: [windows-latest, ubuntu-latest]
+        os: [macos-latest, windows-latest, ubuntu-latest]
 
     steps:
       - name: Clone repository
@@ -38,7 +38,12 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y webkit2gtk-4.0
+          sudo apt-get install -y webkitgtk-6.0 libwebkitgtk-6.0-dev cmake ninja-build clang pkg-config libgtk-4-dev
+
+      - name: Install ninja (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install ninja
 
       - name: Build dynamic library
         run: deno task build
