@@ -15,17 +15,12 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.kind }} ${{ matrix.os }} ${{ matrix.arch }}
+    name: ${{ matrix.kind }} ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:
-      fail-fast: false
       matrix:
-        os: [macos-latest, macos-13, windows-latest, ubuntu-latest]
-        arch: [amd64]
-        include:
-          - os: ubuntu-latest
-            arch: arm64
+        os: [macos-latest, macos-13, windows-latest, ubuntu-latest, ubuntu-24.04-arm]
 
     steps:
       - name: Clone repository
@@ -38,18 +33,11 @@ jobs:
         with:
           deno-version: v2.x
 
-      - name: install webkit2gtk (Linux amd64)
-        if: matrix.os == 'ubuntu-latest' && matrix.arch == 'amd64'
+      - name: install webkit2gtk (Linux)
+        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y webkitgtk-6.0 libwebkitgtk-6.0-dev cmake ninja-build clang pkg-config libgtk-4-dev
-
-      - name: install webkit2gtk (Linux arm64)
-        if: matrix.os == 'ubuntu-latest' && matrix.arch == 'arm64'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
-          sudo apt-get install -y webkitgtk-6.0 libwebkitgtk-6.0-dev:arm64 cmake ninja-build clang pkg-config libgtk-4-dev:arm64
 
       - name: Install ninja (macOS)
         if: matrix.os == 'macos-latest'
@@ -64,8 +52,6 @@ jobs:
           choco install ninja
 
       - name: Build dynamic library
-        env:
-          ARCH: ${{ matrix.arch }}
         run: deno task build
 
       - name: Upload Artifacts
