@@ -105,6 +105,7 @@ export const lib = await dlopen(
     url,
     cache,
     suffixes: {
+      linux: `.${Deno.build.arch}`,
       darwin: `.${Deno.build.arch}`,
     },
   },
