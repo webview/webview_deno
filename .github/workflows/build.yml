@@ -20,13 +20,14 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        os: [
-          macos-latest,
-          macos-13,
-          windows-latest,
-          ubuntu-latest,
-          ubuntu-24.04-arm,
-        ]
+        os:
+          [
+            macos-latest,
+            macos-13,
+            windows-latest,
+            ubuntu-latest,
+            ubuntu-24.04-arm,
+          ]
 
     steps:
       - name: Clone repository
@@ -69,16 +70,17 @@ jobs:
             build/*.dylib
             build/*.so
 
-      # - name: Release Plugin
-      #   uses: softprops/action-gh-release@master
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     tag_name: "webview_deno release"
-      #     draft: true
-      #     files: |
-      #       build/libwebview.x86_64.dylib
-      #       build/libwebview.x86_64.dylib
-      #       build/libwebview.so
-      #       build/webview.dll
-      #       build/Webview2Loader.dll
+      - name: Release Plugin
+        uses: softprops/action-gh-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: "webview_deno release"
+          draft: true
+          files: |
+            build/libwebview.x86_64.dylib
+            build/libwebview.aarch64.dylib
+            build/libwebview.x86_64.so
+            build/libwebview.aarch64.so
+            build/webview.dll
+            build/Webview2Loader.dll

@@ -1,12 +1,11 @@
 import { $ } from "jsr:@david/dax@0.42.0";
-import process from "node:process";
 
-const { platform } = process;
+const { os } = Deno.build;
 $.setPrintCommand(true);
 
 await $.path("./build").ensureDir();
-switch (platform) {
-  case "win32":
+switch (os) {
+  case "windows":
     await $`script/build.bat`;
     await $`cp webview/build/core/Release/webview.dll build/libwebview.dll`;
     break;
