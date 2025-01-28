@@ -7,7 +7,7 @@ await $.path("./build").ensureDir();
 switch (os) {
   case "windows":
     await $`script/build.bat`;
-    await $`cp webview/build/core/Release/webview.dll build/libwebview.dll`;
+    await $`cp webview/build/core/Release/webview.dll build/webview.dll`;
     break;
   case "linux":
     $.cd("webview");
