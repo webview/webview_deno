@@ -1,14 +1,9 @@
 {
   "name": "@webview/webview",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "exports": "./mod.ts",
   "lock": false,
   "tasks": {
-    "check": "deno check mod.ts",
-    "fmt": "deno fmt",
-    "fmt:check": "deno fmt --check",
-    "lint": "deno lint",
-    "test:doc": "deno test -A --unstable-ffi --doc --import-map test_import_map.json",
     "build": "deno run -A script/build.ts",
     "run": "deno task build && export PLUGIN_URL=\"./build/\" && deno run -A --unstable-ffi",
     "run:fast": "export PLUGIN_URL=\"./build/\" && deno run -A --unstable-ffi"
@@ -17,5 +12,5 @@
   "fmt": {
     "exclude": ["webview/"]
   },
-  "imports": { "@denosaurs/plug": "jsr:@denosaurs/plug@^1.0.6" }
+  "imports": { "@denosaurs/plug": "jsr:@denosaurs/plug@^1.0" }
 }
