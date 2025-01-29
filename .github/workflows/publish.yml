@@ -12,6 +12,11 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: denoland/setup-deno@v1
-      - run: deno publish
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Install deno
+        uses: denoland/setup-deno@v2
+
+      - name: Publish to JSR
+        run: deno publish

@@ -8,22 +8,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install stable deno
-        uses: denoland/setup-deno@v1
-        with:
-          deno-version: v2.x
+        uses: denoland/setup-deno@v2
 
       - name: Run check
-        run: deno task check
+        run: deno check mod.ts
 
       # TODO: Re-enable these tests
       #     - name: Run test:doc
       #       run: deno task test:doc
 
       - name: Run fmt
-        run: deno task fmt:check
+        run: deno fmt --check
 
       - name: Run lint
-        run: deno task lint
+        run: deno lint

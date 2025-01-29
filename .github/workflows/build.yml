@@ -30,14 +30,12 @@ jobs:
 
     steps:
       - name: Clone repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: true
 
       - name: Install deno
-        uses: denoland/setup-deno@v1
-        with:
-          deno-version: v2.x
+        uses: denoland/setup-deno@v2
 
       - name: install webkit2gtk (Linux)
         if: startsWith(matrix.os, 'ubuntu')
