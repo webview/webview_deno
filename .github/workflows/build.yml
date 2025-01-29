@@ -19,7 +19,14 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        os:
+          [
+            macos-latest,
+            macos-13,
+            windows-latest,
+            ubuntu-latest,
+            ubuntu-24.04-arm,
+          ]
 
     steps:
       - name: Clone repository
@@ -33,10 +40,22 @@ jobs:
           deno-version: v2.x
 
       - name: install webkit2gtk (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt-get update
-          sudo apt-get install -y webkit2gtk-4.0
+          sudo apt-get install -y webkitgtk-6.0 libwebkitgtk-6.0-dev cmake ninja-build clang pkg-config libgtk-4-dev
+
+      - name: Install ninja (macOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          brew install ninja
+          brew install llvm
+          echo "WEBVIEW_CLANG_FORMAT_EXE=$(brew --prefix llvm)/bin/clang-format" >> $GITHUB_ENV
+
+      - name: Install ninja (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install ninja
 
       - name: Build dynamic library
         run: deno task build
@@ -50,15 +69,17 @@ jobs:
             build/*.dylib
             build/*.so
 
-#      - name: Release Plugin
-#        uses: softprops/action-gh-release@master
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          tag_name: "webview_deno release"
-#          draft: true
-#          files: |
-#            build/libwebview.x86_64.dylib
-#            build/libwebview.so
-#            build/webview.dll
-#            build/Webview2Loader.dll
+      # - name: Release Plugin
+      #   uses: softprops/action-gh-release@master
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: "webview_deno release"
+      #     draft: true
+      #     files: |
+      #       build/libwebview.x86_64.dylib
+      #       build/libwebview.aarch64.dylib
+      #       build/libwebview.x86_64.so
+      #       build/libwebview.aarch64.so
+      #       build/webview.dll
+      #       build/Webview2Loader.dll
